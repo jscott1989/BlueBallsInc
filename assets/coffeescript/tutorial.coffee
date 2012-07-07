@@ -1,0 +1,2 @@
+window.start_tutorial = ->
+	

@@ -10,17 +10,20 @@
 </head>
 <body>
 	<div id="container">
+		%include game
+
 		<div id="menus">
 			%include main_menu
-			%include tutorial_menu
 			%include challenge_menu
 			%include custom_menu
 			%include about_menu
 			%include highscore_menu
+			%include pause_menu
+			%include confirm_exit_menu
 		</div>
 	</div>
 
-	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>

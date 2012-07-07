@@ -2,6 +2,7 @@ body {
   margin: 0;
   font-family: 'Raleway';
   font-size: 20px;
+  margin-top: 20px;
 }
 a {
   color: #000;
@@ -57,4 +58,54 @@ a {
 }
 #menus .overlay-window .inner .inner2 .inner3 ul li:hover {
   background: red;
+}
+#game-cover {
+  width: 900px;
+  height: 600px;
+  background: gray;
+  opacity: 0.8;
+  display: none;
+  position: absolute;
+}
+#game {
+  position: relative;
+  display: none;
+}
+#game #grid,
+#game #sidebar {
+  position: absolute;
+}
+#game #grid {
+  left: 0px;
+  background: pink;
+  width: 700px;
+  height: 600px;
+  display: inline-block;
+}
+#game #sidebar {
+  right: 0px;
+  background: red;
+  width: 200px;
+  height: 600px;
+  display: inline-block;
+}
+#game #sidebar .inner {
+  padding: 10px;
+  padding-top: 0px;
+}
+#game #sidebar .inner .time {
+  text-align: center;
+  font-size: 30px;
+}
+#game #sidebar .inner .time strong {
+  display: block;
+}
+#game #sidebar .inner .time span {
+  font-size: 50px;
+  font-weight: bold;
+}
+#game #sidebar .inner button {
+  width: 100%;
+  height: 30px;
+  font-size: 20px;
 }

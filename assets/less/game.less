@@ -1,0 +1,61 @@
+@import "config.less";
+
+@grid-width: 700px;
+@sidebar-width: @width - @grid-width;
+
+#game-cover {
+	width: @width;
+	height: @height;
+	background: gray;
+	opacity: 0.8;
+	display: none;
+	position: absolute;
+}
+
+#game {
+	position: relative;
+	display: none;
+
+	#grid, #sidebar {
+		position: absolute;
+	}
+
+	#grid {
+		left: 0px;
+		background: pink;
+		width: @grid-width;
+		height: @height;
+		display: inline-block;
+	}
+
+	#sidebar {
+		right: 0px;
+		background: red;
+		width: @sidebar-width;
+		height: @height;
+		display: inline-block;
+
+		.inner {
+			padding: 10px;
+			padding-top: 0px;
+
+			.time {
+				text-align:center;
+				font-size: 30px;
+				strong {
+					display: block;
+				}
+				span {
+					font-size: 50px;
+					font-weight: bold;
+				}
+			}
+
+			button {
+				width: 100%;
+				height: 30px;
+				font-size: 20px;
+			}
+		}
+	}
+}
