@@ -2,6 +2,7 @@ $menus = $('#menus')
 $game = $('#game')
 $game_cover = $('#game-cover')
 $pause_menu = $('#pause-menu')
+$main_menu = $('#main-menu')
 
 paused = false;
 
@@ -17,8 +18,15 @@ $('.pause').click ->
 	paused = true;
 	return false
 
+$('.resume').click ->
+	$game.removeClass('paused');
+	$game_cover.hide()
+	$menus.fadeOut()
+	paused = false;
+	return false
+
 $('.confirm-exit-game').click ->
-	$('#game-cover').hide()
-	$('#game').fadeOut()
-	
-	window.backwards_to($('#main-menu'))
+	$game_cover.hide()
+	$game.fadeOut()
+
+	window.backwards_to($main_menu)

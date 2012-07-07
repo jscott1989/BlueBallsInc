@@ -8,7 +8,7 @@
 					<li data-menu="#custom-menu">Custom Level</li>
 					<li data-menu="#highscore-menu">High Scores</li>
 					<li data-menu="#about-menu">About</li>
-					<li><a href="http://jscott.me/blueballs">Exit</a></li>
+					<li><a href="http://jscott.me/blueballs.html">Exit</a></li>
 				</ul>
 			</div>
 		</div>

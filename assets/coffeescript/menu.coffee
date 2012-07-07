@@ -3,19 +3,27 @@ $game = $('#game')
 $last_active = $('.overlay-window.active')
 
 window.forward_to = ($element) ->
+	$last_active = $('.overlay-window.active')
+
+	if $last_active.attr('id') == $element.attr('id')
+		return
+
 	if $element.prevAll('.overlay-window.active').length == 0
 		$menus.css({'left': '+=600px'})
 
-	$last_active = $('.overlay-window.active')
 	$last_active.after($element).removeClass('active')
 	$element.addClass('active')
 	$menus.animate({"left": "-=600px"})
 
 window.backwards_to = ($element) ->
+	$last_active = $('.overlay-window.active')
+	
+	if $last_active.attr('id') == $element.attr('id')
+		return
+		
 	if $element.prevAll('.overlay-window.active').length > 0
 		$menus.css({'left': '-=600px'})
 
-	$last_active = $('.overlay-window.active')
 	$last_active.before($element).removeClass('active')
 	$element.addClass('active')
 	$menus.animate({"left": "+=600px"})

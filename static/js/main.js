@@ -7,7 +7,7 @@
 
 
 (function() {
-  var $game, $game_cover, $last_active, $menus, $pause_menu, paused;
+  var $game, $game_cover, $last_active, $main_menu, $menus, $pause_menu, paused;
 
   $menus = $('#menus');
 
@@ -16,6 +16,8 @@
   $game_cover = $('#game-cover');
 
   $pause_menu = $('#pause-menu');
+
+  $main_menu = $('#main-menu');
 
   paused = false;
 
@@ -30,10 +32,18 @@
     return false;
   });
 
+  $('.resume').click(function() {
+    $game.removeClass('paused');
+    $game_cover.hide();
+    $menus.fadeOut();
+    paused = false;
+    return false;
+  });
+
   $('.confirm-exit-game').click(function() {
-    $('#game-cover').hide();
-    $('#game').fadeOut();
-    return window.backwards_to($('#main-menu'));
+    $game_cover.hide();
+    $game.fadeOut();
+    return window.backwards_to($main_menu);
   });
 
   /* -------------------------------------------- 
@@ -57,12 +67,15 @@
   $last_active = $('.overlay-window.active');
 
   window.forward_to = function($element) {
+    $last_active = $('.overlay-window.active');
+    if ($last_active.attr('id') === $element.attr('id')) {
+      return;
+    }
     if ($element.prevAll('.overlay-window.active').length === 0) {
       $menus.css({
         'left': '+=600px'
       });
     }
-    $last_active = $('.overlay-window.active');
     $last_active.after($element).removeClass('active');
     $element.addClass('active');
     return $menus.animate({
@@ -71,12 +84,15 @@
   };
 
   window.backwards_to = function($element) {
+    $last_active = $('.overlay-window.active');
+    if ($last_active.attr('id') === $element.attr('id')) {
+      return;
+    }
     if ($element.prevAll('.overlay-window.active').length > 0) {
       $menus.css({
         'left': '-=600px'
       });
     }
-    $last_active = $('.overlay-window.active');
     $last_active.before($element).removeClass('active');
     $element.addClass('active');
     return $menus.animate({
