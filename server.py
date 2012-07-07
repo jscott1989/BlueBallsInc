@@ -10,6 +10,6 @@ bottle.debug(True)
 @get('/')
 def index():
 	# The main page
-
-
+	pass
+	
 bottle.run(host='0.0.0.0', port=argv[1])
