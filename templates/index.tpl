@@ -11,6 +11,7 @@
 <body>
 	<div id="container">
 		%include main_menu
+		%include about_menu
 	</div>
 
 	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>

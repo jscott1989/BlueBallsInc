@@ -6,10 +6,22 @@
 */
 
 
+/* -------------------------------------------- 
+     Begin menu.coffee 
+--------------------------------------------
+*/
+
+
 (function() {
 
-  $(function() {
-    return console.log('r');
+  $('.overlay-window ul li').live('click', function() {
+    var $this, this_a;
+    $this = $(this);
+    this_a = $this.find('a');
+    if (this_a.length > 0) {
+      console.log(this_a);
+      return this_a.click();
+    }
   });
 
 }).call(this);

@@ -5,7 +5,6 @@
 				<li>Tutorial</li>
 				<li>Challenge Mode</li>
 				<li>Custom Level</li>
-				<li>High Scores</li>
 				<li>About</li>
 				<li><a href="http://jscott.me/blueballs">Exit</a></li>
 			</ul>
