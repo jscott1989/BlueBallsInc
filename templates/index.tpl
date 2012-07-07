@@ -10,8 +10,14 @@
 </head>
 <body>
 	<div id="container">
-		%include main_menu
-		%include about_menu
+		<div id="menus">
+			%include main_menu
+			%include tutorial_menu
+			%include challenge_menu
+			%include custom_menu
+			%include about_menu
+			%include highscore_menu
+		</div>
 	</div>
 
 	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>

@@ -13,15 +13,30 @@
 
 
 (function() {
+  var $last_active, $menus;
 
-  $('.overlay-window ul li').live('click', function() {
-    var $this, this_a;
+  $menus = $('#menus');
+
+  $last_active = $('.overlay-window.active');
+
+  $('li[data-menu]').live('click', function() {
+    var $menu_target, $this, menu_target;
     $this = $(this);
-    this_a = $this.find('a');
-    if (this_a.length > 0) {
-      console.log(this_a);
-      return this_a.click();
+    menu_target = $this.data('menu');
+    if (menu_target === 'previous') {
+      $menus.animate({
+        "left": "+=600px"
+      });
+      $('.overlay-window.active').removeClass('active');
+      $last_active.addClass('active');
+      return;
     }
+    $menu_target = $(menu_target);
+    $('.overlay-window.active').after($menu_target).removeClass('active');
+    $menu_target.addClass('active');
+    return $menus.animate({
+      "left": "-=600px"
+    });
   });
 
 }).call(this);
