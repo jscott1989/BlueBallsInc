@@ -1,0 +1,14 @@
+Blue Balls Inc.
+-------------
+
+A simple puzzle game created for SA Gamedev VII.
+
+Created using Python with Bottle for the server side, and HTML and Javascript with jQuery on the client side.
+
+By the final version I plan to support:
+
+* Tutorial
+* Randomly generated levels
+* High scores
+* Custom level creation
+* Custom machine part creation
