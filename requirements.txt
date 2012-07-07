@@ -1,1 +1,2 @@
 bottle
+git+https://github.com/iurisilvio/bottle-pystache.git

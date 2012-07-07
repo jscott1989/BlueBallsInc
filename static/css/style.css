@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+}
+#container {
+  background: orange;
+  margin: auto;
+  width: 900px;
+  height: 600px;
+  overflow: auto;
+  /* To stop margins collapsing */
+
+}
+.overlay-window {
+  background: blue;
+  width: 300px;
+  margin: auto;
+  text-align: center;
+  font-family: 'Raleway';
+  font-size: 40px;
+}
+.overlay-window ul {
+  list-style: none;
+  padding: 0;
+}
+.overlay-window ul li {
+  cursor: pointer;
+}
+.overlay-window ul li:hover {
+  background: red;
+}

@@ -1,0 +1,35 @@
+@height: 600px;
+@width: 900px;
+
+body {
+	margin: 0;
+}
+
+#container {
+	background: orange;
+	margin: auto;
+	width: @width;
+	height: @height;
+	overflow: auto; /* To stop margins collapsing */
+}
+
+.overlay-window {
+	background: blue;
+	width: 300px;
+	margin: auto;
+	text-align: center;
+	font-family: 'Raleway';
+	font-size: 40px;
+	ul {
+		list-style: none;
+		padding: 0;
+
+		li {
+			cursor: pointer;
+
+			&:hover {
+				background: red;
+			}
+		}
+	}
+}
