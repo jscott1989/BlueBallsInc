@@ -2,7 +2,7 @@
 	<div id="grid">
 		<div class="inner">
 			<div class="inner2">
-				<div class="grid grid9">
+				<div data-bind="attr: {class: 'grid grid' + difficulty()}">
 
 				</div>
 			</div>
@@ -11,12 +11,12 @@
 		<div class="inner">
 			<div class="time">
 				<strong>Time</strong>
-				<span class="inner">00:00</span>
+				<span class="inner" data-bind="text: formatted_time">00:00</span>
 			</div>
 
 			<div class="difficulty">
 				<strong>Difficulty</strong>
-				<span class="inner">3</span>
+				<span class="inner" data-bind="text: difficulty"></span>
 			</div>
 
 			<button class="pause">Pause</button>

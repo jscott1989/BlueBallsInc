@@ -5,46 +5,57 @@ $pause_menu = $('#pause-menu')
 $main_menu = $('#main-menu')
 $time = $('.time .inner')
 
-paused = false;
-time = 0;
+GameViewModel = ->
+	self = this
+	self.paused = ko.observable(false)
+	self.time = ko.observable(0)
+	self.difficulty = ko.observable(3)
 
-show_time = ->
-	minutes = parseInt(time / 60)
-	seconds = parseInt(time % 60)
+	self.minutes = ko.computed ->
+		minutes = parseInt(self.time() / 60, 10)
+		if minutes < 10
+			minutes = "0" + minutes
+		return minutes
 
-	if minutes < 10
-		minutes = "0" + minutes
-	if seconds < 10
-		seconds = "0" + seconds
+	self.seconds = ko.computed ->
+		seconds = parseInt(self.time() % 60, 10)
+		if seconds < 10
+			seconds = "0" + seconds
+		return seconds
 
-	$time.text(minutes + ":" + seconds)
+	self.formatted_time = ko.computed ->
+		return self.minutes() + ":" + self.seconds()
+	return
+
+viewModel = new GameViewModel()
+ko.applyBindings(viewModel)
 
 time_changed = ->
-	if !paused
-		time += 1
-		show_time()
+	if !viewModel.paused()
+		viewModel.time(viewModel.time() + 1)
 
 setInterval(time_changed, 1000)
 
-window.start_game = ->
-	time = 0
-	show_time()
-	paused = false
+window.start_game = (difficulty) ->
+	viewModel.time(0)
+	viewModel.paused(false)
+	viewModel.difficulty(difficulty)
+	return
 
 $('.pause').click ->
 	window.forward_to($pause_menu)
 
-	$game.addClass('paused');
-	$game_cover.show();
-	$menus.fadeIn();
-	paused = true;
+	$game.addClass('paused')
+	$game_cover.show()
+	$menus.fadeIn()
+	viewModel.paused(true)
 	return false
 
 $('.resume').click ->
-	$game.removeClass('paused');
+	$game.removeClass('paused')
 	$game_cover.hide()
 	$menus.fadeOut()
-	paused = false;
+	viewModel.paused(false)
 	return false
 
 $('.confirm-exit-game').click ->

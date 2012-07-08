@@ -7,7 +7,7 @@
 
 
 (function() {
-  var $game, $game_cover, $last_active, $main_menu, $menus, $pause_menu, $time, paused, show_time, time, time_changed;
+  var $game, $game_cover, $last_active, $main_menu, $menus, $pause_menu, $time, GameViewModel, time_changed, viewModel;
 
   $menus = $('#menus');
 
@@ -21,36 +21,49 @@
 
   $time = $('.time .inner');
 
-  paused = false;
-
-  time = 0;
-
-  show_time = function() {
-    var minutes, seconds;
-    minutes = parseInt(time / 60);
-    seconds = parseInt(time % 60);
-    if (minutes < 10) {
-      minutes = "0" + minutes;
-    }
-    if (seconds < 10) {
-      seconds = "0" + seconds;
-    }
-    return $time.text(minutes + ":" + seconds);
+  GameViewModel = function() {
+    var self;
+    self = this;
+    self.paused = ko.observable(false);
+    self.time = ko.observable(0);
+    self.difficulty = ko.observable(3);
+    self.minutes = ko.computed(function() {
+      var minutes;
+      minutes = parseInt(self.time() / 60, 10);
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+      return minutes;
+    });
+    self.seconds = ko.computed(function() {
+      var seconds;
+      seconds = parseInt(self.time() % 60, 10);
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      return seconds;
+    });
+    self.formatted_time = ko.computed(function() {
+      return self.minutes() + ":" + self.seconds();
+    });
   };
 
+  viewModel = new GameViewModel();
+
+  ko.applyBindings(viewModel);
+
   time_changed = function() {
-    if (!paused) {
-      time += 1;
-      return show_time();
+    if (!viewModel.paused()) {
+      return viewModel.time(viewModel.time() + 1);
     }
   };
 
   setInterval(time_changed, 1000);
 
-  window.start_game = function() {
-    time = 0;
-    show_time();
-    return paused = false;
+  window.start_game = function(difficulty) {
+    viewModel.time(0);
+    viewModel.paused(false);
+    viewModel.difficulty(difficulty);
   };
 
   $('.pause').click(function() {
@@ -58,7 +71,7 @@
     $game.addClass('paused');
     $game_cover.show();
     $menus.fadeIn();
-    paused = true;
+    viewModel.paused(true);
     return false;
   });
 
@@ -66,7 +79,7 @@
     $game.removeClass('paused');
     $game_cover.hide();
     $menus.fadeOut();
-    paused = false;
+    viewModel.paused(false);
     return false;
   });
 
@@ -83,7 +96,7 @@
 
 
   window.start_tutorial = function() {
-    return window.start_game();
+    return window.start_game(3);
   };
 
   /* -------------------------------------------- 

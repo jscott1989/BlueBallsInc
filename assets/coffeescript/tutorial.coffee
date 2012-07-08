@@ -1,2 +1,2 @@
 window.start_tutorial = ->
-	window.start_game()
+	window.start_game 3
