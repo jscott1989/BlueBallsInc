@@ -2,26 +2,25 @@
 	<div id="grid">
 		<div class="inner">
 			<div class="inner2">
-				<div data-bind="attr: {class: 'grid grid' + difficulty()}">
+				<div id="cr-stage">
 
 				</div>
 			</div>
 		</div>
 	</div><div id="sidebar">
 		<div class="inner">
-			<div class="time">
-				<strong>Time</strong>
-				<span class="inner" data-bind="text: formatted_time">00:00</span>
+			<div class="level stat">
+				<strong>Level</strong>
+				<span class="inner" data-bind="text: level"></span>
 			</div>
-
-			<div class="difficulty">
-				<strong>Difficulty</strong>
-				<span class="inner" data-bind="text: difficulty"></span>
+			<div class="money stat">
+				<strong>Money</strong>
+				<span>&pound;</span><span class="inner" data-bind="text: money"></span>
 			</div>
 
 			<button class="pause">Pause</button>
 		</div>
 	</div>
 </div>
-<div id="game-cover">
+<div id="game-cover" data-bind="style: {display: paused() ? 'block' : 'none' }">
 </div>
