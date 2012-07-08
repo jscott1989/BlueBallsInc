@@ -47,6 +47,6 @@ $('li[data-menu]').click ->
 
 $('.start-tutorial').click ->
 	# Start tutorial mode
+	window.start_tutorial()
 	$menus.fadeOut()
 	$game.fadeIn()
-	window.start_tutorial()

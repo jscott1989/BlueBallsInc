@@ -7,7 +7,7 @@
 
 
 (function() {
-  var $game, $game_cover, $last_active, $main_menu, $menus, $pause_menu, paused;
+  var $game, $game_cover, $last_active, $main_menu, $menus, $pause_menu, $time, paused, show_time, time, time_changed;
 
   $menus = $('#menus');
 
@@ -19,9 +19,39 @@
 
   $main_menu = $('#main-menu');
 
+  $time = $('.time .inner');
+
   paused = false;
 
-  window.start_game = function() {};
+  time = 0;
+
+  show_time = function() {
+    var minutes, seconds;
+    minutes = parseInt(time / 60);
+    seconds = parseInt(time % 60);
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    if (seconds < 10) {
+      seconds = "0" + seconds;
+    }
+    return $time.text(minutes + ":" + seconds);
+  };
+
+  time_changed = function() {
+    if (!paused) {
+      time += 1;
+      return show_time();
+    }
+  };
+
+  setInterval(time_changed, 1000);
+
+  window.start_game = function() {
+    time = 0;
+    show_time();
+    return paused = false;
+  };
 
   $('.pause').click(function() {
     window.forward_to($pause_menu);
@@ -52,7 +82,9 @@
   */
 
 
-  window.start_tutorial = function() {};
+  window.start_tutorial = function() {
+    return window.start_game();
+  };
 
   /* -------------------------------------------- 
        Begin menu.coffee 
@@ -118,9 +150,9 @@
   });
 
   $('.start-tutorial').click(function() {
+    window.start_tutorial();
     $menus.fadeOut();
-    $game.fadeIn();
-    return window.start_tutorial();
+    return $game.fadeIn();
   });
 
 }).call(this);

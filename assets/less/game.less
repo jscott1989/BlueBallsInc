@@ -26,6 +26,40 @@
 		width: @grid-width;
 		height: @height;
 		display: inline-block;
+
+		.inner {
+			display: table;
+			height: 100%;
+			width: 100%;
+
+			.inner2 {
+				display:table-cell;
+				vertical-align:middle;
+
+				.grid {
+					background: orange;
+					margin: auto;
+				}
+
+				// helper class, will never show up in resulting css
+				// will be called as long the index is above 0
+				.loopingClass (@index) when (@index > 0) {
+
+					// create the actual css selector, example will result in
+					// .myclass_30, .myclass_28, .... , .myclass_1
+					(~".grid@{index}") {
+						// your resulting css
+						width: @blockSize * @index;
+						height: @blockSize * @index;
+					}
+
+					// next iteration
+					.loopingClass(@index - 1);
+				}
+				.loopingClass (0) {} // Loop down to 0
+				.loopingClass (@maxGridSize); // From maxGridZie
+			}
+		}
 	}
 
 	#sidebar {
@@ -39,7 +73,7 @@
 			padding: 10px;
 			padding-top: 0px;
 
-			.time {
+			.time, .difficulty {
 				text-align:center;
 				font-size: 30px;
 				strong {
