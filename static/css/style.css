@@ -21,6 +21,7 @@ a {
   position: relative;
   height: 100%;
   width: 99999999px;
+  z-index: 3;
 }
 #menus .overlay-window {
   display: inline-block;
@@ -91,12 +92,20 @@ a {
 #game #grid .inner .inner2 {
   display: table-cell;
   vertical-align: middle;
+  position: relative;
 }
-#game #grid .inner .inner2 #cr-stage {
-  background: orange;
-  margin: auto;
-  width: 680px;
-  height: 573px;
+#game #grid .inner .inner2 canvas {
+  margin-left: 20px;
+  width: 660px;
+  height: 570px;
+  z-index: 1;
+}
+#game #grid .inner .inner2 #gameCanvas {
+  background: white;
+}
+#game #grid .inner .inner2 #debugCanvas {
+  position: absolute;
+  left: 0;
 }
 #game #sidebar {
   right: 0px;

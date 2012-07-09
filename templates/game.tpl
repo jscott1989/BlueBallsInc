@@ -2,23 +2,16 @@
 	<div id="grid">
 		<div class="inner">
 			<div class="inner2">
-				<div id="cr-stage">
-
-				</div>
+				<canvas width="660" height="570" id="gameCanvas"></canvas>
+				<canvas width="660" height="570" id="debugCanvas"></canvas>
 			</div>
 		</div>
 	</div><div id="sidebar">
 		<div class="inner">
-			<div class="level stat">
-				<strong>Level</strong>
-				<span class="inner" data-bind="text: level"></span>
-			</div>
-			<div class="money stat">
-				<strong>Money</strong>
-				<span>&pound;</span><span class="inner" data-bind="text: money"></span>
-			</div>
-
-			<button class="pause">Pause</button>
+			<br /><br />
+			<button class="start">Start</button>
+			<br /><br />
+			<button class="pause">Menu</button>
 		</div>
 	</div>
 </div>

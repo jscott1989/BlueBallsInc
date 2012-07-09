@@ -1,4 +1,4 @@
-###global ko:false, Crafty:false###
+###global ko:false###
 $menus = $('#menus')
 $game = $('#game')
 $pause_menu = $('#pause-menu')
@@ -16,9 +16,12 @@ viewModel = new GameViewModel()
 ko.applyBindings(viewModel)
 
 window.start_game = (level) ->
+	window.clear_game()
 	viewModel.paused(false)
 	viewModel.level(level)
 	viewModel.money(500)
+
+	window.create_ball(2,1)
 	return
 
 $('.pause').click ->
