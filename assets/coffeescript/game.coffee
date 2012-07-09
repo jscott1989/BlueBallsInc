@@ -6,40 +6,42 @@ $main_menu = $('#main-menu')
 
 GameViewModel = ->
 	self = this
-	self.paused = ko.observable(false)
-	self.level = ko.observable(1)
-	self.money = ko.observable(500)
+	self.state = ko.observable("BUILD")
+	self.isPaused = ko.computed ->
+		self.state() == 'PAUSE'
+	self.isPlaying = ko.computed ->
+		self.state() == 'PLAY'
 
 	return
 
-viewModel = new GameViewModel()
-ko.applyBindings(viewModel)
+window.viewModel = new GameViewModel()
+ko.applyBindings(window.viewModel)
 
-window.start_game = (level) ->
-	window.clear_game()
-	viewModel.paused(false)
-	viewModel.level(level)
-	viewModel.money(500)
-
-	window.create_ball(2,1)
+window.start_game = () ->
+	window.viewModel.state("BUILD")
+	window.game.reset()
 	return
 
 $('.pause').click ->
 	window.forward_to($pause_menu)
-
-	$game.addClass('paused')
 	$menus.fadeIn()
-	viewModel.paused(true)
+	window.viewModel.last_state = window.viewModel.state()
+	window.viewModel.state("PAUSE")
 	return false
 
 $('.resume').click ->
-	$game.removeClass('paused')
 	$menus.fadeOut()
-	viewModel.paused(false)
+	window.viewModel.state(window.viewModel.last_state)
 	return false
 
+$('.start').click ->
+	if window.viewModel.state() == "BUILD"
+		window.viewModel.state("PLAY")
+	else
+		window.viewModel.state("BUILD")
+
 $('.confirm-exit-game').click ->
-	viewModel.paused(false)
+	window.viewModel.state("BUILD")
 	$game.fadeOut()
 
 	window.backwards_to($main_menu)

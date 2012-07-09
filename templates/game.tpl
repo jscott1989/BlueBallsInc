@@ -9,11 +9,11 @@
 	</div><div id="sidebar">
 		<div class="inner">
 			<br /><br />
-			<button class="start">Start</button>
+			<button class="start" data-bind="text: isPlaying() ? 'Reset' : 'Start'">Start</button>
 			<br /><br />
 			<button class="pause">Menu</button>
 		</div>
 	</div>
 </div>
-<div id="game-cover" data-bind="style: {display: paused() ? 'block' : 'none' }">
+<div id="game-cover" data-bind="style: {display: isPaused() ? 'block' : 'none' }">
 </div>

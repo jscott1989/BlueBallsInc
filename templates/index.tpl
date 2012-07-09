@@ -26,7 +26,6 @@
 	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type='text/javascript' src='js/knockout.js'></script>
 	<script type='text/javascript' src='js/box2dweb.js'></script>
-	<script type='text/javascript' src='js/boxbox.js'></script>
 	<script type="text/javascript" src="js/main.js"></script>
 	<script type="text/javascript">
 		var _gaq = _gaq || [];

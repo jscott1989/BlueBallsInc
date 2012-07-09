@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, GameViewModel, canvas, entities, viewModel, world;
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2Body, B2BodyDef, B2CircleShape, B2DebugDraw, B2Fixture, B2FixtureDef, B2MassData, B2PolygonShape, B2Vec2, B2World, GameViewModel, canvas, debug_canvas, entities;
 
   $menus = $('#menus');
 
@@ -24,40 +24,48 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.paused = ko.observable(false);
-    self.level = ko.observable(1);
-    self.money = ko.observable(500);
+    self.state = ko.observable("BUILD");
+    self.isPaused = ko.computed(function() {
+      return self.state() === 'PAUSE';
+    });
+    self.isPlaying = ko.computed(function() {
+      return self.state() === 'PLAY';
+    });
   };
 
-  viewModel = new GameViewModel();
+  window.viewModel = new GameViewModel();
 
-  ko.applyBindings(viewModel);
+  ko.applyBindings(window.viewModel);
 
-  window.start_game = function(level) {
-    window.clear_game();
-    viewModel.paused(false);
-    viewModel.level(level);
-    viewModel.money(500);
-    window.create_ball(2, 1);
+  window.start_game = function() {
+    window.viewModel.state("BUILD");
+    window.game.reset();
   };
 
   $('.pause').click(function() {
     window.forward_to($pause_menu);
-    $game.addClass('paused');
     $menus.fadeIn();
-    viewModel.paused(true);
+    window.viewModel.last_state = window.viewModel.state();
+    window.viewModel.state("PAUSE");
     return false;
   });
 
   $('.resume').click(function() {
-    $game.removeClass('paused');
     $menus.fadeOut();
-    viewModel.paused(false);
+    window.viewModel.state(window.viewModel.last_state);
     return false;
   });
 
+  $('.start').click(function() {
+    if (window.viewModel.state() === "BUILD") {
+      return window.viewModel.state("PLAY");
+    } else {
+      return window.viewModel.state("BUILD");
+    }
+  });
+
   $('.confirm-exit-game').click(function() {
-    viewModel.paused(false);
+    window.viewModel.state("BUILD");
     $game.fadeOut();
     return window.backwards_to($main_menu);
   });
@@ -147,42 +155,106 @@
   */
 
 
-  /*global boxbox:false, $:false
+  /*global Box2D:false, $:false
   */
 
 
+  B2Vec2 = Box2D.Common.Math.b2Vec2;
+
+  B2BodyDef = Box2D.Dynamics.b2BodyDef;
+
+  B2Body = Box2D.Dynamics.b2Body;
+
+  B2FixtureDef = Box2D.Dynamics.b2FixtureDef;
+
+  B2Fixture = Box2D.Dynamics.b2Fixture;
+
+  B2World = Box2D.Dynamics.b2World;
+
+  B2MassData = Box2D.Collision.Shapes.b2MassData;
+
+  B2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+
+  B2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
+
+  B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+
   canvas = $('#gameCanvas')[0];
 
-  world = boxbox.createWorld(canvas, {
-    debugDraw: true
-  });
+  debug_canvas = $('#debugCanvas')[0];
 
   entities = [];
 
-  window.create_ball = function(x, y) {
-    return window.ball = world.createEntity({
-      name: 'ball',
-      x: 2,
-      y: 1,
-      shape: "circle",
-      height: 1.5,
-      width: 1.5,
-      fixedRotation: true,
-      friction: 0.3,
-      restitution: 0,
-      color: 'blue',
-      maxVelocityX: 4
-    });
+  window.game = {
+    _: {
+      state_changed: function(state) {
+        if (state === 'BUILD') {
+          return window.game.reset();
+        }
+      },
+      update: function() {
+        var _ref;
+        if ((_ref = window.viewModel.state()) === 'PAUSE' || _ref === 'BUILD') {
+          window.game._.world.DrawDebugData();
+          return;
+        }
+        window.game._.world.Step(1 / 60, 10, 10);
+        window.game._.world.DrawDebugData();
+        return window.game._.world.ClearForces();
+      },
+      entities: []
+    },
+    initialise: function() {
+      var debugDraw;
+      window.game._.world = new B2World(new B2Vec2(0, 10), true);
+      debugDraw = new B2DebugDraw();
+      debugDraw.SetSprite(debug_canvas.getContext("2d"));
+      debugDraw.SetDrawScale(30);
+      debugDraw.SetFillAlpha(0.3);
+      debugDraw.SetLineThickness(1.0);
+      debugDraw.SetFlags(B2DebugDraw.e_shapeBit || B2DebugDraw.e_jointBit);
+      return window.game._.world.SetDebugDraw(debugDraw);
+    },
+    create_dynamic_entity: function(x, y) {
+      var bodyDef, entity, fixDef;
+      bodyDef = new B2BodyDef();
+      bodyDef.type = B2Body.b2_dynamicBody;
+      bodyDef.position.Set(x, y);
+      fixDef = new B2FixtureDef();
+      fixDef.density = 10.0;
+      fixDef.friction = 0.5;
+      fixDef.restitution = 0.2;
+      fixDef.shape = new B2CircleShape(1);
+      entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef);
+      return window.game._.entities.push(entity);
+    },
+    load_state: function(state, save_as_default) {
+      if (save_as_default) {
+        window.game.default_state = state;
+      }
+      return window.game.state = state;
+    },
+    get_state: function() {},
+    play: function() {
+      return window.game.build_state = window.game.get_state();
+    },
+    reset: function() {
+      var entity, _i, _len, _ref;
+      _ref = window.game._.entities;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        window.game._.world.DestroyBody(entity.GetBody());
+      }
+      window.game._.entities = [];
+      return window.game.create_dynamic_entity(5, 5);
+    },
+    reset_hard: function() {}
   };
 
-  window.clear_game = function() {
-    var entity, _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = entities.length; _i < _len; _i++) {
-      entity = entities[_i];
-      _results.push(entity.destroy);
-    }
-    return _results;
-  };
+  window.game.initialise();
+
+  window.setInterval(window.game._.update, 1000 / 60);
+
+  window.viewModel.state.subscribe(window.game._.state_changed);
 
 }).call(this);
