@@ -45,22 +45,24 @@ window.game =
 		window.game._.world.SetDebugDraw(debugDraw)
 
 
-	create_dynamic_entity: (x, y) ->
+	create_dynamic_entity: (entity) ->
+		console.log entity
 		# Create an entity in the world
 		bodyDef = new B2BodyDef()
 		bodyDef.type = B2Body.b2_dynamicBody 	# Object type
-		bodyDef.position.Set(x, y)				# Position
+		bodyDef.position.Set(entity.x, entity.y)				# Position
 
 		fixDef = new B2FixtureDef()
-		fixDef.density = 10.0					# Density
-		fixDef.friction = 0.5					# Friction
-		fixDef.restitution = 0.2				# Restitution
+		fixDef.density = entity.density					# Density
+		fixDef.friction = entity.friction					# Friction
+		fixDef.restitution = entity.restitution				# Restitution
 
-		fixDef.shape = new B2CircleShape(1)		# Shape
+		fixDef.shape = new B2CircleShape(entity.shape.size)		# Shape
 
 		entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef) # Add to the world
 
 		window.game._.entities.push(entity)
+		console.log window.game._.entities
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
@@ -68,7 +70,7 @@ window.game =
 		if save_as_default
 			window.game.default_state = state
 
-		window.game.state = state
+		window.game.create_dynamic_entity(entity) for entity in state.dynamic
 
 	get_state: () ->
 		# Serialize the current game state
@@ -84,7 +86,7 @@ window.game =
 
 		window.game._.entities = []
 
-		window.game.create_dynamic_entity(5,5)
+		window.game.load_state(window.game.default_state)
 
 
 	reset_hard: () ->

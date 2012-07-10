@@ -17,9 +17,15 @@ GameViewModel = ->
 window.viewModel = new GameViewModel()
 ko.applyBindings(window.viewModel)
 
+load_level = (level_name) ->
+	# Load a level from the server
+	$.getJSON '/levels/' + level_name, (data) ->
+		window.game.load_state data, true
+		window.viewModel.state("BUILD")
+		window.game.reset()
+
 window.start_game = () ->
-	window.viewModel.state("BUILD")
-	window.game.reset()
+	load_level("test")
 	return
 
 $('.pause').click ->

@@ -30,4 +30,8 @@ def static_img(filepath):
 def static_js(filepath):
 	return static_file(filepath, root=root_directory + '/static/js/')
 
+@route('/levels/<level>')
+def level(level):
+	return static_file(level + '.js', root=root_directory + '/levels/')
+
 bottle.run(host='0.0.0.0', port=argv[1])
