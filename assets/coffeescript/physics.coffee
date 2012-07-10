@@ -44,6 +44,18 @@ window.game =
 		debugDraw.SetFlags(B2DebugDraw.e_shapeBit || B2DebugDraw.e_jointBit)
 		window.game._.world.SetDebugDraw(debugDraw)
 
+	create_fixture_def: (entity) ->
+		fixDef = new B2FixtureDef()
+		fixDef.density = entity.density					# Density
+		fixDef.friction = entity.friction					# Friction
+		fixDef.restitution = entity.restitution				# Restitution
+
+		if entity.shape.type == "circle"
+			fixDef.shape = new B2CircleShape(entity.shape.size)		# Shape
+		else if entity.shape.type == "rectangle"
+			fixDef.shape = new B2PolygonShape()
+			fixDef.shape.SetAsBox(entity.shape.size.width, entity.shape.size.height)
+		return fixDef
 
 	create_dynamic_entity: (entity) ->
 		# Create an entity in the world
@@ -51,12 +63,7 @@ window.game =
 		bodyDef.type = B2Body.b2_dynamicBody 	# Object type
 		bodyDef.position.Set(entity.x, entity.y)				# Position
 
-		fixDef = new B2FixtureDef()
-		fixDef.density = entity.density					# Density
-		fixDef.friction = entity.friction					# Friction
-		fixDef.restitution = entity.restitution				# Restitution
-
-		fixDef.shape = new B2CircleShape(entity.shape.size)		# Shape
+		fixDef = window.game.create_fixture_def(entity)
 
 		entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef) # Add to the world
 
@@ -68,12 +75,7 @@ window.game =
 		bodyDef.type = B2Body.b2_staticBody
 		bodyDef.position.Set(entity.x, entity.y)
 
-		fixDef = new B2FixtureDef()
-		fixDef.density = entity.density					# Density
-		fixDef.friction = entity.friction					# Friction
-		fixDef.restitution = entity.restitution				# Restitution
-
-		fixDef.shape = new B2CircleShape(entity.shape.size)		# Shape
+		fixDef = window.game.create_fixture_def(entity)
 
 		body = window.game._.world.CreateBody(bodyDef)
 		body.CreateFixture(fixDef)

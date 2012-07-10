@@ -153,16 +153,26 @@
       debugDraw.SetFlags(B2DebugDraw.e_shapeBit || B2DebugDraw.e_jointBit);
       return window.game._.world.SetDebugDraw(debugDraw);
     },
+    create_fixture_def: function(entity) {
+      var fixDef;
+      fixDef = new B2FixtureDef();
+      fixDef.density = entity.density;
+      fixDef.friction = entity.friction;
+      fixDef.restitution = entity.restitution;
+      if (entity.shape.type === "circle") {
+        fixDef.shape = new B2CircleShape(entity.shape.size);
+      } else if (entity.shape.type === "rectangle") {
+        fixDef.shape = new B2PolygonShape();
+        fixDef.shape.SetAsBox(entity.shape.size.width, entity.shape.size.height);
+      }
+      return fixDef;
+    },
     create_dynamic_entity: function(entity) {
       var bodyDef, fixDef;
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_dynamicBody;
       bodyDef.position.Set(entity.x, entity.y);
-      fixDef = new B2FixtureDef();
-      fixDef.density = entity.density;
-      fixDef.friction = entity.friction;
-      fixDef.restitution = entity.restitution;
-      fixDef.shape = new B2CircleShape(entity.shape.size);
+      fixDef = window.game.create_fixture_def(entity);
       entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef);
       return window.game._.entities.push(entity);
     },
@@ -171,11 +181,7 @@
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_staticBody;
       bodyDef.position.Set(entity.x, entity.y);
-      fixDef = new B2FixtureDef();
-      fixDef.density = entity.density;
-      fixDef.friction = entity.friction;
-      fixDef.restitution = entity.restitution;
-      fixDef.shape = new B2CircleShape(entity.shape.size);
+      fixDef = window.game.create_fixture_def(entity);
       body = window.game._.world.CreateBody(bodyDef);
       return body.CreateFixture(fixDef);
     },
