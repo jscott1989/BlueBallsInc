@@ -155,7 +155,6 @@
     },
     create_dynamic_entity: function(entity) {
       var bodyDef, fixDef;
-      console.log(entity);
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_dynamicBody;
       bodyDef.position.Set(entity.x, entity.y);
@@ -165,19 +164,36 @@
       fixDef.restitution = entity.restitution;
       fixDef.shape = new B2CircleShape(entity.shape.size);
       entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef);
-      window.game._.entities.push(entity);
-      return console.log(window.game._.entities);
+      return window.game._.entities.push(entity);
+    },
+    create_static_entity: function(entity) {
+      var body, bodyDef, fixDef;
+      bodyDef = new B2BodyDef();
+      bodyDef.type = B2Body.b2_staticBody;
+      bodyDef.position.Set(entity.x, entity.y);
+      fixDef = new B2FixtureDef();
+      fixDef.density = entity.density;
+      fixDef.friction = entity.friction;
+      fixDef.restitution = entity.restitution;
+      fixDef.shape = new B2CircleShape(entity.shape.size);
+      body = window.game._.world.CreateBody(bodyDef);
+      return body.CreateFixture(fixDef);
     },
     load_state: function(state, save_as_default) {
-      var entity, _i, _len, _ref, _results;
+      var entity, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (save_as_default) {
         window.game.default_state = state;
       }
       _ref = state.dynamic;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        _results.push(window.game.create_dynamic_entity(entity));
+        window.game.create_dynamic_entity(entity);
+      }
+      _ref1 = state["static"];
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        entity = _ref1[_j];
+        _results.push(window.game.create_static_entity(entity));
       }
       return _results;
     },

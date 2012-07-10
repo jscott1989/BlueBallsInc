@@ -46,7 +46,6 @@ window.game =
 
 
 	create_dynamic_entity: (entity) ->
-		console.log entity
 		# Create an entity in the world
 		bodyDef = new B2BodyDef()
 		bodyDef.type = B2Body.b2_dynamicBody 	# Object type
@@ -62,7 +61,22 @@ window.game =
 		entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef) # Add to the world
 
 		window.game._.entities.push(entity)
-		console.log window.game._.entities
+
+	create_static_entity: (entity) ->
+		# Create a static entity, likely a floor or something
+		bodyDef = new B2BodyDef()
+		bodyDef.type = B2Body.b2_staticBody
+		bodyDef.position.Set(entity.x, entity.y)
+
+		fixDef = new B2FixtureDef()
+		fixDef.density = entity.density					# Density
+		fixDef.friction = entity.friction					# Friction
+		fixDef.restitution = entity.restitution				# Restitution
+
+		fixDef.shape = new B2CircleShape(entity.shape.size)		# Shape
+
+		body = window.game._.world.CreateBody(bodyDef)
+		body.CreateFixture(fixDef)
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
@@ -71,6 +85,7 @@ window.game =
 			window.game.default_state = state
 
 		window.game.create_dynamic_entity(entity) for entity in state.dynamic
+		window.game.create_static_entity(entity) for entity in state.static
 
 	get_state: () ->
 		# Serialize the current game state

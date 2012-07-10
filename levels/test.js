@@ -26,5 +26,30 @@
 				"size": 4
 			}
 		}
+	],
+
+	"static": [
+		{
+			"x": 5,
+			"y": 10,
+			"density": 20.0,
+			"friction": 0.5,
+			"restitution": 0.2,
+			"shape": {
+				"type": "rectangle",
+				"size": 2
+			}
+		},
+		{
+			"x": 13,
+			"y": 10,
+			"density": 20.0,
+			"friction": 0.5,
+			"restitution": 0.2,
+			"shape": {
+				"type": "rectangle",
+				"size": 2
+			}
+		}
 	]
 }
