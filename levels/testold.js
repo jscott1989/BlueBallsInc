@@ -45,7 +45,29 @@
 			"restitution": 0.2,
 			"shape": {
 				"type": "rectangle",
-				"size": {"width": 4, "height": 4}
+				"size": {"width": 0.3, "height": 1}
+			}
+		},
+		{
+			"x": 15,
+			"y": 15,
+			"density": 20.0,
+			"friction": 0.5,
+			"restitution": 0.2,
+			"shape": {
+				"type": "rectangle",
+				"size": {"width": 0.3, "height": 1}
+			}
+		},
+		{
+			"x": 14,
+			"y": 10,
+			"density": 20.0,
+			"friction": 0.5,
+			"restitution": 0.2,
+			"shape": {
+				"type": "rectangle",
+				"size": {"width": 3, "height": 3}
 			}
 		}
 	],
