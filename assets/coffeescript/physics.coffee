@@ -31,6 +31,8 @@ window.game =
 		state_changed: (state) ->
 			if state == 'BUILD'
 				window.game.reset()
+			else if state == 'PLAY'
+				window.game.play()
 
 		update: () ->
 			if window.game._.is_mouse_down && !window.game._.mouse_joint
@@ -52,7 +54,7 @@ window.game =
 					window.game._.world.DestroyJoint(window.game._.mouse_joint)
 					window.game._.mouse_joint = null
 
-			if window.viewModel.state() in ['PAUSE', 'BUILD']
+			if window.viewModel.state() == 'PAUSE'
 				window.game._.world.DrawDebugData()
 				return
 			window.game._.world.Step(1 / 60, 10, 10)
@@ -87,6 +89,12 @@ window.game =
 		else if entity.shape.type == "rectangle"
 			fixDef.shape = new B2PolygonShape()
 			fixDef.shape.SetAsBox(entity.shape.size.width, entity.shape.size.height)
+		else if entity.shape.type == "polygon"
+			fixDef.shape = new B2PolygonShape()
+			vectors = []
+			for vector in entity.shape.vectors
+				vectors.push(new B2Vec2(vector.x, vector.y))
+			fixDef.shape.SetAsArray(vectors)
 		return fixDef
 
 	create_dynamic_entity: (entity) ->
@@ -94,6 +102,10 @@ window.game =
 		bodyDef = new B2BodyDef()
 		bodyDef.type = B2Body.b2_dynamicBody 	# Object type
 		bodyDef.position.Set(entity.x, entity.y)				# Position
+
+		console.log entity
+		if 'angle' of entity
+			bodyDef.angle = entity.angle
 
 		fixDef = window.game.create_fixture_def(entity)
 
@@ -107,6 +119,9 @@ window.game =
 		bodyDef.type = B2Body.b2_staticBody
 		bodyDef.position.Set(entity.x, entity.y)
 
+		if 'angle' of entity
+			bodyDef.angle = entity.angle
+
 		fixDef = window.game.create_fixture_def(entity)
 
 		body = window.game._.world.CreateBody(bodyDef)
@@ -117,12 +132,47 @@ window.game =
 
 		if save_as_default
 			window.game.default_state = state
+			window.game.build_state = state
 
 		window.game.create_dynamic_entity(entity) for entity in state.dynamic
 		window.game.create_static_entity(entity) for entity in state.static
 
 	get_state: () ->
 		# Serialize the current game state
+		state = {"dynamic": [], "static": []}
+		for entity in window.game._.entities
+			body = entity.GetBody()
+			position = body.GetPosition()
+			fixtures = body.GetFixtureList()
+			shape = fixtures.GetShape()
+			entity = {
+				"x": position.x
+				"y": position.y
+				"density": fixtures.GetDensity()
+				"friction": fixtures.GetFriction()
+				"restitution": fixtures.GetRestitution()
+				"angle": body.GetAngle()
+				"shape": {
+					"type": "rectangle"
+					"size": {"width": 1, "height": 1}
+				}
+			}
+
+			if shape.GetType() == 1 # Polygon
+				entity.shape.type = 'polygon'
+				entity.shape.vectors = []
+				for vector of shape.m_vertices
+					entity.shape.vectors.push({"x": shape.m_vertices[vector].x, "y": shape.m_vertices[vector].y})
+
+			else if shape.GetType() == 0 # Circle
+				entity.shape.type = 'circle'
+				entity.shape.size = shape.m_radius
+
+			if body.GetType() == B2Body.b2_staticBody
+				state["static"].push(entity)
+			else
+				state["dynamic"].push(entity)
+		return state
 
 	play: () ->
 		# Start the simulation
@@ -135,7 +185,7 @@ window.game =
 
 		window.game._.entities = []
 
-		window.game.load_state(window.game.default_state)
+		window.game.load_state(window.game.build_state)
 
 
 	reset_hard: () ->

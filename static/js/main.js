@@ -141,10 +141,12 @@
       state_changed: function(state) {
         if (state === 'BUILD') {
           return window.game.reset();
+        } else if (state === 'PLAY') {
+          return window.game.play();
         }
       },
       update: function() {
-        var body, md, _ref;
+        var body, md;
         if (window.game._.is_mouse_down && !window.game._.mouse_joint) {
           body = window.game.get_body_at_mouse();
           if (body) {
@@ -166,7 +168,7 @@
             window.game._.mouse_joint = null;
           }
         }
-        if ((_ref = window.viewModel.state()) === 'PAUSE' || _ref === 'BUILD') {
+        if (window.viewModel.state() === 'PAUSE') {
           window.game._.world.DrawDebugData();
           return;
         }
@@ -191,7 +193,7 @@
       return window.game._.world.SetDebugDraw(debugDraw);
     },
     create_fixture_def: function(entity) {
-      var fixDef;
+      var fixDef, vector, vectors, _i, _len, _ref;
       fixDef = new B2FixtureDef();
       fixDef.density = entity.density;
       fixDef.friction = entity.friction;
@@ -201,6 +203,15 @@
       } else if (entity.shape.type === "rectangle") {
         fixDef.shape = new B2PolygonShape();
         fixDef.shape.SetAsBox(entity.shape.size.width, entity.shape.size.height);
+      } else if (entity.shape.type === "polygon") {
+        fixDef.shape = new B2PolygonShape();
+        vectors = [];
+        _ref = entity.shape.vectors;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          vector = _ref[_i];
+          vectors.push(new B2Vec2(vector.x, vector.y));
+        }
+        fixDef.shape.SetAsArray(vectors);
       }
       return fixDef;
     },
@@ -209,6 +220,10 @@
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_dynamicBody;
       bodyDef.position.Set(entity.x, entity.y);
+      console.log(entity);
+      if ('angle' in entity) {
+        bodyDef.angle = entity.angle;
+      }
       fixDef = window.game.create_fixture_def(entity);
       entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef);
       return window.game._.entities.push(entity);
@@ -218,6 +233,9 @@
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_staticBody;
       bodyDef.position.Set(entity.x, entity.y);
+      if ('angle' in entity) {
+        bodyDef.angle = entity.angle;
+      }
       fixDef = window.game.create_fixture_def(entity);
       body = window.game._.world.CreateBody(bodyDef);
       return body.CreateFixture(fixDef);
@@ -226,6 +244,7 @@
       var entity, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (save_as_default) {
         window.game.default_state = state;
+        window.game.build_state = state;
       }
       _ref = state.dynamic;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -240,7 +259,55 @@
       }
       return _results;
     },
-    get_state: function() {},
+    get_state: function() {
+      var body, entity, fixtures, position, shape, state, vector, _i, _len, _ref;
+      state = {
+        "dynamic": [],
+        "static": []
+      };
+      _ref = window.game._.entities;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        body = entity.GetBody();
+        position = body.GetPosition();
+        fixtures = body.GetFixtureList();
+        shape = fixtures.GetShape();
+        entity = {
+          "x": position.x,
+          "y": position.y,
+          "density": fixtures.GetDensity(),
+          "friction": fixtures.GetFriction(),
+          "restitution": fixtures.GetRestitution(),
+          "angle": body.GetAngle(),
+          "shape": {
+            "type": "rectangle",
+            "size": {
+              "width": 1,
+              "height": 1
+            }
+          }
+        };
+        if (shape.GetType() === 1) {
+          entity.shape.type = 'polygon';
+          entity.shape.vectors = [];
+          for (vector in shape.m_vertices) {
+            entity.shape.vectors.push({
+              "x": shape.m_vertices[vector].x,
+              "y": shape.m_vertices[vector].y
+            });
+          }
+        } else if (shape.GetType() === 0) {
+          entity.shape.type = 'circle';
+          entity.shape.size = shape.m_radius;
+        }
+        if (body.GetType() === B2Body.b2_staticBody) {
+          state["static"].push(entity);
+        } else {
+          state["dynamic"].push(entity);
+        }
+      }
+      return state;
+    },
     play: function() {
       return window.game.build_state = window.game.get_state();
     },
@@ -252,7 +319,7 @@
         window.game._.world.DestroyBody(entity.GetBody());
       }
       window.game._.entities = [];
-      return window.game.load_state(window.game.default_state);
+      return window.game.load_state(window.game.build_state);
     },
     reset_hard: function() {},
     mouse_down: function(e) {
