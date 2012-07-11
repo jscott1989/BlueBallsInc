@@ -33,18 +33,24 @@ window.game =
 				window.game.reset()
 
 		update: () ->
-			if window.game._.is_mouse_down && window.game._.selected_body
+			if window.game._.is_mouse_down && !window.game._.mouse_joint
+				body = window.game.get_body_at_mouse()
+				if body
+					md = new B2MouseJointDef()
+					md.bodyA = window.game._.world.GetGroundBody();
+					md.bodyB = body;
+					md.target.Set(window.game._.mouseX, window.game._.mouseY);
+					md.collideConnected = true;
+					md.maxForce = 300.0 * body.GetMass();
+					window.game._.mouse_joint = window.game._.world.CreateJoint(md);
+					body.SetAwake(true);
 
-				position = window.game._.selected_body.GetPosition
-				offset = {"x": position.x - window.game._.mouseX, "y": position.y - window.game._.mouseY}
-
-				if offset.x != window.game._.selected_body_offset or offset.y != window.game._.selected_body_offset
-					# Move it
-					console.log "MOVE"
-					console.log window.game._.mouseX + window.game._.selected_body_offset.x, window.game._.mouseY + window.game._.selected_body_offset.y
-					window.game._.selected_body.SetPosition(window.game._.mouseX + window.game._.selected_body_offset.x, window.game._.mouseY + window.game._.selected_body_offset.y)
-					# window.game._.selected_body.SetPosition(1,1)
-				window.game._.selected_body.SetAwake(true)
+			if window.game._.mouse_joint
+				if window.game._.is_mouse_down
+					window.game._.mouse_joint.SetTarget(new B2Vec2(window.game._.mouseX, window.game._.mouseY))
+				else
+					window.game._.world.DestroyJoint(window.game._.mouse_joint)
+					window.game._.mouse_joint = null
 
 			if window.viewModel.state() in ['PAUSE', 'BUILD']
 				window.game._.world.DrawDebugData()
