@@ -1,6 +1,8 @@
 ###global Box2D:false, $:false###
 
+B2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
 B2Vec2 = Box2D.Common.Math.b2Vec2;
+B2AABB = Box2D.Collision.b2AABB;
 B2BodyDef = Box2D.Dynamics.b2BodyDef;
 B2Body = Box2D.Dynamics.b2Body;
 B2FixtureDef = Box2D.Dynamics.b2FixtureDef;
@@ -11,18 +13,39 @@ B2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
 B2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
-canvas = $('#gameCanvas')[0]
+$canvas = $('#gameCanvas')
+canvas = $canvas[0]
 debug_canvas = $('#debugCanvas')[0]
 
 entities = []
 
+canvasPosition = $canvas.offset()
+
 window.game =
 	_:
+		is_mouse_down: false
+		mouseX: false
+		mouseY: false
+		mouse_joint: false
+
 		state_changed: (state) ->
 			if state == 'BUILD'
 				window.game.reset()
 
 		update: () ->
+			if window.game._.is_mouse_down && window.game._.selected_body
+
+				position = window.game._.selected_body.GetPosition
+				offset = {"x": position.x - window.game._.mouseX, "y": position.y - window.game._.mouseY}
+
+				if offset.x != window.game._.selected_body_offset or offset.y != window.game._.selected_body_offset
+					# Move it
+					console.log "MOVE"
+					console.log window.game._.mouseX + window.game._.selected_body_offset.x, window.game._.mouseY + window.game._.selected_body_offset.y
+					window.game._.selected_body.SetPosition(window.game._.mouseX + window.game._.selected_body_offset.x, window.game._.mouseY + window.game._.selected_body_offset.y)
+					# window.game._.selected_body.SetPosition(1,1)
+				window.game._.selected_body.SetAwake(true)
+
 			if window.viewModel.state() in ['PAUSE', 'BUILD']
 				window.game._.world.DrawDebugData()
 				return
@@ -30,6 +53,9 @@ window.game =
 			window.game._.world.DrawDebugData()
 			window.game._.world.ClearForces()
 		entities: []
+
+	refresh_canvas_position: () ->
+		canvasPosition = $canvas.offset()
 
 	initialise: () ->
 		# Initialise Box2D
@@ -109,6 +135,43 @@ window.game =
 	reset_hard: () ->
 		# Reset to the beginning of the level, reverting any changes to the build
 
+	mouse_down: (e) ->
+		if e.clientX > canvasPosition.left && e.clientY > canvasPosition.top && e.clientX < canvasPosition.left + 660 && e.clientY < canvasPosition.top + 570
+			window.game._.is_mouse_down = true;
+			window.game.mouse_move(e)
+			window.game._.selected_body = window.game.get_body_at_mouse()
+			$(document).bind('mousemove', window.game.mouse_move)
+
+	mouse_up: (e) ->
+		window.game._.is_mouse_down = false
+
+	mouse_move: (e) ->
+		window.game._.mouseX = (e.clientX - canvasPosition.left) / 30
+		window.game._.mouseY = (e.clientY - canvasPosition.top) / 30
+
+	get_body_at_mouse: () ->
+		window.game._.mousePVec = new B2Vec2(window.game._.mouseX, window.game._.mouseY)
+		aabb = new B2AABB();
+		aabb.lowerBound.Set(window.game._.mouseX - 0.1, window.game._.mouseY - 0.1)
+		aabb.upperBound.Set(window.game._.mouseX + 0.1, window.game._.mouseY + 0.1)
+
+		
+		window.game._.selected_body = null
+		window.game._.world.QueryAABB(window.game.get_body_cb, aabb)
+		return window.game._.selected_body
+
+	get_body_cb: (fixture) ->
+		if fixture.GetBody().GetType() != B2Body.b2_staticBody
+			if fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), window.game._.mousePVec)
+				window.game._.selected_body = fixture.GetBody()
+				position = window.game._.selected_body.GetPosition()
+				window.game._.selected_body_offset = {"x": position.x - window.game._.mouseX, "y": position.y - window.game._.mouseY}
+				return false
+		return true
+
+
+$(document).mousedown(window.game.mouse_down)
+$(document).mouseup(window.game.mouse_up)
 window.game.initialise()
 window.setInterval(window.game._.update, 1000 / 60);
 

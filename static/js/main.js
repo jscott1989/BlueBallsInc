@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2Body, B2BodyDef, B2CircleShape, B2DebugDraw, B2Fixture, B2FixtureDef, B2MassData, B2PolygonShape, B2Vec2, B2World, GameViewModel, canvas, debug_canvas, entities, load_level;
+  var $canvas, $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2DebugDraw, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2Vec2, B2World, GameViewModel, canvas, canvasPosition, debug_canvas, entities, load_level;
 
   $menus = $('#menus');
 
@@ -46,6 +46,7 @@
   };
 
   window.start_game = function() {
+    window.game.refresh_canvas_position();
     load_level("test");
   };
 
@@ -97,7 +98,11 @@
   */
 
 
+  B2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
+
   B2Vec2 = Box2D.Common.Math.b2Vec2;
+
+  B2AABB = Box2D.Collision.b2AABB;
 
   B2BodyDef = Box2D.Dynamics.b2BodyDef;
 
@@ -117,21 +122,42 @@
 
   B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
-  canvas = $('#gameCanvas')[0];
+  $canvas = $('#gameCanvas');
+
+  canvas = $canvas[0];
 
   debug_canvas = $('#debugCanvas')[0];
 
   entities = [];
 
+  canvasPosition = $canvas.offset();
+
   window.game = {
     _: {
+      is_mouse_down: false,
+      mouseX: false,
+      mouseY: false,
+      mouse_joint: false,
       state_changed: function(state) {
         if (state === 'BUILD') {
           return window.game.reset();
         }
       },
       update: function() {
-        var _ref;
+        var offset, position, _ref;
+        if (window.game._.is_mouse_down && window.game._.selected_body) {
+          position = window.game._.selected_body.GetPosition;
+          offset = {
+            "x": position.x - window.game._.mouseX,
+            "y": position.y - window.game._.mouseY
+          };
+          if (offset.x !== window.game._.selected_body_offset || offset.y !== window.game._.selected_body_offset) {
+            console.log("MOVE");
+            console.log(window.game._.mouseX + window.game._.selected_body_offset.x, window.game._.mouseY + window.game._.selected_body_offset.y);
+            window.game._.selected_body.SetPosition(window.game._.mouseX + window.game._.selected_body_offset.x, window.game._.mouseY + window.game._.selected_body_offset.y);
+          }
+          window.game._.selected_body.SetAwake(true);
+        }
         if ((_ref = window.viewModel.state()) === 'PAUSE' || _ref === 'BUILD') {
           window.game._.world.DrawDebugData();
           return;
@@ -141,6 +167,9 @@
         return window.game._.world.ClearForces();
       },
       entities: []
+    },
+    refresh_canvas_position: function() {
+      return canvasPosition = $canvas.offset();
     },
     initialise: function() {
       var debugDraw;
@@ -217,8 +246,52 @@
       window.game._.entities = [];
       return window.game.load_state(window.game.default_state);
     },
-    reset_hard: function() {}
+    reset_hard: function() {},
+    mouse_down: function(e) {
+      if (e.clientX > canvasPosition.left && e.clientY > canvasPosition.top && e.clientX < canvasPosition.left + 660 && e.clientY < canvasPosition.top + 570) {
+        window.game._.is_mouse_down = true;
+        window.game.mouse_move(e);
+        window.game._.selected_body = window.game.get_body_at_mouse();
+        return $(document).bind('mousemove', window.game.mouse_move);
+      }
+    },
+    mouse_up: function(e) {
+      return window.game._.is_mouse_down = false;
+    },
+    mouse_move: function(e) {
+      window.game._.mouseX = (e.clientX - canvasPosition.left) / 30;
+      return window.game._.mouseY = (e.clientY - canvasPosition.top) / 30;
+    },
+    get_body_at_mouse: function() {
+      var aabb;
+      window.game._.mousePVec = new B2Vec2(window.game._.mouseX, window.game._.mouseY);
+      aabb = new B2AABB();
+      aabb.lowerBound.Set(window.game._.mouseX - 0.1, window.game._.mouseY - 0.1);
+      aabb.upperBound.Set(window.game._.mouseX + 0.1, window.game._.mouseY + 0.1);
+      window.game._.selected_body = null;
+      window.game._.world.QueryAABB(window.game.get_body_cb, aabb);
+      return window.game._.selected_body;
+    },
+    get_body_cb: function(fixture) {
+      var position;
+      if (fixture.GetBody().GetType() !== B2Body.b2_staticBody) {
+        if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), window.game._.mousePVec)) {
+          window.game._.selected_body = fixture.GetBody();
+          position = window.game._.selected_body.GetPosition();
+          window.game._.selected_body_offset = {
+            "x": position.x - window.game._.mouseX,
+            "y": position.y - window.game._.mouseY
+          };
+          return false;
+        }
+      }
+      return true;
+    }
   };
+
+  $(document).mousedown(window.game.mouse_down);
+
+  $(document).mouseup(window.game.mouse_up);
 
   window.game.initialise();
 
@@ -290,9 +363,9 @@
   });
 
   $('.start-tutorial').click(function() {
-    window.start_tutorial();
     $menus.fadeOut();
-    return $game.fadeIn();
+    $game.fadeIn();
+    return window.start_tutorial();
   });
 
 }).call(this);

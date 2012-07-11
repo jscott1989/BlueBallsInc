@@ -25,6 +25,8 @@ load_level = (level_name) ->
 		window.game.reset()
 
 window.start_game = () ->
+	# Needed as we need to do this after the canvas is visible
+	window.game.refresh_canvas_position()
 	load_level("test")
 	return
 

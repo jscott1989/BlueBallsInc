@@ -16,6 +16,17 @@
 			}
 		},
 		{
+			"x": 1,
+			"y": 1,
+			"density": 10.0,
+			"friction": 0.5,
+			"restitution": 0.2,
+			"shape": {
+				"type": "circle",
+				"size": 0.1
+			}
+		},
+		{
 			"x": 9,
 			"y": 7,
 			"density": 20.0,
