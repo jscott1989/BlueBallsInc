@@ -78,6 +78,13 @@
     return window.backwards_to($main_menu);
   });
 
+  $('.confirm-restart-level').click(function() {
+    window.viewModel.state("BUILD");
+    $menus.fadeOut();
+    load_level("test");
+    return window.backwards_to($main_menu);
+  });
+
   /* -------------------------------------------- 
        Begin tutorial.coffee 
   --------------------------------------------
@@ -238,7 +245,8 @@
       }
       fixDef = window.game.create_fixture_def(entity);
       body = window.game._.world.CreateBody(bodyDef);
-      return body.CreateFixture(fixDef);
+      entity = body.CreateFixture(fixDef);
+      return window.game._.entities.push(entity);
     },
     load_state: function(state, save_as_default) {
       var entity, _i, _j, _len, _len1, _ref, _ref1, _results;
@@ -300,6 +308,7 @@
           entity.shape.type = 'circle';
           entity.shape.size = shape.m_radius;
         }
+        console.log(body.GetType());
         if (body.GetType() === B2Body.b2_staticBody) {
           state["static"].push(entity);
         } else {
@@ -321,7 +330,16 @@
       window.game._.entities = [];
       return window.game.load_state(window.game.build_state);
     },
-    reset_hard: function() {},
+    reset_hard: function() {
+      var entity, _i, _len, _ref;
+      _ref = window.game._.entities;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        window.game._.world.DestroyBody(entity.GetBody());
+      }
+      window.game._.entities = [];
+      return window.game.load_state(window.game.default_state);
+    },
     mouse_down: function(e) {
       if (e.clientX > canvasPosition.left && e.clientY > canvasPosition.top && e.clientX < canvasPosition.left + 660 && e.clientY < canvasPosition.top + 570) {
         window.game._.is_mouse_down = true;

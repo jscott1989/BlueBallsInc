@@ -20,6 +20,7 @@
 			%include highscore_menu
 			%include pause_menu
 			%include confirm_exit_menu
+			%include confirm_restart_menu
 		</div>
 	</div>
 

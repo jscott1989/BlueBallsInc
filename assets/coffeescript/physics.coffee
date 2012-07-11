@@ -125,7 +125,9 @@ window.game =
 		fixDef = window.game.create_fixture_def(entity)
 
 		body = window.game._.world.CreateBody(bodyDef)
-		body.CreateFixture(fixDef)
+		entity = body.CreateFixture(fixDef)
+
+		window.game._.entities.push(entity)
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
@@ -168,6 +170,7 @@ window.game =
 				entity.shape.type = 'circle'
 				entity.shape.size = shape.m_radius
 
+			console.log body.GetType()
 			if body.GetType() == B2Body.b2_staticBody
 				state["static"].push(entity)
 			else
@@ -190,6 +193,11 @@ window.game =
 
 	reset_hard: () ->
 		# Reset to the beginning of the level, reverting any changes to the build
+		window.game._.world.DestroyBody(entity.GetBody()) for entity in window.game._.entities
+
+		window.game._.entities = []
+
+		window.game.load_state(window.game.default_state)
 
 	mouse_down: (e) ->
 		if e.clientX > canvasPosition.left && e.clientY > canvasPosition.top && e.clientX < canvasPosition.left + 660 && e.clientY < canvasPosition.top + 570

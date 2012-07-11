@@ -5,6 +5,7 @@
 				<h1>Game Paused</h1>
 				<ul>
 					<li class="resume">Resume</li>
+					<li data-menu="#confirm-restart-menu">Restart level</li>
 					<li data-menu="#confirm-exit-menu">Exit</li>
 				</ul>
 			</div>
