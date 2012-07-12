@@ -134,3 +134,19 @@ a {
   height: 30px;
   font-size: 20px;
 }
+#game #sidebar .inner #toolbox {
+  background: white;
+  border: 2px solid black;
+  padding: 0;
+  list-style: none;
+}
+#game #sidebar .inner #toolbox li {
+  padding-left: 5px;
+  cursor: pointer;
+}
+#game #sidebar .inner #toolbox li:hover {
+  background: orange;
+}
+#game #sidebar .inner #toolbox li.active {
+  background: blue;
+}

@@ -12,6 +12,11 @@
 			<button class="start" data-bind="text: isPlaying() ? 'Reset' : 'Start'">Start</button>
 			<br /><br />
 			<button class="pause">Menu</button>
+
+			<ul id="toolbox">
+				<li data-bind="css: { active : tool() == 'MOVE' }" data-tool="MOVE">Move</li>
+				<li data-bind="css: { active : tool() == 'GLUE' }" data-tool="GLUE">Glue</li>
+			</ul>
 		</div>
 	</div>
 </div>

@@ -6,6 +6,8 @@ $main_menu = $('#main-menu')
 
 GameViewModel = ->
 	self = this
+	self.tool = ko.observable("MOVE")
+	self.last_tool = ko.observable("MOVE")
 	self.state = ko.observable("BUILD")
 	self.isPaused = ko.computed ->
 		self.state() == 'PAUSE'
@@ -60,3 +62,14 @@ $('.confirm-restart-level').click ->
 	load_level("test")
 
 	window.backwards_to($main_menu)
+
+
+$('#toolbox li').click ->
+	window.viewModel.last_tool(window.viewModel.tool())
+	window.viewModel.tool($(this).data('tool'))
+
+window.select_last_tool = () ->
+	# Select the last selected tool (the current one is finished with)
+	tmp_tool = window.viewModel.tool()
+	window.viewModel.tool(window.viewModel.last_tool())
+	window.viewModel.last_tool(tmp_tool)

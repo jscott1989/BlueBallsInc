@@ -12,17 +12,19 @@ B2MassData = Box2D.Collision.Shapes.b2MassData;
 B2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
 B2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+B2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
+B2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
+B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef
 
 $canvas = $('#gameCanvas')
 canvas = $canvas[0]
 debug_canvas = $('#debugCanvas')[0]
 
-entities = []
-
-canvasPosition = $canvas.offset()
-
 window.game =
+	tools:
+		_:"_"
 	_:
+		canvasPosition: {"x": 0, "y": 0}
 		is_mouse_down: false
 		mouseX: false
 		mouseY: false
@@ -35,24 +37,7 @@ window.game =
 				window.game.play()
 
 		update: () ->
-			if window.game._.is_mouse_down && !window.game._.mouse_joint
-				body = window.game.get_body_at_mouse()
-				if body
-					md = new B2MouseJointDef()
-					md.bodyA = window.game._.world.GetGroundBody();
-					md.bodyB = body;
-					md.target.Set(window.game._.mouseX, window.game._.mouseY);
-					md.collideConnected = true;
-					md.maxForce = 300.0 * body.GetMass();
-					window.game._.mouse_joint = window.game._.world.CreateJoint(md);
-					body.SetAwake(true);
-
-			if window.game._.mouse_joint
-				if window.game._.is_mouse_down
-					window.game._.mouse_joint.SetTarget(new B2Vec2(window.game._.mouseX, window.game._.mouseY))
-				else
-					window.game._.world.DestroyJoint(window.game._.mouse_joint)
-					window.game._.mouse_joint = null
+			window.game.tools[window.viewModel.tool()].update()
 
 			if window.viewModel.state() == 'PAUSE'
 				window.game._.world.DrawDebugData()
@@ -60,10 +45,12 @@ window.game =
 			window.game._.world.Step(1 / 60, 10, 10)
 			window.game._.world.DrawDebugData()
 			window.game._.world.ClearForces()
-		entities: []
+		entities: [],
+		entityIDs: {},
+		joints: []
 
 	refresh_canvas_position: () ->
-		canvasPosition = $canvas.offset()
+		window.game._.canvasPosition = $canvas.offset()
 
 	initialise: () ->
 		# Initialise Box2D
@@ -103,15 +90,17 @@ window.game =
 		bodyDef.type = B2Body.b2_dynamicBody 	# Object type
 		bodyDef.position.Set(entity.x, entity.y)				# Position
 
-		console.log entity
 		if 'angle' of entity
 			bodyDef.angle = entity.angle
 
 		fixDef = window.game.create_fixture_def(entity)
 
-		entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef) # Add to the world
+		body = window.game._.world.CreateBody(bodyDef)
+		created_entity = body.CreateFixture(fixDef) # Add to the world
 
-		window.game._.entities.push(entity)
+		window.game._.entities.push(created_entity)
+		if 'id' of entity
+			window.game._.entityIDs[entity.id] = created_entity
 
 	create_static_entity: (entity) ->
 		# Create a static entity, likely a floor or something
@@ -125,9 +114,31 @@ window.game =
 		fixDef = window.game.create_fixture_def(entity)
 
 		body = window.game._.world.CreateBody(bodyDef)
-		entity = body.CreateFixture(fixDef)
+		created_entity = body.CreateFixture(fixDef)
 
-		window.game._.entities.push(entity)
+		window.game._.entities.push(created_entity)
+		if 'id' of entity
+			window.game._.entityIDs[entity.id] = created_entity
+
+	create_joint: (joint) ->
+		if joint.type == 'revolute'
+			j = new B2RevoluteJointDef()
+		else if joint.type =='distance'
+			j = new B2DistanceJointDef()
+		else if joint.type =='weld'
+			j = new B2WeldJointDef()
+		j.bodyA = window.game._.entityIDs[joint.bodyA].GetBody()
+		j.bodyB = window.game._.entityIDs[joint.bodyB].GetBody()
+		if "localAnchorA" of joint
+			j.localAnchorA.Set(joint.localAnchorA.x,joint.localAnchorA.y)
+		if "motor" of joint
+			if joint.motor.enabled
+				j.enableMotor = true
+				j.maxMotorTorque = 55
+				j.motorSpeed=-10
+		j = window.game._.world.CreateJoint(j)
+		window.game._.joints.push(j)
+		console.log j
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
@@ -136,8 +147,9 @@ window.game =
 			window.game.default_state = state
 			window.game.build_state = state
 
-		window.game.create_dynamic_entity(entity) for entity in state.dynamic
-		window.game.create_static_entity(entity) for entity in state.static
+		window.game.create_dynamic_entity(entity) for entity in state.dynamic if state.dynamic
+		window.game.create_static_entity(entity) for entity in state.static if state.static
+		window.game.create_joint(joint) for joint in state.joints if state.joints
 
 	get_state: () ->
 		# Serialize the current game state
@@ -156,7 +168,6 @@ window.game =
 				"angle": body.GetAngle()
 				"shape": {
 					"type": "rectangle"
-					"size": {"width": 1, "height": 1}
 				}
 			}
 
@@ -170,7 +181,6 @@ window.game =
 				entity.shape.type = 'circle'
 				entity.shape.size = shape.m_radius
 
-			console.log body.GetType()
 			if body.GetType() == B2Body.b2_staticBody
 				state["static"].push(entity)
 			else
@@ -185,6 +195,7 @@ window.game =
 		# Reset the simulation into the "build" state
 		# window.game.load_state(window.game.build_state)
 		window.game._.world.DestroyBody(entity.GetBody()) for entity in window.game._.entities
+		window.game._.world.DestroyJoint(joint) for joint in window.game._.joints
 
 		window.game._.entities = []
 
@@ -194,24 +205,21 @@ window.game =
 	reset_hard: () ->
 		# Reset to the beginning of the level, reverting any changes to the build
 		window.game._.world.DestroyBody(entity.GetBody()) for entity in window.game._.entities
+		window.game._.world.DestroyJoint(joint) for joint in window.game._.joints
+
 
 		window.game._.entities = []
 
 		window.game.load_state(window.game.default_state)
 
 	mouse_down: (e) ->
-		if e.clientX > canvasPosition.left && e.clientY > canvasPosition.top && e.clientX < canvasPosition.left + 660 && e.clientY < canvasPosition.top + 570
-			window.game._.is_mouse_down = true;
-			window.game.mouse_move(e)
-			window.game._.selected_body = window.game.get_body_at_mouse()
-			$(document).bind('mousemove', window.game.mouse_move)
+		window.game.tools[window.viewModel.tool()].mouse_down(e)
 
 	mouse_up: (e) ->
-		window.game._.is_mouse_down = false
+		window.game.tools[window.viewModel.tool()].mouse_up(e)
 
 	mouse_move: (e) ->
-		window.game._.mouseX = (e.clientX - canvasPosition.left) / 30
-		window.game._.mouseY = (e.clientY - canvasPosition.top) / 30
+		window.game.tools[window.viewModel.tool()].mouse_move(e)
 
 	get_body_at_mouse: () ->
 		window.game._.mousePVec = new B2Vec2(window.game._.mouseX, window.game._.mouseY)

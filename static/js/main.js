@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $canvas, $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2DebugDraw, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2Vec2, B2World, GameViewModel, canvas, canvasPosition, debug_canvas, entities, load_level;
+  var $canvas, $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, canvas, debug_canvas, load_level;
 
   $menus = $('#menus');
 
@@ -24,6 +24,8 @@
   GameViewModel = function() {
     var self;
     self = this;
+    self.tool = ko.observable("MOVE");
+    self.last_tool = ko.observable("MOVE");
     self.state = ko.observable("BUILD");
     self.isPaused = ko.computed(function() {
       return self.state() === 'PAUSE';
@@ -85,6 +87,18 @@
     return window.backwards_to($main_menu);
   });
 
+  $('#toolbox li').click(function() {
+    window.viewModel.last_tool(window.viewModel.tool());
+    return window.viewModel.tool($(this).data('tool'));
+  });
+
+  window.select_last_tool = function() {
+    var tmp_tool;
+    tmp_tool = window.viewModel.tool();
+    window.viewModel.tool(window.viewModel.last_tool());
+    return window.viewModel.last_tool(tmp_tool);
+  };
+
   /* -------------------------------------------- 
        Begin tutorial.coffee 
   --------------------------------------------
@@ -129,18 +143,27 @@
 
   B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
+  B2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef;
+
+  B2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef;
+
+  B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
+
   $canvas = $('#gameCanvas');
 
   canvas = $canvas[0];
 
   debug_canvas = $('#debugCanvas')[0];
 
-  entities = [];
-
-  canvasPosition = $canvas.offset();
-
   window.game = {
+    tools: {
+      _: "_"
+    },
     _: {
+      canvasPosition: {
+        "x": 0,
+        "y": 0
+      },
       is_mouse_down: false,
       mouseX: false,
       mouseY: false,
@@ -153,28 +176,7 @@
         }
       },
       update: function() {
-        var body, md;
-        if (window.game._.is_mouse_down && !window.game._.mouse_joint) {
-          body = window.game.get_body_at_mouse();
-          if (body) {
-            md = new B2MouseJointDef();
-            md.bodyA = window.game._.world.GetGroundBody();
-            md.bodyB = body;
-            md.target.Set(window.game._.mouseX, window.game._.mouseY);
-            md.collideConnected = true;
-            md.maxForce = 300.0 * body.GetMass();
-            window.game._.mouse_joint = window.game._.world.CreateJoint(md);
-            body.SetAwake(true);
-          }
-        }
-        if (window.game._.mouse_joint) {
-          if (window.game._.is_mouse_down) {
-            window.game._.mouse_joint.SetTarget(new B2Vec2(window.game._.mouseX, window.game._.mouseY));
-          } else {
-            window.game._.world.DestroyJoint(window.game._.mouse_joint);
-            window.game._.mouse_joint = null;
-          }
-        }
+        window.game.tools[window.viewModel.tool()].update();
         if (window.viewModel.state() === 'PAUSE') {
           window.game._.world.DrawDebugData();
           return;
@@ -183,10 +185,12 @@
         window.game._.world.DrawDebugData();
         return window.game._.world.ClearForces();
       },
-      entities: []
+      entities: [],
+      entityIDs: {},
+      joints: []
     },
     refresh_canvas_position: function() {
-      return canvasPosition = $canvas.offset();
+      return window.game._.canvasPosition = $canvas.offset();
     },
     initialise: function() {
       var debugDraw;
@@ -223,20 +227,23 @@
       return fixDef;
     },
     create_dynamic_entity: function(entity) {
-      var bodyDef, fixDef;
+      var body, bodyDef, created_entity, fixDef;
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_dynamicBody;
       bodyDef.position.Set(entity.x, entity.y);
-      console.log(entity);
       if ('angle' in entity) {
         bodyDef.angle = entity.angle;
       }
       fixDef = window.game.create_fixture_def(entity);
-      entity = window.game._.world.CreateBody(bodyDef).CreateFixture(fixDef);
-      return window.game._.entities.push(entity);
+      body = window.game._.world.CreateBody(bodyDef);
+      created_entity = body.CreateFixture(fixDef);
+      window.game._.entities.push(created_entity);
+      if ('id' in entity) {
+        return window.game._.entityIDs[entity.id] = created_entity;
+      }
     },
     create_static_entity: function(entity) {
-      var body, bodyDef, fixDef;
+      var body, bodyDef, created_entity, fixDef;
       bodyDef = new B2BodyDef();
       bodyDef.type = B2Body.b2_staticBody;
       bodyDef.position.Set(entity.x, entity.y);
@@ -245,27 +252,66 @@
       }
       fixDef = window.game.create_fixture_def(entity);
       body = window.game._.world.CreateBody(bodyDef);
-      entity = body.CreateFixture(fixDef);
-      return window.game._.entities.push(entity);
+      created_entity = body.CreateFixture(fixDef);
+      window.game._.entities.push(created_entity);
+      if ('id' in entity) {
+        return window.game._.entityIDs[entity.id] = created_entity;
+      }
+    },
+    create_joint: function(joint) {
+      var j;
+      if (joint.type === 'revolute') {
+        j = new B2RevoluteJointDef();
+      } else if (joint.type === 'distance') {
+        j = new B2DistanceJointDef();
+      } else if (joint.type === 'weld') {
+        j = new B2WeldJointDef();
+      }
+      j.bodyA = window.game._.entityIDs[joint.bodyA].GetBody();
+      j.bodyB = window.game._.entityIDs[joint.bodyB].GetBody();
+      if ("localAnchorA" in joint) {
+        j.localAnchorA.Set(joint.localAnchorA.x, joint.localAnchorA.y);
+      }
+      if ("motor" in joint) {
+        if (joint.motor.enabled) {
+          j.enableMotor = true;
+          j.maxMotorTorque = 55;
+          j.motorSpeed = -10;
+        }
+      }
+      j = window.game._.world.CreateJoint(j);
+      window.game._.joints.push(j);
+      return console.log(j);
     },
     load_state: function(state, save_as_default) {
-      var entity, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var entity, joint, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       if (save_as_default) {
         window.game.default_state = state;
         window.game.build_state = state;
       }
-      _ref = state.dynamic;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        entity = _ref[_i];
-        window.game.create_dynamic_entity(entity);
+      if (state.dynamic) {
+        _ref = state.dynamic;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          entity = _ref[_i];
+          window.game.create_dynamic_entity(entity);
+        }
       }
-      _ref1 = state["static"];
-      _results = [];
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        entity = _ref1[_j];
-        _results.push(window.game.create_static_entity(entity));
+      if (state["static"]) {
+        _ref1 = state["static"];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          entity = _ref1[_j];
+          window.game.create_static_entity(entity);
+        }
       }
-      return _results;
+      if (state.joints) {
+        _ref2 = state.joints;
+        _results = [];
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          joint = _ref2[_k];
+          _results.push(window.game.create_joint(joint));
+        }
+        return _results;
+      }
     },
     get_state: function() {
       var body, entity, fixtures, position, shape, state, vector, _i, _len, _ref;
@@ -288,11 +334,7 @@
           "restitution": fixtures.GetRestitution(),
           "angle": body.GetAngle(),
           "shape": {
-            "type": "rectangle",
-            "size": {
-              "width": 1,
-              "height": 1
-            }
+            "type": "rectangle"
           }
         };
         if (shape.GetType() === 1) {
@@ -308,7 +350,6 @@
           entity.shape.type = 'circle';
           entity.shape.size = shape.m_radius;
         }
-        console.log(body.GetType());
         if (body.GetType() === B2Body.b2_staticBody) {
           state["static"].push(entity);
         } else {
@@ -321,39 +362,43 @@
       return window.game.build_state = window.game.get_state();
     },
     reset: function() {
-      var entity, _i, _len, _ref;
+      var entity, joint, _i, _j, _len, _len1, _ref, _ref1;
       _ref = window.game._.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
         window.game._.world.DestroyBody(entity.GetBody());
+      }
+      _ref1 = window.game._.joints;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        joint = _ref1[_j];
+        window.game._.world.DestroyJoint(joint);
       }
       window.game._.entities = [];
       return window.game.load_state(window.game.build_state);
     },
     reset_hard: function() {
-      var entity, _i, _len, _ref;
+      var entity, joint, _i, _j, _len, _len1, _ref, _ref1;
       _ref = window.game._.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
         window.game._.world.DestroyBody(entity.GetBody());
       }
+      _ref1 = window.game._.joints;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        joint = _ref1[_j];
+        window.game._.world.DestroyJoint(joint);
+      }
       window.game._.entities = [];
       return window.game.load_state(window.game.default_state);
     },
     mouse_down: function(e) {
-      if (e.clientX > canvasPosition.left && e.clientY > canvasPosition.top && e.clientX < canvasPosition.left + 660 && e.clientY < canvasPosition.top + 570) {
-        window.game._.is_mouse_down = true;
-        window.game.mouse_move(e);
-        window.game._.selected_body = window.game.get_body_at_mouse();
-        return $(document).bind('mousemove', window.game.mouse_move);
-      }
+      return window.game.tools[window.viewModel.tool()].mouse_down(e);
     },
     mouse_up: function(e) {
-      return window.game._.is_mouse_down = false;
+      return window.game.tools[window.viewModel.tool()].mouse_up(e);
     },
     mouse_move: function(e) {
-      window.game._.mouseX = (e.clientX - canvasPosition.left) / 30;
-      return window.game._.mouseY = (e.clientY - canvasPosition.top) / 30;
+      return window.game.tools[window.viewModel.tool()].mouse_move(e);
     },
     get_body_at_mouse: function() {
       var aabb;
@@ -391,6 +436,67 @@
   window.setInterval(window.game._.update, 1000 / 60);
 
   window.viewModel.state.subscribe(window.game._.state_changed);
+
+  /* -------------------------------------------- 
+       Begin move.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.tools.MOVE = {
+    mouse_down: function(e) {
+      if (e.clientX > window.game._.canvasPosition.left && e.clientY > window.game._.canvasPosition.top && e.clientX < window.game._.canvasPosition.left + 660 && e.clientY < window.game._.canvasPosition.top + 570) {
+        window.game._.is_mouse_down = true;
+        window.game.mouse_move(e);
+        window.game._.selected_body = window.game.get_body_at_mouse();
+        return $(document).bind('mousemove', window.game.mouse_move);
+      }
+    },
+    mouse_up: function(e) {
+      return window.game._.is_mouse_down = false;
+    },
+    mouse_move: function(e) {
+      window.game._.mouseX = (e.clientX - window.game._.canvasPosition.left) / 30;
+      return window.game._.mouseY = (e.clientY - window.game._.canvasPosition.top) / 30;
+    },
+    update: function() {
+      var body, md;
+      if (window.game._.is_mouse_down && !window.game._.mouse_joint) {
+        body = window.game.get_body_at_mouse();
+        if (body) {
+          md = new B2MouseJointDef();
+          md.bodyA = window.game._.world.GetGroundBody();
+          md.bodyB = body;
+          md.target.Set(window.game._.mouseX, window.game._.mouseY);
+          md.collideConnected = true;
+          md.maxForce = 300.0 * body.GetMass();
+          window.game._.mouse_joint = window.game._.world.CreateJoint(md);
+          body.SetAwake(true);
+        }
+      }
+      if (window.game._.mouse_joint) {
+        if (window.game._.is_mouse_down) {
+          return window.game._.mouse_joint.SetTarget(new B2Vec2(window.game._.mouseX, window.game._.mouseY));
+        } else {
+          window.game._.world.DestroyJoint(window.game._.mouse_joint);
+          return window.game._.mouse_joint = null;
+        }
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin glue.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.tools.GLUE = {
+    mouse_down: function(e) {},
+    mouse_up: function(e) {},
+    mouse_move: function(e) {},
+    update: function() {}
+  };
 
   /* -------------------------------------------- 
        Begin menu.coffee 
