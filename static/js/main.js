@@ -25,6 +25,7 @@
     var self;
     self = this;
     self.debug = ko.observable(true);
+    self.level = ko.observable("level1");
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
     self.state = ko.observable("BUILD");
@@ -50,7 +51,7 @@
 
   window.start_game = function() {
     window.physics.start_game();
-    load_level("test");
+    load_level(window.viewModel.level());
   };
 
   $('.pause').click(function() {
@@ -84,7 +85,7 @@
   $('.confirm-restart-level').click(function() {
     window.viewModel.state("BUILD");
     $menus.fadeOut();
-    load_level("test");
+    load_level(window.viewModel.level());
     return window.backwards_to($main_menu);
   });
 
@@ -188,18 +189,24 @@
     create_fixture_def: function(entity) {
       var fixDef, vector, vectors, _i, _len, _ref;
       fixDef = new B2FixtureDef();
-      fixDef.density = entity.density;
-      fixDef.friction = entity.friction;
-      fixDef.restitution = entity.restitution;
-      if (entity.shape.type === "circle") {
-        fixDef.shape = new B2CircleShape(entity.shape.size);
-      } else if (entity.shape.type === "rectangle") {
+      if ("density" in entity.physics) {
+        fixDef.density = entity.physics.density;
+      }
+      if ("friction" in entity.physics) {
+        fixDef.friction = entity.physics.friction;
+      }
+      if ("restitution" in entity.physics) {
+        fixDef.restitution = entity.physics.restitution;
+      }
+      if (entity.physics.shape.type === "circle") {
+        fixDef.shape = new B2CircleShape(entity.physics.shape.size);
+      } else if (entity.physics.shape.type === "rectangle") {
         fixDef.shape = new B2PolygonShape();
-        fixDef.shape.SetAsBox(entity.shape.size.width, entity.shape.size.height);
-      } else if (entity.shape.type === "polygon") {
+        fixDef.shape.SetAsBox(entity.physics.shape.size.width, entity.physics.shape.size.height);
+      } else if (entity.physics.shape.type === "polygon") {
         fixDef.shape = new B2PolygonShape();
         vectors = [];
-        _ref = entity.shape.vectors;
+        _ref = entity.physics.shape.vectors;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           vector = _ref[_i];
           vectors.push(new B2Vec2(vector.x, vector.y));
@@ -208,49 +215,25 @@
       }
       return fixDef;
     },
-    create_entity: function(entity, type) {
-      var body, bodyDef, created_entity, fixDef;
+    add_entity: function(entity) {
+      var body, bodyDef, fixDef;
       bodyDef = new B2BodyDef();
-      if (type === "static") {
+      if (entity.fixed) {
         bodyDef.type = B2Body.b2_staticBody;
       } else {
         bodyDef.type = B2Body.b2_dynamicBody;
       }
+      console.log(entity.x, entity.y);
       bodyDef.position.Set(entity.x, entity.y);
       if ('angle' in entity) {
         bodyDef.angle = entity.angle;
       }
       fixDef = window.physics.create_fixture_def(entity);
       body = window.physics.world.CreateBody(bodyDef);
-      created_entity = body.CreateFixture(fixDef);
-      window.game.entities.push(created_entity);
-      if ('id' in entity) {
-        return window.game.entityIDs[entity.id] = created_entity;
-      }
+      return entity.fixture = body.CreateFixture(fixDef);
     },
-    create_joint: function(joint) {
-      var j;
-      if (joint.type === 'revolute') {
-        j = new B2RevoluteJointDef();
-      } else if (joint.type === 'distance') {
-        j = new B2DistanceJointDef();
-      } else if (joint.type === 'weld') {
-        j = new B2WeldJointDef();
-      }
-      j.bodyA = window.game.entityIDs[joint.bodyA].GetBody();
-      j.bodyB = window.game.entityIDs[joint.bodyB].GetBody();
-      if ("localAnchorA" in joint) {
-        j.localAnchorA.Set(joint.localAnchorA.x, joint.localAnchorA.y);
-      }
-      if ("motor" in joint) {
-        if (joint.motor.enabled) {
-          j.enableMotor = true;
-          j.maxMotorTorque = 55;
-          j.motorSpeed = -10;
-        }
-      }
-      j = window.physics.world.CreateJoint(j);
-      return window.game.joints.push(j);
+    remove_entity: function(entity) {
+      return window.physics.world.DestroyBody(entity.fixture.GetBody());
     }
   };
 
@@ -260,7 +243,7 @@
   */
 
 
-  /*global Box2D:false, $:false, Stage:false, Ticker:false
+  /*global Box2D:false, $:false, Stage:false, Ticker:false, Bitmap:false, Graphics:false, Shape:false
   */
 
 
@@ -304,7 +287,9 @@
     debug_canvas: $('#debugCanvas')[0],
     entities: [],
     entityIDs: {},
-    stage: new Stage(window.game.canvas),
+    walls: [],
+    next_id: 1,
+    stage: new Stage($('#gameCanvas')[0]),
     init: function() {
       window.physics.init();
       window.game.stage.update();
@@ -318,83 +303,95 @@
         return window.game.play();
       }
     },
+    create_entity: function(entity) {
+      entity = $.extend({}, window.game.entity_types[entity.type], entity);
+      if ("init" in entity) {
+        entity.init();
+      }
+      if (!'id' in entity) {
+        entity.id = 'entity_' + (window.game.next_id++);
+      }
+      if ('image' in entity) {
+        entity.bitmap = new Bitmap("/img/" + entity.image);
+        entity.bitmap.regX = entity.bitmap.image.width * 0.5;
+        entity.bitmap.regY = entity.bitmap.image.height * 0.5;
+        window.game.stage.addChild(entity.bitmap);
+      }
+      window.game.entities.push(entity);
+      window.game.entityIDs[entity.id] = entity;
+      return window.physics.add_entity(entity);
+    },
+    create_wall: function(wall) {
+      if (wall === "bottom") {
+        return window.game.create_entity({
+          "type": "xwall",
+          "x": 11,
+          "y": 19
+        });
+      } else if (wall === "top") {
+        return window.game.create_entity({
+          "type": "xwall",
+          "x": 11,
+          "y": 0
+        });
+      } else if (wall === "left") {
+        return window.game.create_entity({
+          "type": "ywall",
+          "x": 0,
+          "y": 9.5
+        });
+      } else if (wall === "right") {
+        return window.game.create_entity({
+          "type": "ywall",
+          "x": 22,
+          "y": 9.5
+        });
+      }
+    },
     load_state: function(state, save_as_default) {
-      var entity, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var entity, wall, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (save_as_default) {
         window.game.default_state = state;
         window.game.build_state = state;
       }
-      if (state.dynamic) {
-        _ref = state.dynamic;
+      if (state.entities) {
+        _ref = state.entities;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           entity = _ref[_i];
-          window.physics.create_entity(entity, "dynamic");
+          window.game.create_entity(entity);
         }
       }
-      if (state["static"]) {
-        _ref1 = state["static"];
-        _results = [];
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          entity = _ref1[_j];
-          _results.push(window.physics.create_entity(entity, "static"));
-        }
-        return _results;
+      window.game.walls = state.walls;
+      _ref1 = window.game.walls;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        wall = _ref1[_j];
+        _results.push(window.game.create_wall(wall));
       }
+      return _results;
     },
     get_state: function() {
-      var body, entity, fixtures, position, shape, state, vector, _i, _len, _ref;
+      var state;
       state = {
-        "dynamic": [],
-        "static": []
+        "entities": []
       };
-      _ref = window.game.entities;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        entity = _ref[_i];
-        body = entity.GetBody();
-        position = body.GetPosition();
-        fixtures = body.GetFixtureList();
-        shape = fixtures.GetShape();
-        entity = {
-          "x": position.x,
-          "y": position.y,
-          "density": fixtures.GetDensity(),
-          "friction": fixtures.GetFriction(),
-          "restitution": fixtures.GetRestitution(),
-          "angle": body.GetAngle(),
-          "shape": {
-            "type": "rectangle"
-          }
-        };
-        if (shape.GetType() === 1) {
-          entity.shape.type = 'polygon';
-          entity.shape.vectors = [];
-          for (vector in shape.m_vertices) {
-            entity.shape.vectors.push({
-              "x": shape.m_vertices[vector].x,
-              "y": shape.m_vertices[vector].y
-            });
-          }
-        } else if (shape.GetType() === 0) {
-          entity.shape.type = 'circle';
-          entity.shape.size = shape.m_radius;
-        }
-        if (body.GetType() === B2Body.b2_staticBody) {
-          state["static"].push(entity);
-        } else {
-          state.dynamic.push(entity);
-        }
-      }
       return state;
     },
     play: function() {
       return window.game.build_state = window.game.get_state();
+    },
+    remove_entity: function(entity) {
+      if ("bitmap" in entity) {
+        window.game.stage.removeChild(entity.bitmap);
+      }
+      return window.physics.remove_entity(entity);
     },
     reset: function() {
       var entity, _i, _len, _ref;
       _ref = window.game.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        window.physics.world.DestroyBody(entity.GetBody());
+        window.game.remove_entity(entity);
       }
       window.game.entities = [];
       return window.game.load_state(window.game.build_state);
@@ -404,14 +401,46 @@
       _ref = window.game.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        window.physics.world.DestroyBody(entity.GetBody());
+        window.game.remove_entity(entity);
       }
       window.game.entities = [];
       return window.game.load_state(window.game.default_state);
     },
+    meters_to_pixels: function(meters) {
+      return meters * 30;
+    },
+    pixels_to_meters: function(pixels) {
+      return pixels / 30;
+    },
+    degrees_to_radians: function(degrees) {
+      return degrees * 0.0174532925199432957;
+    },
+    radians_to_degrees: function(radians) {
+      return radians * 57.295779513082320876;
+    },
+    update_position: function(entity) {
+      var position;
+      if ("bitmap" in entity) {
+        position = entity.fixture.GetBody().GetPosition();
+        entity.bitmap.x = window.game.meters_to_pixels(position.x);
+        entity.bitmap.y = window.game.meters_to_pixels(position.y);
+        return entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle());
+      }
+    },
+    update_positions: function() {
+      var entity, _i, _len, _ref, _results;
+      _ref = window.game.entities;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        _results.push(window.game.update_position(entity));
+      }
+      return _results;
+    },
     tick: function() {
       window.game.tools[window.viewModel.tool()].update();
       window.physics.update();
+      window.game.update_positions();
       return window.game.stage.update();
     },
     mouse_down: function(e) {
@@ -432,6 +461,58 @@
   window.game.init();
 
   window.viewModel.state.subscribe(window.game.state_changed);
+
+  /* -------------------------------------------- 
+       Begin entities.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types = {
+    box: {
+      name: "Box",
+      image: "box.png",
+      physics: {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 6,
+            height: 6
+          }
+        }
+      },
+      init: function() {}
+    },
+    xwall: {
+      name: "Wall",
+      fixed: true,
+      "physics": {
+        "shape": {
+          "type": "rectangle",
+          "size": {
+            "width": 11,
+            "height": 0.1
+          }
+        }
+      }
+    },
+    ywall: {
+      name: "Wall",
+      fixed: true,
+      "physics": {
+        "shape": {
+          "type": "rectangle",
+          "size": {
+            "width": 0.1,
+            "height": 9.5
+          }
+        }
+      }
+    }
+  };
 
   /* -------------------------------------------- 
        Begin move.coffee 

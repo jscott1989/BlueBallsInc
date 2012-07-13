@@ -7,6 +7,7 @@ $main_menu = $('#main-menu')
 GameViewModel = ->
 	self = this
 	self.debug = ko.observable(true)
+	self.level = ko.observable("level1")
 	self.tool = ko.observable("MOVE")
 	self.last_tool = ko.observable("MOVE")
 	self.state = ko.observable("BUILD")
@@ -30,7 +31,7 @@ load_level = (level_name) ->
 window.start_game = () ->
 	# Needed as we need to do this after the canvas is visible
 	window.physics.start_game()
-	load_level("test")
+	load_level(window.viewModel.level())
 	return
 
 $('.pause').click ->
@@ -60,10 +61,9 @@ $('.confirm-exit-game').click ->
 $('.confirm-restart-level').click ->
 	window.viewModel.state("BUILD")
 	$menus.fadeOut()
-	load_level("test")
+	load_level(window.viewModel.level())
 
 	window.backwards_to($main_menu)
-
 
 $('#toolbox li').click ->
 	window.viewModel.last_tool(window.viewModel.tool())

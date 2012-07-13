@@ -1,4 +1,4 @@
-###global Box2D:false, $:false, Stage:false, Ticker:false###
+###global Box2D:false, $:false, Stage:false, Ticker:false, Bitmap:false, Graphics:false, Shape:false###
 
 # TODO: Remove this once we have more elaborate entities
 B2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
@@ -29,10 +29,13 @@ window.game =
 	canvas: $('#gameCanvas')[0]
 	debug_canvas: $('#debugCanvas')[0]
 
-	entities: [],
-	entityIDs: {}, # Entities by ID
+	entities: []
+	entityIDs: {} # Entities by ID
+	walls: [] # The walls used before
 
-	stage: new Stage(window.game.canvas)
+	next_id: 1 # With random IDs
+
+	stage: new Stage($('#gameCanvas')[0])
 
 	init: () ->
 		# Initialise the game engine
@@ -51,6 +54,36 @@ window.game =
 			# Starting playing
 			window.game.play()
 
+	create_entity: (entity) ->
+		entity = $.extend({}, window.game.entity_types[entity.type], entity)
+		if "init" of entity
+			entity.init()
+
+		if not 'id' of entity
+			entity.id = 'entity_' + (window.game.next_id++)
+
+		if 'image' of entity
+			entity.bitmap = new Bitmap("/img/" + entity.image)
+			entity.bitmap.regX = entity.bitmap.image.width * 0.5
+			entity.bitmap.regY = entity.bitmap.image.height * 0.5
+
+			window.game.stage.addChild(entity.bitmap)
+
+		window.game.entities.push(entity)
+		window.game.entityIDs[entity.id] = entity
+
+		window.physics.add_entity(entity)
+
+	create_wall: (wall) ->
+		if wall == "bottom"
+			window.game.create_entity({"type": "xwall","x": 11,"y": 19})
+		else if wall == "top"
+			window.game.create_entity({"type": "xwall","x": 11,"y": 0})
+		else if wall == "left"
+			window.game.create_entity({"type": "ywall","x": 0,"y": 9.5})
+		else if wall == "right"
+			window.game.create_entity({"type": "ywall","x": 22,"y": 9.5})
+
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
 
@@ -58,74 +91,75 @@ window.game =
 			window.game.default_state = state
 			window.game.build_state = state
 
-		# TODO: Create entities with more properties
-		window.physics.create_entity(entity, "dynamic") for entity in state.dynamic if state.dynamic
-		window.physics.create_entity(entity, "static") for entity in state.static if state.static
+		window.game.create_entity(entity) for entity in state.entities if state.entities
+
+		window.game.walls = state.walls
+		window.game.create_wall(wall) for wall in window.game.walls
 
 	get_state: () ->
 		# Serialize the current game state
-		state = {"dynamic": [], "static": []}
-		for entity in window.game.entities
-			body = entity.GetBody()
-			position = body.GetPosition()
-			fixtures = body.GetFixtureList()
-			shape = fixtures.GetShape()
-			entity = {
-				"x": position.x
-				"y": position.y
-				"density": fixtures.GetDensity()
-				"friction": fixtures.GetFriction()
-				"restitution": fixtures.GetRestitution()
-				"angle": body.GetAngle()
-				"shape": {
-					"type": "rectangle"
-				}
-			}
-
-			if shape.GetType() == 1 # Polygon
-				entity.shape.type = 'polygon'
-				entity.shape.vectors = []
-				for vector of shape.m_vertices
-					entity.shape.vectors.push({"x": shape.m_vertices[vector].x, "y": shape.m_vertices[vector].y})
-
-			else if shape.GetType() == 0 # Circle
-				entity.shape.type = 'circle'
-				entity.shape.size = shape.m_radius
-
-			if body.GetType() == B2Body.b2_staticBody
-				state.static.push(entity)
-			else
-				state.dynamic.push(entity)
+		state = {"entities": []}
 		return state
 
 	play: () ->
 		# Start the simulation
 		window.game.build_state = window.game.get_state()
 
+	remove_entity: (entity) ->
+		if "bitmap" of entity
+			window.game.stage.removeChild(entity.bitmap)
+
+		window.physics.remove_entity(entity)
+
 	reset: () ->
 		# Reset the simulation into the "build" state
 
 		# TODO: Destroy entities, not bodies
-		window.physics.world.DestroyBody(entity.GetBody()) for entity in window.game.entities
+		window.game.remove_entity(entity) for entity in window.game.entities
 
 		window.game.entities = []
 
 		window.game.load_state(window.game.build_state)
 
-
 	reset_level: () ->
 		# Reset to the beginning of the level, reverting any changes to the build
-		window.physics.world.DestroyBody(entity.GetBody()) for entity in window.game.entities
-
+		window.game.remove_entity(entity) for entity in window.game.entities
 
 		window.game.entities = []
 
 		window.game.load_state(window.game.default_state)
 
+	meters_to_pixels: (meters) ->
+		meters * 30
+	pixels_to_meters: (pixels) ->
+		pixels / 30
+
+	degrees_to_radians: (degrees) ->
+		degrees * 0.0174532925199432957
+
+	radians_to_degrees: (radians) ->
+		radians * 57.295779513082320876
+
+	update_position: (entity) ->
+		if "bitmap" of entity
+			# If we're drawing this
+			position = entity.fixture.GetBody().GetPosition()
+			entity.bitmap.x = window.game.meters_to_pixels(position.x)
+			entity.bitmap.y = window.game.meters_to_pixels(position.y)
+			entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle())
+
+	update_positions: () ->
+		# Update the drawing positions to be in line with the physics
+		window.game.update_position(entity) for entity in window.game.entities
+
 	tick: () ->
+		# Called each frame
 		window.game.tools[window.viewModel.tool()].update()
 
 		window.physics.update()
+
+		window.game.update_positions()
+
 		window.game.stage.update()
 
 	mouse_down: (e) ->

@@ -54,60 +54,44 @@ window.physics =
 
 	create_fixture_def: (entity) ->
 		fixDef = new B2FixtureDef()
-		fixDef.density = entity.density					# Density
-		fixDef.friction = entity.friction					# Friction
-		fixDef.restitution = entity.restitution				# Restitution
 
-		if entity.shape.type == "circle"
-			fixDef.shape = new B2CircleShape(entity.shape.size)		# Shape
-		else if entity.shape.type == "rectangle"
+		if "density" of entity.physics
+			fixDef.density = entity.physics.density					# Density
+		if "friction" of entity.physics
+			fixDef.friction = entity.physics.friction					# Friction
+		if "restitution" of entity.physics
+			fixDef.restitution = entity.physics.restitution				# Restitution
+
+		if entity.physics.shape.type == "circle"
+			fixDef.shape = new B2CircleShape(entity.physics.shape.size)		# Shape
+		else if entity.physics.shape.type == "rectangle"
 			fixDef.shape = new B2PolygonShape()
-			fixDef.shape.SetAsBox(entity.shape.size.width, entity.shape.size.height)
-		else if entity.shape.type == "polygon"
+			fixDef.shape.SetAsBox(entity.physics.shape.size.width, entity.physics.shape.size.height)
+		else if entity.physics.shape.type == "polygon"
 			fixDef.shape = new B2PolygonShape()
 			vectors = []
-			for vector in entity.shape.vectors
+			for vector in entity.physics.shape.vectors
 				vectors.push(new B2Vec2(vector.x, vector.y))
 			fixDef.shape.SetAsArray(vectors)
 		return fixDef
 
-	create_entity: (entity, type) ->
-		# Create an entity in the world
+	add_entity: (entity) ->
 		bodyDef = new B2BodyDef()
 
-		if type == "static"
-			bodyDef.type = B2Body.b2_staticBody 	# Object type
+		if entity.fixed
+			bodyDef.type = B2Body.b2_staticBody
 		else
-			bodyDef.type = B2Body.b2_dynamicBody 	# Object type
-		bodyDef.position.Set(entity.x, entity.y)				# Position
+			bodyDef.type = B2Body.b2_dynamicBody
+
+		console.log entity.x, entity.y
+		bodyDef.position.Set(entity.x, entity.y)
 
 		if 'angle' of entity
 			bodyDef.angle = entity.angle
 
 		fixDef = window.physics.create_fixture_def(entity)
-
 		body = window.physics.world.CreateBody(bodyDef)
-		created_entity = body.CreateFixture(fixDef) # Add to the world
+		entity.fixture = body.CreateFixture(fixDef) # Add to the world
 
-		window.game.entities.push(created_entity)
-		if 'id' of entity
-			window.game.entityIDs[entity.id] = created_entity
-
-	create_joint: (joint) ->
-		if joint.type == 'revolute'
-			j = new B2RevoluteJointDef()
-		else if joint.type =='distance'
-			j = new B2DistanceJointDef()
-		else if joint.type =='weld'
-			j = new B2WeldJointDef()
-		j.bodyA = window.game.entityIDs[joint.bodyA].GetBody()
-		j.bodyB = window.game.entityIDs[joint.bodyB].GetBody()
-		if "localAnchorA" of joint
-			j.localAnchorA.Set(joint.localAnchorA.x,joint.localAnchorA.y)
-		if "motor" of joint
-			if joint.motor.enabled
-				j.enableMotor = true
-				j.maxMotorTorque = 55
-				j.motorSpeed=-10
-		j = window.physics.world.CreateJoint(j)
-		window.game.joints.push(j)
+	remove_entity: (entity) ->
+		window.physics.world.DestroyBody(entity.fixture.GetBody())
