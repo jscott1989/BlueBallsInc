@@ -98,7 +98,8 @@ window.game =
 
 	get_state: () ->
 		# Serialize the current game state
-		state = {"entities": []}
+		state = {"entities": $.extend({}, window.game.entities), "walls": []} # Walls are already included in entities
+		console.log state
 		return state
 
 	play: () ->
@@ -147,6 +148,10 @@ window.game =
 			entity.bitmap.x = window.game.meters_to_pixels(position.x)
 			entity.bitmap.y = window.game.meters_to_pixels(position.y)
 			entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle())
+
+			if "scale" of entity
+				entity.bitmap.scaleX = entity.scale * entity.scale_adjustment
+				entity.bitmap.scaleY = entity.scale * entity.scale_adjustment
 
 	update_positions: () ->
 		# Update the drawing positions to be in line with the physics

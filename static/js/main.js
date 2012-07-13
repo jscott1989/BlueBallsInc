@@ -373,8 +373,10 @@
     get_state: function() {
       var state;
       state = {
-        "entities": []
+        "entities": $.extend({}, window.game.entities),
+        "walls": []
       };
+      console.log(state);
       return state;
     },
     play: function() {
@@ -424,7 +426,11 @@
         position = entity.fixture.GetBody().GetPosition();
         entity.bitmap.x = window.game.meters_to_pixels(position.x);
         entity.bitmap.y = window.game.meters_to_pixels(position.y);
-        return entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle());
+        entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle());
+        if ("scale" in entity) {
+          entity.bitmap.scaleX = entity.scale * entity.scale_adjustment;
+          return entity.bitmap.scaleY = entity.scale * entity.scale_adjustment;
+        }
       }
     },
     update_positions: function() {
@@ -472,6 +478,7 @@
     box: {
       name: "Box",
       image: "box.png",
+      scale_adjustment: 0.2,
       physics: {
         density: 40,
         friction: 2,
@@ -484,7 +491,10 @@
           }
         }
       },
-      init: function() {}
+      init: function() {
+        this.physics.shape.size.width = this.scale_adjustment * 6 * this.scale;
+        return this.physics.shape.size.height = this.scale_adjustment * 6 * this.scale;
+      }
     },
     xwall: {
       name: "Wall",
