@@ -387,7 +387,6 @@
     clean_entity: function(entity) {
       var position;
       entity = $.extend({}, entity);
-      console.log();
       entity.physics.density = entity.fixture.m_density;
       entity.physics.friction = entity.fixture.m_friction;
       entity.physics.restitution = entity.fixture.m_restitution;

@@ -120,16 +120,20 @@ window.game =
 		# This returns a copy
 		entity = $.extend({}, entity)
 
-		console.log()
+		# Basic physical properties
 		entity.physics.density = entity.fixture.m_density
 		entity.physics.friction = entity.fixture.m_friction
 		entity.physics.restitution = entity.fixture.m_restitution
 
-		position = entity['fixture'].GetBody().GetPosition()
 
+		# Position and angle
+		position = entity['fixture'].GetBody().GetPosition()
 		entity.x = position.x
 		entity.y = position.y
 		entity.angle = entity['fixture'].GetBody().GetAngle()
+
+		# TODO Initial forces? Maybe?
+
 		delete entity['bitmap']
 		delete entity['fixture']
 		delete entity['init']
