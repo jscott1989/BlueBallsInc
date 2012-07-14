@@ -49,4 +49,4 @@ $('.start-tutorial').click ->
 	# Start tutorial mode
 	$menus.fadeOut()
 	$game.fadeIn()
-	window.start_tutorial()
+	window.start_game()

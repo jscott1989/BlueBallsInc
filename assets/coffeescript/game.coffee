@@ -79,16 +79,19 @@ window.game =
 			window.game.tools[new_tool].select()
 
 	create_entity: (entity) ->
-		entity = $.extend({}, window.game.entity_types[entity.type], entity)
+		entity = $.extend({}, window.game.entity_base, window.game.entity_types[entity.type], entity)
 		if "init" of entity
 			entity.init()
+
+		window.game.components[component].init(entity) for component in entity.components
 
 		if not entity.id
 			entity.id = 'entity_' + (window.game.next_id++)
 
+		if not ('bitmaps' of entity)
+			entity.bitmaps = []
+		
 		if 'image' of entity
-			if not ('bitmaps' of entity)
-				entity.bitmaps = []
 
 			bitmap = new Bitmap("/img/" + entity.image)
 			bitmap.regX = bitmap.image.width * 0.5
@@ -141,16 +144,16 @@ window.game =
 
 
 		# Position and angle
-		position = entity['fixture'].GetBody().GetPosition()
+		position = entity.fixture.GetBody().GetPosition()
 		entity.x = position.x
 		entity.y = position.y
-		entity.angle = entity['fixture'].GetBody().GetAngle()
+		entity.angle = entity.fixture.GetBody().GetAngle()
 
 		# TODO Initial forces? Maybe?
 
-		delete entity['bitmaps']
-		delete entity['fixture']
-		delete entity['init']
+		delete entity.bitmaps
+		delete entity.fixture
+		delete entity.init
 		return entity
 
 	get_state: () ->

@@ -102,16 +102,6 @@
   };
 
   /* -------------------------------------------- 
-       Begin tutorial.coffee 
-  --------------------------------------------
-  */
-
-
-  window.start_tutorial = function() {
-    return window.start_game(1);
-  };
-
-  /* -------------------------------------------- 
        Begin physics.coffee 
   --------------------------------------------
   */
@@ -323,18 +313,23 @@
       }
     },
     create_entity: function(entity) {
-      var bitmap;
-      entity = $.extend({}, window.game.entity_types[entity.type], entity);
+      var bitmap, component, _i, _len, _ref;
+      entity = $.extend({}, window.game.entity_base, window.game.entity_types[entity.type], entity);
       if ("init" in entity) {
         entity.init();
+      }
+      _ref = entity.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        window.game.components[component].init(entity);
       }
       if (!entity.id) {
         entity.id = 'entity_' + (window.game.next_id++);
       }
+      if (!('bitmaps' in entity)) {
+        entity.bitmaps = [];
+      }
       if ('image' in entity) {
-        if (!('bitmaps' in entity)) {
-          entity.bitmaps = [];
-        }
         bitmap = new Bitmap("/img/" + entity.image);
         bitmap.regX = bitmap.image.width * 0.5;
         bitmap.regY = bitmap.image.height * 0.5;
@@ -405,13 +400,13 @@
       entity.physics.density = entity.fixture.m_density;
       entity.physics.friction = entity.fixture.m_friction;
       entity.physics.restitution = entity.fixture.m_restitution;
-      position = entity['fixture'].GetBody().GetPosition();
+      position = entity.fixture.GetBody().GetPosition();
       entity.x = position.x;
       entity.y = position.y;
-      entity.angle = entity['fixture'].GetBody().GetAngle();
-      delete entity['bitmaps'];
-      delete entity['fixture'];
-      delete entity['init'];
+      entity.angle = entity.fixture.GetBody().GetAngle();
+      delete entity.bitmaps;
+      delete entity.fixture;
+      delete entity.init;
       return entity;
     },
     get_state: function() {
@@ -585,60 +580,10 @@
   window.viewModel.tool.subscribe(window.game.tool_changed);
 
   /* -------------------------------------------- 
-       Begin entities.coffee 
+       Begin tools.coffee 
   --------------------------------------------
   */
 
-
-  window.game.entity_types = {
-    box: {
-      name: "Box",
-      image: "box.png",
-      scale_adjustment: 0.2,
-      physics: {
-        density: 40,
-        friction: 2,
-        restitution: 0.2,
-        shape: {
-          type: "rectangle",
-          size: {
-            width: 6,
-            height: 6
-          }
-        }
-      },
-      init: function() {
-        this.physics.shape.size.width = this.scale_adjustment * 6 * this.scale;
-        return this.physics.shape.size.height = this.scale_adjustment * 6 * this.scale;
-      }
-    },
-    xwall: {
-      name: "Wall",
-      fixed: true,
-      "physics": {
-        "shape": {
-          "type": "rectangle",
-          "size": {
-            "width": 11.5,
-            "height": 0.1
-          }
-        }
-      }
-    },
-    ywall: {
-      name: "Wall",
-      fixed: true,
-      "physics": {
-        "shape": {
-          "type": "rectangle",
-          "size": {
-            "width": 0.1,
-            "height": 10
-          }
-        }
-      }
-    }
-  };
 
   /* -------------------------------------------- 
        Begin move.coffee 
@@ -692,25 +637,12 @@
       return window.game.tools.GLUE.mouse_is_down = false;
     },
     update: function() {
-      var bitmap, entity, offset;
+      var entity, offset;
       if (window.game.tools.GLUE.mouse_is_down) {
         entity = window.game.get_entity_at_mouse();
         if (entity) {
-          if (!('glue' in entity)) {
-            entity.glue = [];
-          }
-          if (!('bitmaps' in entity)) {
-            entity.bitmaps = [];
-          }
-          bitmap = window.game.bitmaps.glue.clone();
           offset = window.game.get_offset_to_mouse(entity);
-          bitmap.regX = window.game.meters_to_pixels(offset.x) + (bitmap.image.width / 2);
-          bitmap.regY = window.game.meters_to_pixels(offset.y) + (bitmap.image.width / 2);
-          entity.bitmaps.push(bitmap);
-          window.game.stage.addChild(bitmap);
-          return entity.glue.push({
-            "position": "TODO"
-          });
+          return entity.add_glue(offset);
         }
       }
     }
@@ -723,24 +655,157 @@
 
 
   window.game.tools.CLEAN = {
-    mouse_is_down: false,
-    select: function() {},
-    deselect: function() {},
-    mouse_down: function(e) {
-      return window.game.tools.GLUE.mouse_is_down = true;
-    },
-    mouse_up: function(e) {
-      return window.game.tools.GLUE.mouse_is_down = false;
-    },
     update: function() {
-      var entity;
-      if (window.game.tools.GLUE.mouse_is_down) {
+      var entity, offset;
+      if (window.game.mouse_down) {
         entity = window.game.get_entity_at_mouse();
         if (entity) {
-          return console.log("CLEAN");
+          offset = window.game.get_offset_to_mouse(entity);
+          return entity.clean_glue(offset);
         }
       }
     }
+  };
+
+  /* -------------------------------------------- 
+       Begin entities.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types = {};
+
+  window.game.entity_base = {
+    components: ["gluable"]
+  };
+
+  /* -------------------------------------------- 
+       Begin box.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.box = {
+    name: "Box",
+    image: "box.png",
+    width_scale: 6,
+    height_scale: 6,
+    scale_adjustment: 0.2,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "rectangle",
+        size: {
+          width: 6,
+          height: 6
+        }
+      }
+    },
+    init: function() {
+      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
+      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin walls.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.xwall = {
+    name: "Wall",
+    fixed: true,
+    "physics": {
+      "shape": {
+        "type": "rectangle",
+        "size": {
+          "width": 11.5,
+          "height": 0.1
+        }
+      }
+    }
+  };
+
+  window.game.entity_types.ywall = {
+    name: "Wall",
+    fixed: true,
+    "physics": {
+      "shape": {
+        "type": "rectangle",
+        "size": {
+          "width": 0.1,
+          "height": 10
+        }
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin components.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.components = {};
+
+  /* -------------------------------------------- 
+       Begin gluable.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.components.gluable = {
+    init: function(entity) {
+      entity.glue = [];
+      entity.add_glue = function(offset) {
+        var bitmap;
+        bitmap = window.game.bitmaps.glue.clone();
+        bitmap.regX = window.game.meters_to_pixels(offset.x) + (bitmap.image.width / 2);
+        bitmap.regY = window.game.meters_to_pixels(offset.y) + (bitmap.image.width / 2);
+        entity.bitmaps.push(bitmap);
+        entity.glue.push({
+          "x": offset.x,
+          "y": offset.y,
+          "bitmap": bitmap
+        });
+        return window.game.stage.addChild(bitmap);
+      };
+      return entity.clean_glue = function(offset) {
+        var glue, glue_to_remove, idx, max_x, max_y, min_x, min_y, _i, _j, _len, _len1, _ref, _results;
+        min_x = offset.x - 0.2;
+        max_x = offset.x + 0.2;
+        min_y = offset.y - 0.2;
+        max_y = offset.y + 0.2;
+        glue_to_remove = [];
+        _ref = entity.glue;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          glue = _ref[_i];
+          if (glue.x > min_x && glue.x < max_x && glue.y > min_y && glue.y < max_y) {
+            glue_to_remove.push(glue);
+          }
+        }
+        _results = [];
+        for (_j = 0, _len1 = glue_to_remove.length; _j < _len1; _j++) {
+          glue = glue_to_remove[_j];
+          window.game.stage.removeChild(glue.bitmap);
+          idx = entity.glue.indexOf(glue);
+          if (idx !== -1) {
+            entity.glue.splice(idx, 1);
+          }
+          idx = entity.bitmaps.indexOf(glue.bitmap);
+          if (idx !== -1) {
+            _results.push(entity.bitmaps.splice(idx, 1));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      };
+    },
+    update: function(entity) {}
   };
 
   /* -------------------------------------------- 
@@ -809,7 +874,7 @@
   $('.start-tutorial').click(function() {
     $menus.fadeOut();
     $game.fadeIn();
-    return window.start_tutorial();
+    return window.start_game();
   });
 
 }).call(this);
