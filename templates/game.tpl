@@ -2,8 +2,8 @@
 	<div id="grid">
 		<div class="inner">
 			<div class="inner2">
-				<canvas width="660" height="570" id="gameCanvas"></canvas>
-				<canvas width="660" height="570" id="debugCanvas" data-bind="style: {display: debug() ? 'inline' : 'none' }"></canvas>
+				<canvas width="700" height="600" id="gameCanvas"></canvas>
+				<canvas width="700" height="600" id="debugCanvas" data-bind="style: {display: debug() ? 'inline' : 'none' }"></canvas>
 			</div>
 		</div>
 	</div><div id="sidebar">

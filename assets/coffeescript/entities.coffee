@@ -25,7 +25,7 @@ window.game.entity_types =
 			"shape":
 		        "type": "rectangle"
 		        "size":
-		            "width": 11,
+		            "width": 11.5,
 		            "height": 0.1
 
 	ywall:
@@ -36,4 +36,4 @@ window.game.entity_types =
 		        "type": "rectangle"
 		        "size":
 		            "width": 0.1,
-		            "height": 9.5
+		            "height": 10

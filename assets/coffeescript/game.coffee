@@ -33,6 +33,8 @@ window.game =
 	canvas: $('#gameCanvas')[0]
 	debug_canvas: $('#debugCanvas')[0]
 	canvas_position: {"x": 0, "y": 0}
+	canvas_width: 700,
+	canvas_height: 600
 
 	entities: []
 	entityIDs: {} # Entities by ID
@@ -106,13 +108,13 @@ window.game =
 
 	create_wall: (wall) ->
 		if wall == "bottom"
-			window.game.create_entity({"type": "xwall","x": 11,"y": 19.1})
+			window.game.create_entity({"type": "xwall","x": 11.5,"y": 20})
 		else if wall == "top"
-			window.game.create_entity({"type": "xwall","x": 11,"y": -0.1})
+			window.game.create_entity({"type": "xwall","x": 11.5,"y": -0})
 		else if wall == "left"
-			window.game.create_entity({"type": "ywall","x": -0.1,"y": 9.5})
+			window.game.create_entity({"type": "ywall","x": -0,"y": 10})
 		else if wall == "right"
-			window.game.create_entity({"type": "ywall","x": 22.1,"y": 9.5})
+			window.game.create_entity({"type": "ywall","x": 23.2,"y": 10})
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
@@ -218,7 +220,7 @@ window.game =
 		window.game.stage.update()
 
 	mouse_down: (e) ->
-		if e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + 660 && e.clientY < window.game.canvas_position.top + 570
+		if e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height
 			window.game.mouse_down = true
 			if 'mouse_down' of window.game.tools[window.viewModel.tool()]
 				window.game.tools[window.viewModel.tool()].mouse_down(e)
@@ -244,10 +246,9 @@ window.game =
 		selected_body = null
 
 		get_body_cb = (fixture) ->
-			if fixture.GetBody().GetType() != B2Body.b2_staticBody
-				if fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)
-					selected_body = fixture.GetBody()
-					return false
+			if fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)
+				selected_body = fixture.GetBody()
+				return false
 			return true
 
 		window.physics.world.QueryAABB(get_body_cb, aabb)

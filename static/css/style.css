@@ -106,9 +106,8 @@ a {
   position: relative;
 }
 #game #grid .inner .inner2 canvas {
-  margin-left: 20px;
-  width: 660px;
-  height: 570px;
+  width: 700px;
+  height: 600px;
   z-index: 1;
 }
 #game #grid .inner .inner2 #gameCanvas {

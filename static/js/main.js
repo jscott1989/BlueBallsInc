@@ -286,6 +286,8 @@
       "x": 0,
       "y": 0
     },
+    canvas_width: 700,
+    canvas_height: 600,
     entities: [],
     entityIDs: {},
     walls: [],
@@ -351,26 +353,26 @@
       if (wall === "bottom") {
         return window.game.create_entity({
           "type": "xwall",
-          "x": 11,
-          "y": 19.1
+          "x": 11.5,
+          "y": 20
         });
       } else if (wall === "top") {
         return window.game.create_entity({
           "type": "xwall",
-          "x": 11,
-          "y": -0.1
+          "x": 11.5,
+          "y": -0
         });
       } else if (wall === "left") {
         return window.game.create_entity({
           "type": "ywall",
-          "x": -0.1,
-          "y": 9.5
+          "x": -0,
+          "y": 10
         });
       } else if (wall === "right") {
         return window.game.create_entity({
           "type": "ywall",
-          "x": 22.1,
-          "y": 9.5
+          "x": 23.2,
+          "y": 10
         });
       }
     },
@@ -503,7 +505,7 @@
       return window.game.stage.update();
     },
     mouse_down: function(e) {
-      if (e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + 660 && e.clientY < window.game.canvas_position.top + 570) {
+      if (e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height) {
         window.game.mouse_down = true;
         if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
           return window.game.tools[window.viewModel.tool()].mouse_down(e);
@@ -531,11 +533,9 @@
       aabb.upperBound.Set(window.game.mouseX + 0.1, window.game.mouseY + 0.1);
       selected_body = null;
       get_body_cb = function(fixture) {
-        if (fixture.GetBody().GetType() !== B2Body.b2_staticBody) {
-          if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
-            selected_body = fixture.GetBody();
-            return false;
-          }
+        if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
+          selected_body = fixture.GetBody();
+          return false;
         }
         return true;
       };
@@ -619,7 +619,7 @@
         "shape": {
           "type": "rectangle",
           "size": {
-            "width": 11,
+            "width": 11.5,
             "height": 0.1
           }
         }
@@ -633,7 +633,7 @@
           "type": "rectangle",
           "size": {
             "width": 0.1,
-            "height": 9.5
+            "height": 10
           }
         }
       }
@@ -698,6 +698,9 @@
         if (entity) {
           if (!('glue' in entity)) {
             entity.glue = [];
+          }
+          if (!('bitmaps' in entity)) {
+            entity.bitmaps = [];
           }
           bitmap = window.game.bitmaps.glue.clone();
           offset = window.game.get_offset_to_mouse(entity);

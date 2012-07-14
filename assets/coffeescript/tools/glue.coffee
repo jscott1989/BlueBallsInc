@@ -16,6 +16,8 @@ window.game.tools.GLUE =
 			if entity
 				if not ('glue' of entity)
 					entity.glue = []
+				if not ('bitmaps' of entity)
+					entity.bitmaps = []
 
 				bitmap = window.game.bitmaps.glue.clone()
 
