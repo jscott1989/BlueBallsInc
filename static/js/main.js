@@ -50,7 +50,7 @@
   };
 
   window.start_game = function() {
-    window.physics.start_game();
+    window.game.start_game();
     load_level(window.viewModel.level());
   };
 
@@ -152,10 +152,6 @@
   B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
   window.physics = {
-    canvasPosition: {
-      "x": 0,
-      "y": 0
-    },
     world: new B2World(new B2Vec2(0, 10), true),
     init: function() {
       var debugDraw;
@@ -167,12 +163,7 @@
       debugDraw.SetFlags(B2DebugDraw.e_shapeBit || B2DebugDraw.e_jointBit);
       return window.physics.world.SetDebugDraw(debugDraw);
     },
-    start_game: function() {
-      return window.physics.refresh_canvas_position();
-    },
-    refresh_canvas_position: function() {
-      return window.physics.canvasPosition = window.game.$canvas.offset();
-    },
+    start_game: function() {},
     update: function() {
       if (window.viewModel.state() === 'PAUSE') {
         if (window.viewModel.debug()) {
@@ -223,17 +214,19 @@
       } else {
         bodyDef.type = B2Body.b2_dynamicBody;
       }
-      console.log(entity.x, entity.y);
       bodyDef.position.Set(entity.x, entity.y);
       if ('angle' in entity) {
         bodyDef.angle = entity.angle;
       }
       fixDef = window.physics.create_fixture_def(entity);
       body = window.physics.world.CreateBody(bodyDef);
+      body.userData = entity.id;
       return entity.fixture = body.CreateFixture(fixDef);
     },
     remove_entity: function(entity) {
-      return window.physics.world.DestroyBody(entity.fixture.GetBody());
+      var body;
+      body = entity.fixture.GetBody();
+      return window.physics.world.DestroyBody(body);
     }
   };
 
@@ -285,6 +278,10 @@
     $canvas: $('#gameCanvas'),
     canvas: $('#gameCanvas')[0],
     debug_canvas: $('#debugCanvas')[0],
+    canvas_position: {
+      "x": 0,
+      "y": 0
+    },
     entities: [],
     entityIDs: {},
     walls: [],
@@ -297,6 +294,13 @@
       Ticker.setFPS(window.game.FPS);
       return Ticker.addListener(this);
     },
+    start_game: function() {
+      window.game.refresh_canvas_position();
+      return window.physics.start_game();
+    },
+    refresh_canvas_position: function() {
+      return window.game.canvas_position = window.game.$canvas.offset();
+    },
     state_changed: function(state) {
       if (state === 'BUILD') {
         return window.game.reset();
@@ -305,15 +309,19 @@
       }
     },
     tool_changed: function(new_tool) {
-      window.game.tools[window.game.last_selected_tool].deselect();
-      return window.game.tools[new_tool].select();
+      if ('deselect' in window.game.tools[window.game.last_selected_tool]) {
+        window.game.tools[window.game.last_selected_tool].deselect();
+      }
+      if ('select' in window.game.tools[new_tool]) {
+        return window.game.tools[new_tool].select();
+      }
     },
     create_entity: function(entity) {
       entity = $.extend({}, window.game.entity_types[entity.type], entity);
       if ("init" in entity) {
         entity.init();
       }
-      if (!'id' in entity) {
+      if (!entity.id) {
         entity.id = 'entity_' + (window.game.next_id++);
       }
       if ('image' in entity) {
@@ -355,6 +363,7 @@
     },
     load_state: function(state, save_as_default) {
       var entity, wall, _i, _j, _len, _len1, _ref, _ref1, _results;
+      window.game.clear_entities();
       if (save_as_default) {
         window.game.default_state = state;
         window.game.build_state = state;
@@ -375,12 +384,37 @@
       }
       return _results;
     },
+    clean_entity: function(entity) {
+      var position;
+      entity = $.extend({}, entity);
+      console.log();
+      entity.physics.density = entity.fixture.m_density;
+      entity.physics.friction = entity.fixture.m_friction;
+      entity.physics.restitution = entity.fixture.m_restitution;
+      position = entity['fixture'].GetBody().GetPosition();
+      entity.x = position.x;
+      entity.y = position.y;
+      entity.angle = entity['fixture'].GetBody().GetAngle();
+      delete entity['bitmap'];
+      delete entity['fixture'];
+      delete entity['init'];
+      return entity;
+    },
     get_state: function() {
-      var state;
+      var entity, state;
       state = {
-        "entities": $.extend({}, window.game.entities),
         "walls": []
       };
+      state.entities = (function() {
+        var _i, _len, _ref, _results;
+        _ref = window.game.entities;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          entity = _ref[_i];
+          _results.push(window.game.clean_entity(entity));
+        }
+        return _results;
+      })();
       console.log(state);
       return state;
     },
@@ -393,7 +427,7 @@
       }
       return window.physics.remove_entity(entity);
     },
-    reset: function() {
+    clear_entities: function() {
       var entity, _i, _len, _ref;
       _ref = window.game.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -401,16 +435,12 @@
         window.game.remove_entity(entity);
       }
       window.game.entities = [];
+      return window.game.entityIDs = [];
+    },
+    reset: function() {
       return window.game.load_state(window.game.build_state);
     },
     reset_level: function() {
-      var entity, _i, _len, _ref;
-      _ref = window.game.entities;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        entity = _ref[_i];
-        window.game.remove_entity(entity);
-      }
-      window.game.entities = [];
       return window.game.load_state(window.game.default_state);
     },
     meters_to_pixels: function(meters) {
@@ -455,19 +485,56 @@
       return window.game.stage.update();
     },
     mouse_down: function(e) {
-      return window.game.tools[window.viewModel.tool()].mouse_down(e);
+      if (e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + 660 && e.clientY < window.game.canvas_position.top + 570) {
+        window.game.mouse_down = true;
+        if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
+          return window.game.tools[window.viewModel.tool()].mouse_down(e);
+        }
+      }
     },
     mouse_up: function(e) {
-      return window.game.tools[window.viewModel.tool()].mouse_up(e);
+      window.game.mouse_down = false;
+      if ('mouse_up' in window.game.tools[window.viewModel.tool()]) {
+        return window.game.tools[window.viewModel.tool()].mouse_up(e);
+      }
     },
     mouse_move: function(e) {
-      return window.game.tools[window.viewModel.tool()].mouse_move(e);
+      window.game.mouseX = (e.clientX - window.game.canvas_position.left) / 30;
+      window.game.mouseY = (e.clientY - window.game.canvas_position.top) / 30;
+      if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
+        return window.game.tools[window.viewModel.tool()].mouse_move(e);
+      }
+    },
+    get_entity_at_mouse: function() {
+      var aabb, get_body_cb, mousePVec, selected_body;
+      mousePVec = new B2Vec2(window.game.mouseX, window.game.mouseY);
+      aabb = new B2AABB();
+      aabb.lowerBound.Set(window.game.mouseX - 0.1, window.game.mouseY - 0.1);
+      aabb.upperBound.Set(window.game.mouseX + 0.1, window.game.mouseY + 0.1);
+      selected_body = null;
+      get_body_cb = function(fixture) {
+        if (fixture.GetBody().GetType() !== B2Body.b2_staticBody) {
+          if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
+            selected_body = fixture.GetBody();
+            return false;
+          }
+        }
+        return true;
+      };
+      window.physics.world.QueryAABB(get_body_cb, aabb);
+      if (selected_body) {
+        console.log(selected_body);
+        console.log(selected_body.userData);
+        return window.game.entityIDs[selected_body.userData];
+      }
     }
   };
 
   $(document).mousedown(window.game.mouse_down);
 
   $(document).mouseup(window.game.mouse_up);
+
+  $(document).mousemove(window.game.mouse_move);
 
   window.game.init();
 
@@ -538,36 +605,17 @@
 
 
   window.game.tools.MOVE = {
-    is_mouse_down: false,
-    mouseX: false,
-    mouseY: false,
     mouse_joint: false,
-    select: function() {},
-    deselect: function() {},
-    mouse_down: function(e) {
-      if (e.clientX > window.physics.canvasPosition.left && e.clientY > window.physics.canvasPosition.top && e.clientX < window.physics.canvasPosition.left + 660 && e.clientY < window.physics.canvasPosition.top + 570) {
-        window.game.tools.MOVE.is_mouse_down = true;
-        window.game.mouse_move(e);
-        window.game.tools.MOVE.selected_body = window.game.tools.MOVE.get_body_at_mouse();
-        return $(document).bind('mousemove', window.game.mouse_move);
-      }
-    },
-    mouse_up: function(e) {
-      return window.game.tools.MOVE.is_mouse_down = false;
-    },
-    mouse_move: function(e) {
-      window.game.tools.MOVE.mouseX = (e.clientX - window.physics.canvasPosition.left) / 30;
-      return window.game.tools.MOVE.mouseY = (e.clientY - window.physics.canvasPosition.top) / 30;
-    },
     update: function() {
-      var body, md;
-      if (window.game.tools.MOVE.is_mouse_down && !window.game.tools.MOVE.mouse_joint) {
-        body = window.game.tools.MOVE.get_body_at_mouse();
-        if (body) {
+      var body, entity, md;
+      if (window.game.mouse_down && !window.game.tools.MOVE.mouse_joint) {
+        entity = window.game.get_entity_at_mouse();
+        if (entity) {
+          body = entity.fixture.GetBody();
           md = new B2MouseJointDef();
           md.bodyA = window.physics.world.GetGroundBody();
           md.bodyB = body;
-          md.target.Set(window.game.tools.MOVE.mouseX, window.game.tools.MOVE.mouseY);
+          md.target.Set(window.game.mouseX, window.game.mouseY);
           md.collideConnected = true;
           md.maxForce = 300.0 * body.GetMass();
           window.game.tools.MOVE.mouse_joint = window.physics.world.CreateJoint(md);
@@ -575,32 +623,13 @@
         }
       }
       if (window.game.tools.MOVE.mouse_joint) {
-        if (window.game.tools.MOVE.is_mouse_down) {
-          return window.game.tools.MOVE.mouse_joint.SetTarget(new B2Vec2(window.game.tools.MOVE.mouseX, window.game.tools.MOVE.mouseY));
+        if (window.game.mouse_down) {
+          return window.game.tools.MOVE.mouse_joint.SetTarget(new B2Vec2(window.game.mouseX, window.game.mouseY));
         } else {
           window.physics.world.DestroyJoint(window.game.tools.MOVE.mouse_joint);
           return window.game.tools.MOVE.mouse_joint = null;
         }
       }
-    },
-    get_body_at_mouse: function() {
-      var aabb;
-      window.game.tools.MOVE.mousePVec = new B2Vec2(window.game.tools.MOVE.mouseX, window.game.tools.MOVE.mouseY);
-      aabb = new B2AABB();
-      aabb.lowerBound.Set(window.game.tools.MOVE.mouseX - 0.1, window.game.tools.MOVE.mouseY - 0.1);
-      aabb.upperBound.Set(window.game.tools.MOVE.mouseX + 0.1, window.game.tools.MOVE.mouseY + 0.1);
-      window.game.tools.MOVE.selected_body = null;
-      window.physics.world.QueryAABB(window.game.tools.MOVE.get_body_cb, aabb);
-      return window.game.tools.MOVE.selected_body;
-    },
-    get_body_cb: function(fixture) {
-      if (fixture.GetBody().GetType() !== B2Body.b2_staticBody) {
-        if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), window.game.tools.MOVE.mousePVec)) {
-          window.game.tools.MOVE.selected_body = fixture.GetBody();
-          return false;
-        }
-      }
-      return true;
     }
   };
 
@@ -611,12 +640,20 @@
 
 
   window.game.tools.GLUE = {
+    mouse_is_down: false,
     select: function() {},
     deselect: function() {},
-    mouse_down: function(e) {},
-    mouse_up: function(e) {},
-    mouse_move: function(e) {},
-    update: function() {}
+    mouse_down: function(e) {
+      return window.game.tools.GLUE.mouse_is_down = true;
+    },
+    mouse_up: function(e) {
+      return window.game.tools.GLUE.mouse_is_down = false;
+    },
+    update: function() {
+      if (window.game.tools.GLUE.mouse_is_down) {
+        return console.log("GLUE");
+      }
+    }
   };
 
   /* -------------------------------------------- 

@@ -17,7 +17,6 @@ B2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
 B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef
 
 window.physics =
-	canvasPosition: {"x": 0, "y": 0}
 	world: new B2World(new B2Vec2(0,10),  true)
 
 	init: () ->
@@ -33,11 +32,7 @@ window.physics =
 		window.physics.world.SetDebugDraw(debugDraw)
 
 	start_game: () ->
-		window.physics.refresh_canvas_position()
-
-	refresh_canvas_position: () ->
-		# This is needed as it can't be calculated until the canvas is visible
-		window.physics.canvasPosition = window.game.$canvas.offset()
+		
 
 	update: () ->
 		# Update the physics engine each tick
@@ -83,15 +78,18 @@ window.physics =
 		else
 			bodyDef.type = B2Body.b2_dynamicBody
 
-		console.log entity.x, entity.y
 		bodyDef.position.Set(entity.x, entity.y)
 
 		if 'angle' of entity
 			bodyDef.angle = entity.angle
 
 		fixDef = window.physics.create_fixture_def(entity)
+
 		body = window.physics.world.CreateBody(bodyDef)
+
+		body.userData = entity.id
 		entity.fixture = body.CreateFixture(fixDef) # Add to the world
 
 	remove_entity: (entity) ->
-		window.physics.world.DestroyBody(entity.fixture.GetBody())
+		body = entity.fixture.GetBody()
+		window.physics.world.DestroyBody(body)

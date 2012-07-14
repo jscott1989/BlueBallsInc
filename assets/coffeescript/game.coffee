@@ -28,6 +28,7 @@ window.game =
 	$canvas: $('#gameCanvas')
 	canvas: $('#gameCanvas')[0]
 	debug_canvas: $('#debugCanvas')[0]
+	canvas_position: {"x": 0, "y": 0}
 
 	entities: []
 	entityIDs: {} # Entities by ID
@@ -46,6 +47,14 @@ window.game =
 		Ticker.setFPS(window.game.FPS)
 		Ticker.addListener(this)
 
+	start_game: () ->
+		window.game.refresh_canvas_position()
+		window.physics.start_game()
+
+	refresh_canvas_position: () ->
+		# This is needed as it can't be calculated until the canvas is visible
+		window.game.canvas_position = window.game.$canvas.offset()
+
 	state_changed: (state) ->
 		# This is called when the stage changes (Between, BUILD, PLAY, and PAUSED)
 		if state == 'BUILD'
@@ -58,15 +67,17 @@ window.game =
 
 	tool_changed: (new_tool) ->
 		# This is called when the selected tool changes
-		window.game.tools[window.game.last_selected_tool].deselect()
-		window.game.tools[new_tool].select()
+		if 'deselect' of window.game.tools[window.game.last_selected_tool]
+			window.game.tools[window.game.last_selected_tool].deselect()
+		if 'select' of window.game.tools[new_tool]
+			window.game.tools[new_tool].select()
 
 	create_entity: (entity) ->
 		entity = $.extend({}, window.game.entity_types[entity.type], entity)
 		if "init" of entity
 			entity.init()
 
-		if not 'id' of entity
+		if not entity.id
 			entity.id = 'entity_' + (window.game.next_id++)
 
 		if 'image' of entity
@@ -93,6 +104,7 @@ window.game =
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
+		window.game.clear_entities()
 
 		if save_as_default
 			window.game.default_state = state
@@ -103,9 +115,32 @@ window.game =
 		window.game.walls = state.walls
 		window.game.create_wall(wall) for wall in window.game.walls
 
+	clean_entity: (entity) ->
+		# Remove game specific items from an entity so it can be loaded in a clean state
+		# This returns a copy
+		entity = $.extend({}, entity)
+
+		console.log()
+		entity.physics.density = entity.fixture.m_density
+		entity.physics.friction = entity.fixture.m_friction
+		entity.physics.restitution = entity.fixture.m_restitution
+
+		position = entity['fixture'].GetBody().GetPosition()
+
+		entity.x = position.x
+		entity.y = position.y
+		entity.angle = entity['fixture'].GetBody().GetAngle()
+		delete entity['bitmap']
+		delete entity['fixture']
+		delete entity['init']
+		return entity
+
 	get_state: () ->
 		# Serialize the current game state
-		state = {"entities": $.extend({}, window.game.entities), "walls": []} # Walls are already included in entities
+		state = {"walls": []} # Walls are already included in entities
+
+		state.entities = (window.game.clean_entity(entity) for entity in window.game.entities)
+
 		console.log state
 		return state
 
@@ -119,22 +154,18 @@ window.game =
 
 		window.physics.remove_entity(entity)
 
+	clear_entities: () ->
+		window.game.remove_entity(entity) for entity in window.game.entities
+		window.game.entities = []
+		window.game.entityIDs = []
+
+
 	reset: () ->
 		# Reset the simulation into the "build" state
-
-		# TODO: Destroy entities, not bodies
-		window.game.remove_entity(entity) for entity in window.game.entities
-
-		window.game.entities = []
-
 		window.game.load_state(window.game.build_state)
 
 	reset_level: () ->
 		# Reset to the beginning of the level, reverting any changes to the build
-		window.game.remove_entity(entity) for entity in window.game.entities
-
-		window.game.entities = []
-
 		window.game.load_state(window.game.default_state)
 
 	meters_to_pixels: (meters) ->
@@ -175,16 +206,47 @@ window.game =
 		window.game.stage.update()
 
 	mouse_down: (e) ->
-		window.game.tools[window.viewModel.tool()].mouse_down(e)
+		if e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + 660 && e.clientY < window.game.canvas_position.top + 570
+			window.game.mouse_down = true
+			if 'mouse_down' of window.game.tools[window.viewModel.tool()]
+				window.game.tools[window.viewModel.tool()].mouse_down(e)
 
 	mouse_up: (e) ->
-		window.game.tools[window.viewModel.tool()].mouse_up(e)
+		window.game.mouse_down = false
+		if 'mouse_up' of window.game.tools[window.viewModel.tool()]
+			window.game.tools[window.viewModel.tool()].mouse_up(e)
 
 	mouse_move: (e) ->
-		window.game.tools[window.viewModel.tool()].mouse_move(e)
+		window.game.mouseX = (e.clientX - window.game.canvas_position.left) / 30
+		window.game.mouseY = (e.clientY - window.game.canvas_position.top) / 30
+
+		if 'mouse_move' of window.game.tools[window.viewModel.tool()]
+			window.game.tools[window.viewModel.tool()].mouse_move(e)
+
+	get_entity_at_mouse: () ->
+		mousePVec = new B2Vec2(window.game.mouseX, window.game.mouseY)
+		aabb = new B2AABB();
+		aabb.lowerBound.Set(window.game.mouseX - 0.1, window.game.mouseY - 0.1)
+		aabb.upperBound.Set(window.game.mouseX + 0.1, window.game.mouseY + 0.1)
+
+		selected_body = null
+
+		get_body_cb = (fixture) ->
+			if fixture.GetBody().GetType() != B2Body.b2_staticBody
+				if fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)
+					selected_body = fixture.GetBody()
+					return false
+			return true
+
+		window.physics.world.QueryAABB(get_body_cb, aabb)
+		if selected_body
+			console.log selected_body
+			console.log selected_body.userData
+			return window.game.entityIDs[selected_body.userData]
 
 $(document).mousedown(window.game.mouse_down)
 $(document).mouseup(window.game.mouse_up)
+$(document).mousemove(window.game.mouse_move)
 window.game.init()
 
 window.viewModel.state.subscribe window.game.state_changed
