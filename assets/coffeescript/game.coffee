@@ -23,7 +23,11 @@ window.game =
 	tools:
 		_: "" # This just ensures the tools object exists, tools will add themselves into this object
 
+	bitmaps:
+		glue: new Bitmap("/img/glue.png")
+
 	FPS: 60
+	scale: 30
 	# Canvases
 	$canvas: $('#gameCanvas')
 	canvas: $('#gameCanvas')[0]
@@ -81,11 +85,19 @@ window.game =
 			entity.id = 'entity_' + (window.game.next_id++)
 
 		if 'image' of entity
-			entity.bitmap = new Bitmap("/img/" + entity.image)
-			entity.bitmap.regX = entity.bitmap.image.width * 0.5
-			entity.bitmap.regY = entity.bitmap.image.height * 0.5
+			if not ('bitmaps' of entity)
+				entity.bitmaps = []
 
-			window.game.stage.addChild(entity.bitmap)
+			bitmap = new Bitmap("/img/" + entity.image)
+			bitmap.regX = bitmap.image.width * 0.5
+			bitmap.regY = bitmap.image.height * 0.5
+
+			if "scale" of entity
+				bitmap.scaleX = entity.scale * entity.scale_adjustment
+				bitmap.scaleY = entity.scale * entity.scale_adjustment
+
+			entity.bitmaps.push(bitmap)
+			window.game.stage.addChild(bitmap)
 
 		window.game.entities.push(entity)
 		window.game.entityIDs[entity.id] = entity
@@ -94,13 +106,13 @@ window.game =
 
 	create_wall: (wall) ->
 		if wall == "bottom"
-			window.game.create_entity({"type": "xwall","x": 11,"y": 19})
+			window.game.create_entity({"type": "xwall","x": 11,"y": 19.1})
 		else if wall == "top"
-			window.game.create_entity({"type": "xwall","x": 11,"y": 0})
+			window.game.create_entity({"type": "xwall","x": 11,"y": -0.1})
 		else if wall == "left"
-			window.game.create_entity({"type": "ywall","x": 0,"y": 9.5})
+			window.game.create_entity({"type": "ywall","x": -0.1,"y": 9.5})
 		else if wall == "right"
-			window.game.create_entity({"type": "ywall","x": 22,"y": 9.5})
+			window.game.create_entity({"type": "ywall","x": 22.1,"y": 9.5})
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state
@@ -134,7 +146,7 @@ window.game =
 
 		# TODO Initial forces? Maybe?
 
-		delete entity['bitmap']
+		delete entity['bitmaps']
 		delete entity['fixture']
 		delete entity['init']
 		return entity
@@ -145,7 +157,6 @@ window.game =
 
 		state.entities = (window.game.clean_entity(entity) for entity in window.game.entities)
 
-		console.log state
 		return state
 
 	play: () ->
@@ -153,8 +164,8 @@ window.game =
 		window.game.build_state = window.game.get_state()
 
 	remove_entity: (entity) ->
-		if "bitmap" of entity
-			window.game.stage.removeChild(entity.bitmap)
+		if "bitmaps" of entity
+			window.game.stage.removeChild(bitmap) for bitmap in entity.bitmaps
 
 		window.physics.remove_entity(entity)
 
@@ -173,9 +184,9 @@ window.game =
 		window.game.load_state(window.game.default_state)
 
 	meters_to_pixels: (meters) ->
-		meters * 30
+		meters * window.game.scale
 	pixels_to_meters: (pixels) ->
-		pixels / 30
+		pixels / window.game.scale
 
 	degrees_to_radians: (degrees) ->
 		degrees * 0.0174532925199432957
@@ -184,16 +195,13 @@ window.game =
 		radians * 57.295779513082320876
 
 	update_position: (entity) ->
-		if "bitmap" of entity
+		if "bitmaps" of entity
 			# If we're drawing this
 			position = entity.fixture.GetBody().GetPosition()
-			entity.bitmap.x = window.game.meters_to_pixels(position.x)
-			entity.bitmap.y = window.game.meters_to_pixels(position.y)
-			entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle())
-
-			if "scale" of entity
-				entity.bitmap.scaleX = entity.scale * entity.scale_adjustment
-				entity.bitmap.scaleY = entity.scale * entity.scale_adjustment
+			for bitmap in entity.bitmaps
+				bitmap.x = window.game.meters_to_pixels(position.x)
+				bitmap.y = window.game.meters_to_pixels(position.y)
+				bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle())
 
 	update_positions: () ->
 		# Update the drawing positions to be in line with the physics
@@ -221,8 +229,8 @@ window.game =
 			window.game.tools[window.viewModel.tool()].mouse_up(e)
 
 	mouse_move: (e) ->
-		window.game.mouseX = (e.clientX - window.game.canvas_position.left) / 30
-		window.game.mouseY = (e.clientY - window.game.canvas_position.top) / 30
+		window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale
+		window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale
 
 		if 'mouse_move' of window.game.tools[window.viewModel.tool()]
 			window.game.tools[window.viewModel.tool()].mouse_move(e)
@@ -244,9 +252,30 @@ window.game =
 
 		window.physics.world.QueryAABB(get_body_cb, aabb)
 		if selected_body
-			console.log selected_body
-			console.log selected_body.userData
 			return window.game.entityIDs[selected_body.userData]
+
+	get_offset_to_mouse: (entity) ->
+		body = entity.fixture.GetBody()
+		position = body.GetPosition()
+		mouse_position = {"x": window.game.mouseX, "y": window.game.mouseY}
+
+		rotated_position = window.game.rotate_point(mouse_position, position, 0-body.GetAngle())
+		return {"x": position.x - rotated_position.x, "y": position.y - rotated_position.y}
+
+	rotate_point: (point, origin, angle) ->
+		s = Math.sin(angle)
+		c = Math.cos(angle)
+
+		point.x -= origin.x
+		point.y -= origin.y
+
+		xnew = point.x * c - point.y * s
+		ynew = point.x * s + point.y * c
+
+		point.x = xnew + origin.x
+		point.y = ynew + origin.y
+
+		return point
 
 $(document).mousedown(window.game.mouse_down)
 $(document).mouseup(window.game.mouse_up)

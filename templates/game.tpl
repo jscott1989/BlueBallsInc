@@ -16,6 +16,7 @@
 			<ul id="toolbox">
 				<li data-bind="css: { active : tool() == 'MOVE' }" data-tool="MOVE">Move</li>
 				<li data-bind="css: { active : tool() == 'GLUE' }" data-tool="GLUE">Glue</li>
+				<li data-bind="css: { active : tool() == 'CLEAN' }" data-tool="CLEAN">Clean</li>
 			</ul>
 
 			<input type="checkbox" name="debug" data-bind="checked: debug"> Debug

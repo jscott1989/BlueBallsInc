@@ -274,7 +274,11 @@
     tools: {
       _: ""
     },
+    bitmaps: {
+      glue: new Bitmap("/img/glue.png")
+    },
     FPS: 60,
+    scale: 30,
     $canvas: $('#gameCanvas'),
     canvas: $('#gameCanvas')[0],
     debug_canvas: $('#debugCanvas')[0],
@@ -317,6 +321,7 @@
       }
     },
     create_entity: function(entity) {
+      var bitmap;
       entity = $.extend({}, window.game.entity_types[entity.type], entity);
       if ("init" in entity) {
         entity.init();
@@ -325,10 +330,18 @@
         entity.id = 'entity_' + (window.game.next_id++);
       }
       if ('image' in entity) {
-        entity.bitmap = new Bitmap("/img/" + entity.image);
-        entity.bitmap.regX = entity.bitmap.image.width * 0.5;
-        entity.bitmap.regY = entity.bitmap.image.height * 0.5;
-        window.game.stage.addChild(entity.bitmap);
+        if (!('bitmaps' in entity)) {
+          entity.bitmaps = [];
+        }
+        bitmap = new Bitmap("/img/" + entity.image);
+        bitmap.regX = bitmap.image.width * 0.5;
+        bitmap.regY = bitmap.image.height * 0.5;
+        if ("scale" in entity) {
+          bitmap.scaleX = entity.scale * entity.scale_adjustment;
+          bitmap.scaleY = entity.scale * entity.scale_adjustment;
+        }
+        entity.bitmaps.push(bitmap);
+        window.game.stage.addChild(bitmap);
       }
       window.game.entities.push(entity);
       window.game.entityIDs[entity.id] = entity;
@@ -339,24 +352,24 @@
         return window.game.create_entity({
           "type": "xwall",
           "x": 11,
-          "y": 19
+          "y": 19.1
         });
       } else if (wall === "top") {
         return window.game.create_entity({
           "type": "xwall",
           "x": 11,
-          "y": 0
+          "y": -0.1
         });
       } else if (wall === "left") {
         return window.game.create_entity({
           "type": "ywall",
-          "x": 0,
+          "x": -0.1,
           "y": 9.5
         });
       } else if (wall === "right") {
         return window.game.create_entity({
           "type": "ywall",
-          "x": 22,
+          "x": 22.1,
           "y": 9.5
         });
       }
@@ -394,7 +407,7 @@
       entity.x = position.x;
       entity.y = position.y;
       entity.angle = entity['fixture'].GetBody().GetAngle();
-      delete entity['bitmap'];
+      delete entity['bitmaps'];
       delete entity['fixture'];
       delete entity['init'];
       return entity;
@@ -414,15 +427,19 @@
         }
         return _results;
       })();
-      console.log(state);
       return state;
     },
     play: function() {
       return window.game.build_state = window.game.get_state();
     },
     remove_entity: function(entity) {
-      if ("bitmap" in entity) {
-        window.game.stage.removeChild(entity.bitmap);
+      var bitmap, _i, _len, _ref;
+      if ("bitmaps" in entity) {
+        _ref = entity.bitmaps;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          bitmap = _ref[_i];
+          window.game.stage.removeChild(bitmap);
+        }
       }
       return window.physics.remove_entity(entity);
     },
@@ -443,10 +460,10 @@
       return window.game.load_state(window.game.default_state);
     },
     meters_to_pixels: function(meters) {
-      return meters * 30;
+      return meters * window.game.scale;
     },
     pixels_to_meters: function(pixels) {
-      return pixels / 30;
+      return pixels / window.game.scale;
     },
     degrees_to_radians: function(degrees) {
       return degrees * 0.0174532925199432957;
@@ -455,16 +472,18 @@
       return radians * 57.295779513082320876;
     },
     update_position: function(entity) {
-      var position;
-      if ("bitmap" in entity) {
+      var bitmap, position, _i, _len, _ref, _results;
+      if ("bitmaps" in entity) {
         position = entity.fixture.GetBody().GetPosition();
-        entity.bitmap.x = window.game.meters_to_pixels(position.x);
-        entity.bitmap.y = window.game.meters_to_pixels(position.y);
-        entity.bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle());
-        if ("scale" in entity) {
-          entity.bitmap.scaleX = entity.scale * entity.scale_adjustment;
-          return entity.bitmap.scaleY = entity.scale * entity.scale_adjustment;
+        _ref = entity.bitmaps;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          bitmap = _ref[_i];
+          bitmap.x = window.game.meters_to_pixels(position.x);
+          bitmap.y = window.game.meters_to_pixels(position.y);
+          _results.push(bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle()));
         }
+        return _results;
       }
     },
     update_positions: function() {
@@ -498,8 +517,8 @@
       }
     },
     mouse_move: function(e) {
-      window.game.mouseX = (e.clientX - window.game.canvas_position.left) / 30;
-      window.game.mouseY = (e.clientY - window.game.canvas_position.top) / 30;
+      window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale;
+      window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale;
       if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
         return window.game.tools[window.viewModel.tool()].mouse_move(e);
       }
@@ -522,10 +541,34 @@
       };
       window.physics.world.QueryAABB(get_body_cb, aabb);
       if (selected_body) {
-        console.log(selected_body);
-        console.log(selected_body.userData);
         return window.game.entityIDs[selected_body.userData];
       }
+    },
+    get_offset_to_mouse: function(entity) {
+      var body, mouse_position, position, rotated_position;
+      body = entity.fixture.GetBody();
+      position = body.GetPosition();
+      mouse_position = {
+        "x": window.game.mouseX,
+        "y": window.game.mouseY
+      };
+      rotated_position = window.game.rotate_point(mouse_position, position, 0 - body.GetAngle());
+      return {
+        "x": position.x - rotated_position.x,
+        "y": position.y - rotated_position.y
+      };
+    },
+    rotate_point: function(point, origin, angle) {
+      var c, s, xnew, ynew;
+      s = Math.sin(angle);
+      c = Math.cos(angle);
+      point.x -= origin.x;
+      point.y -= origin.y;
+      xnew = point.x * c - point.y * s;
+      ynew = point.x * s + point.y * c;
+      point.x = xnew + origin.x;
+      point.y = ynew + origin.y;
+      return point;
     }
   };
 
@@ -649,8 +692,50 @@
       return window.game.tools.GLUE.mouse_is_down = false;
     },
     update: function() {
+      var bitmap, entity, offset;
       if (window.game.tools.GLUE.mouse_is_down) {
-        return console.log("GLUE");
+        entity = window.game.get_entity_at_mouse();
+        if (entity) {
+          if (!('glue' in entity)) {
+            entity.glue = [];
+          }
+          bitmap = window.game.bitmaps.glue.clone();
+          offset = window.game.get_offset_to_mouse(entity);
+          bitmap.regX = window.game.meters_to_pixels(offset.x) + (bitmap.image.width / 2);
+          bitmap.regY = window.game.meters_to_pixels(offset.y) + (bitmap.image.width / 2);
+          entity.bitmaps.push(bitmap);
+          window.game.stage.addChild(bitmap);
+          return entity.glue.push({
+            "position": "TODO"
+          });
+        }
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin clean.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.tools.CLEAN = {
+    mouse_is_down: false,
+    select: function() {},
+    deselect: function() {},
+    mouse_down: function(e) {
+      return window.game.tools.GLUE.mouse_is_down = true;
+    },
+    mouse_up: function(e) {
+      return window.game.tools.GLUE.mouse_is_down = false;
+    },
+    update: function() {
+      var entity;
+      if (window.game.tools.GLUE.mouse_is_down) {
+        entity = window.game.get_entity_at_mouse();
+        if (entity) {
+          return console.log("CLEAN");
+        }
       }
     }
   };
