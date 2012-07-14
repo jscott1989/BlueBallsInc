@@ -1,4 +1,4 @@
-<div id="game">
+<div id="game" data-bind="attr: { class: 'tool_' + tool() }">
 	<div id="grid">
 		<div class="inner">
 			<div class="inner2">

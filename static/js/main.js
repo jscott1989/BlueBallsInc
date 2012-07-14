@@ -290,6 +290,7 @@
     walls: [],
     next_id: 1,
     stage: new Stage($('#gameCanvas')[0]),
+    last_selected_tool: "MOVE",
     init: function() {
       window.physics.init();
       window.game.stage.update();
@@ -302,6 +303,10 @@
       } else if (state === 'PLAY') {
         return window.game.play();
       }
+    },
+    tool_changed: function(new_tool) {
+      window.game.tools[window.game.last_selected_tool].deselect();
+      return window.game.tools[new_tool].select();
     },
     create_entity: function(entity) {
       entity = $.extend({}, window.game.entity_types[entity.type], entity);
@@ -468,6 +473,8 @@
 
   window.viewModel.state.subscribe(window.game.state_changed);
 
+  window.viewModel.tool.subscribe(window.game.tool_changed);
+
   /* -------------------------------------------- 
        Begin entities.coffee 
   --------------------------------------------
@@ -535,6 +542,8 @@
     mouseX: false,
     mouseY: false,
     mouse_joint: false,
+    select: function() {},
+    deselect: function() {},
     mouse_down: function(e) {
       if (e.clientX > window.physics.canvasPosition.left && e.clientY > window.physics.canvasPosition.top && e.clientX < window.physics.canvasPosition.left + 660 && e.clientY < window.physics.canvasPosition.top + 570) {
         window.game.tools.MOVE.is_mouse_down = true;
@@ -585,15 +594,9 @@
       return window.game.tools.MOVE.selected_body;
     },
     get_body_cb: function(fixture) {
-      var position;
       if (fixture.GetBody().GetType() !== B2Body.b2_staticBody) {
         if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), window.game.tools.MOVE.mousePVec)) {
           window.game.tools.MOVE.selected_body = fixture.GetBody();
-          position = window.game.tools.MOVE.selected_body.GetPosition();
-          window.game.tools.MOVE.selected_body_offset = {
-            "x": position.x - window.game.tools.MOVE.mouseX,
-            "y": position.y - window.game.tools.MOVE.mouseY
-          };
           return false;
         }
       }
@@ -608,6 +611,8 @@
 
 
   window.game.tools.GLUE = {
+    select: function() {},
+    deselect: function() {},
     mouse_down: function(e) {},
     mouse_up: function(e) {},
     mouse_move: function(e) {},

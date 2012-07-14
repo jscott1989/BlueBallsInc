@@ -3,6 +3,15 @@
 @grid-width: 700px;
 @sidebar-width: @width - @grid-width;
 
+* {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
 #game-cover {
 	width: @width;
 	height: @height;
@@ -15,6 +24,13 @@
 #game {
 	position: relative;
 	display: none;
+
+	&.tool_GLUE {
+		canvas {
+			cursor: pointer;
+		}
+	}
+
 
 	#grid, #sidebar {
 		position: absolute;

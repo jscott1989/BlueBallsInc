@@ -37,6 +37,8 @@ window.game =
 
 	stage: new Stage($('#gameCanvas')[0])
 
+	last_selected_tool: "MOVE" # The previously selected tool, used to inform when it's deselected
+
 	init: () ->
 		# Initialise the game engine
 		window.physics.init()
@@ -53,6 +55,11 @@ window.game =
 		else if state == 'PLAY'
 			# Starting playing
 			window.game.play()
+
+	tool_changed: (new_tool) ->
+		# This is called when the selected tool changes
+		window.game.tools[window.game.last_selected_tool].deselect()
+		window.game.tools[new_tool].select()
 
 	create_entity: (entity) ->
 		entity = $.extend({}, window.game.entity_types[entity.type], entity)
@@ -181,3 +188,4 @@ $(document).mouseup(window.game.mouse_up)
 window.game.init()
 
 window.viewModel.state.subscribe window.game.state_changed
+window.viewModel.tool.subscribe window.game.tool_changed

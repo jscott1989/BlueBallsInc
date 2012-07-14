@@ -8,6 +8,12 @@ window.game.tools.MOVE =
 	mouseY: false
 	mouse_joint: false
 
+	select: () ->
+
+
+	deselect: () ->
+
+
 	mouse_down: (e) ->
 		if e.clientX > window.physics.canvasPosition.left && e.clientY > window.physics.canvasPosition.top && e.clientX < window.physics.canvasPosition.left + 660 && e.clientY < window.physics.canvasPosition.top + 570
 			window.game.tools.MOVE.is_mouse_down = true
@@ -57,7 +63,5 @@ window.game.tools.MOVE =
 		if fixture.GetBody().GetType() != B2Body.b2_staticBody
 			if fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), window.game.tools.MOVE.mousePVec)
 				window.game.tools.MOVE.selected_body = fixture.GetBody()
-				position = window.game.tools.MOVE.selected_body.GetPosition()
-				window.game.tools.MOVE.selected_body_offset = {"x": position.x - window.game.tools.MOVE.mouseX, "y": position.y - window.game.tools.MOVE.mouseY}
 				return false
 		return true
