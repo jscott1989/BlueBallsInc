@@ -1,7 +1,8 @@
 {
     "settings": {
         "balls_needed": 3,
-        "tools": ["MOVE"]
+        "tools": ["MOVE"],
+        "seed": "1234567899"
     },
     "walls": [],
     "entities": [

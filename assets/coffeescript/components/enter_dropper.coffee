@@ -1,3 +1,4 @@
+###global Box2D:false, $:false, Math:false###
 # This will spawn balls and drop them
 
 window.game.components.enter_dropper =
@@ -19,4 +20,4 @@ window.game.components.enter_dropper =
 					entity.last_ball_created = 0
 					entity.balls_created += 1
 					position = entity.fixture.GetBody().GetPosition()
-					window.game.create_ball(position.x, position.y + 1)
+					window.game.create_ball(position.x + (Math.random() * 0.2) - 0.1, position.y + 1)

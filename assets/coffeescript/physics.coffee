@@ -144,6 +144,8 @@ window.physics =
 
 		body = window.physics.world.CreateBody(bodyDef)
 
+		# body.SetSleepingAllowed(false)
+
 		body.userData = entity.id
 		entity.fixture = body.CreateFixture(fixDef) # Add to the world
 

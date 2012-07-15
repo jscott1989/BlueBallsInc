@@ -154,6 +154,11 @@ window.game =
 
 		window.viewModel.balls_needed(window.game.settings.balls_needed)
 
+		if not ("seed" of window.game.settings)
+			window.game.settings.seed = Math.random()
+
+		Math.seed_random(window.game.settings.seed)
+
 		window.game.walls = state.walls
 		window.game.create_wall(wall) for wall in window.game.walls
 

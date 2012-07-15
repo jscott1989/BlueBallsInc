@@ -502,6 +502,10 @@
         window.viewModel.allowed_tools.push(tool);
       }
       window.viewModel.balls_needed(window.game.settings.balls_needed);
+      if (!("seed" in window.game.settings)) {
+        window.game.settings.seed = Math.random();
+      }
+      Math.seed_random(window.game.settings.seed);
       window.game.walls = state.walls;
       _ref2 = window.game.walls;
       _results = [];
@@ -1061,6 +1065,10 @@
   */
 
 
+  /*global Box2D:false, $:false, Math:false
+  */
+
+
   window.game.components.enter_dropper = {
     init: function(entity) {
       entity.balls_created = 0;
@@ -1078,7 +1086,7 @@
             entity.last_ball_created = 0;
             entity.balls_created += 1;
             position = entity.fixture.GetBody().GetPosition();
-            return window.game.create_ball(position.x, position.y + 1);
+            return window.game.create_ball(position.x + (Math.random() * 0.2) - 0.1, position.y + 1);
           }
         }
       }
