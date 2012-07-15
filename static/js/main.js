@@ -25,7 +25,7 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(false);
+    self.debug = ko.observable(true);
     self.level = ko.observable("level1");
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
@@ -263,6 +263,12 @@
         fixDef.shape = new B2CircleShape(entity.physics.shape.size);
       } else if (entity.physics.shape.type === "rectangle") {
         fixDef.shape = new B2PolygonShape();
+        if (!('size' in entity.physics.shape)) {
+          entity.physics.shape.size = {
+            width: (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2),
+            height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
+          };
+        }
         fixDef.shape.SetAsBox(entity.physics.shape.size.width, entity.physics.shape.size.height);
       } else if (entity.physics.shape.type === "polygon") {
         fixDef.shape = new B2PolygonShape();
@@ -404,10 +410,11 @@
       return window.game.last_selected_tool = new_tool;
     },
     create_entity: function(entity) {
-      var bitmap, component, _i, _len, _ref;
+      var bitmap, component, scale, scale_adjustment, _i, _len, _ref;
       entity = $.extend(true, {}, window.game.entity_base, window.game.entity_types[entity.type], entity);
-      if ("init" in entity) {
+      if ("init" in entity && !("initialised" in entity)) {
         entity.init(entity);
+        entity.initialised = true;
       }
       _ref = entity.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -428,8 +435,16 @@
         bitmap.regX = bitmap.image.width * 0.5;
         bitmap.regY = bitmap.image.height * 0.5;
         if ("scale" in entity) {
-          bitmap.scaleX = entity.scale * entity.scale_adjustment;
-          bitmap.scaleY = entity.scale * entity.scale_adjustment;
+          scale = 1;
+          if ("scale" in entity) {
+            scale = entity.scale;
+          }
+          scale_adjustment = 1;
+          if ("scale_adjustment" in entity) {
+            scale_adjustment = entity.scale_adjustment;
+          }
+          bitmap.scaleX = scale * scale_adjustment;
+          bitmap.scaleY = scale * scale_adjustment;
         }
         entity.bitmaps.push(bitmap);
         window.game.stage.addChild(bitmap);
@@ -832,7 +847,7 @@
     physics: {
       density: 40,
       friction: 2,
-      restitution: 0.5,
+      restitution: 0.4,
       shape: {
         type: "circle",
         size: 1
@@ -853,24 +868,14 @@
   window.game.entity_types.box = {
     name: "Box",
     image: "box.png",
-    width_scale: 6,
-    height_scale: 6,
     scale_adjustment: 0.2,
     physics: {
       density: 40,
       friction: 2,
       restitution: 0.2,
       shape: {
-        type: "rectangle",
-        size: {
-          width: 6,
-          height: 6
-        }
+        type: "rectangle"
       }
-    },
-    init: function() {
-      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
-      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
     }
   };
 
@@ -882,43 +887,29 @@
 
   window.game.entity_types.enter_dropper = {
     name: "Ball Dropper",
-    image: "enter_dropper.png",
-    width_scale: 2,
-    height_scale: 2,
     fixed: true,
-    scale_adjustment: 1,
-    scale: 0.5,
     physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.2,
       shape: {
         type: "rectangle",
         size: {
-          width: 6,
-          height: 6
+          width: 0.1,
+          height: 0.1
         }
       }
     },
     init: function(entity) {
-      entity.physics.shape.size.width = entity.scale_adjustment * entity.width_scale * entity.scale;
-      entity.physics.shape.size.height = entity.scale_adjustment * entity.height_scale * entity.scale;
       return entity.components.push('enter_dropper');
     }
   };
 
   /* -------------------------------------------- 
-       Begin box.coffee 
+       Begin exit.coffee 
   --------------------------------------------
   */
 
 
-  window.game.entity_types.exit_box = {
+  window.game.entity_types.exit = {
     name: "Box",
-    image: "exit_box.png",
-    width_scale: 2,
-    height_scale: 2,
-    scale_adjustment: 0.5,
     fixed: true,
     physics: {
       density: 40,
@@ -927,14 +918,12 @@
       shape: {
         type: "rectangle",
         size: {
-          width: 6,
-          height: 6
+          width: 1,
+          height: 1
         }
       }
     },
     init: function(entity) {
-      entity.physics.shape.size.width = entity.scale_adjustment * entity.width_scale * entity.scale;
-      entity.physics.shape.size.height = entity.scale_adjustment * entity.height_scale * entity.scale;
       return entity.components.push('exit');
     }
   };
@@ -985,11 +974,7 @@
     fixed: true,
     "physics": {
       "shape": {
-        "type": "rectangle",
-        "size": {
-          "width": 1,
-          "height": 1
-        }
+        "type": "rectangle"
       }
     }
   };
@@ -1000,11 +985,7 @@
     fixed: true,
     "physics": {
       "shape": {
-        "type": "rectangle",
-        "size": {
-          "width": 1,
-          "height": 1
-        }
+        "type": "rectangle"
       }
     }
   };
@@ -1097,7 +1078,7 @@
             entity.last_ball_created = 0;
             entity.balls_created += 1;
             position = entity.fixture.GetBody().GetPosition();
-            return window.game.create_ball(position.x, position.y + 0.1);
+            return window.game.create_ball(position.x, position.y + 1);
           }
         }
       }

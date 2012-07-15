@@ -88,8 +88,9 @@ window.game =
 
 	create_entity: (entity) ->
 		entity = $.extend(true, {}, window.game.entity_base, window.game.entity_types[entity.type], entity)
-		if "init" of entity
+		if "init" of entity and not ("initialised" of entity)
 			entity.init(entity)
+			entity.initialised = true
 
 		window.game.components[component].init(entity) for component in entity.components
 
@@ -109,8 +110,14 @@ window.game =
 			bitmap.regY = bitmap.image.height * 0.5
 
 			if "scale" of entity
-				bitmap.scaleX = entity.scale * entity.scale_adjustment
-				bitmap.scaleY = entity.scale * entity.scale_adjustment
+				scale = 1
+				if "scale" of entity
+					scale = entity.scale
+				scale_adjustment = 1
+				if "scale_adjustment" of entity
+					scale_adjustment = entity.scale_adjustment
+				bitmap.scaleX = scale * scale_adjustment
+				bitmap.scaleY = scale * scale_adjustment
 
 			entity.bitmaps.push(bitmap)
 			window.game.stage.addChild(bitmap)

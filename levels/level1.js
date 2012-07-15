@@ -6,18 +6,33 @@
     "walls": [],
     "entities": [
         {
+            "type": "yline",
+            "x": 4.3,
+            "y": 1
+        },
+        {
+            "type": "yline",
+            "x": 6.7,
+            "y": 1
+        },
+        {
             "type": "enter_dropper",
             "x": 5.5,
-            "y": 1,
+            "y": 0.4,
             "maximum_balls": 3
         },
         {
             "type": "xline",
-            "x": 15,
-            "y": 5
+            "x": 16,
+            "y": 12
         },
         {
-            "type": "exit_box",
+            "type": "xline",
+            "x": 16,
+            "y": 15.2
+        },
+        {
+            "type": "exit",
             "x": 17,
             "y": 14
         },

@@ -19,4 +19,4 @@ window.game.components.enter_dropper =
 					entity.last_ball_created = 0
 					entity.balls_created += 1
 					position = entity.fixture.GetBody().GetPosition()
-					window.game.create_ball(position.x, position.y + 0.1)
+					window.game.create_ball(position.x, position.y + 1)

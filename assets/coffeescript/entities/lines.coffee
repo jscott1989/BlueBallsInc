@@ -5,9 +5,6 @@ window.game.entity_types.xline =
 	"physics":
 		"shape":
 	        "type": "rectangle"
-	        "size":
-	            "width": 1,
-	            "height": 1
 
 window.game.entity_types.yline =
 	name: "Line"
@@ -16,6 +13,3 @@ window.game.entity_types.yline =
 	"physics":
 		"shape":
 	        "type": "rectangle"
-	        "size":
-	            "width": 1,
-	            "height": 1

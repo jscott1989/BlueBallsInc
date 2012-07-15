@@ -6,7 +6,7 @@ $main_menu = $('#main-menu')
 
 GameViewModel = ->
 	self = this
-	self.debug = ko.observable(false)
+	self.debug = ko.observable(true)
 	self.level = ko.observable("level1")
 	self.tool = ko.observable("MOVE")
 	self.last_tool = ko.observable("MOVE")
