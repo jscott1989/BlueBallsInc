@@ -21,7 +21,7 @@
 				<span data-bind="text: balls_complete"></span>/<span data-bind="text: balls_needed"></span>
 			</div>
 
-			<!--<label><input type="checkbox" name="debug" data-bind="checked: debug"> Debug</label>-->
+			<label><input type="checkbox" name="debug" data-bind="checked: debug"> Debug</label>
 		</div>
 	</div>
 </div>
