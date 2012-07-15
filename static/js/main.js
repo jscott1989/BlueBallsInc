@@ -11,7 +11,8 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, images, img, load_level, preload, _i, _len;
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, images, img, load_level, preload, _i, _len,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
 
@@ -148,8 +149,9 @@
 
   window.physics = {
     world: new B2World(new B2Vec2(0, 10), true),
+    entities_to_delete: [],
     begin_contact: function(contact) {
-      var bodyA, bodyB, entityA, entityB, manifold;
+      var bodyA, bodyB, component, entityA, entityB, manifold, _i, _j, _len, _len1, _ref, _ref1, _results;
       bodyA = contact.GetFixtureA().GetBody();
       bodyB = contact.GetFixtureB().GetBody();
       entityA = window.game.entityIDs[bodyA.userData];
@@ -158,16 +160,48 @@
       entityA.touching[entityB.id] = {
         "manifold": manifold
       };
-      return entityB.touching[entityA.id] = {
+      entityB.touching[entityA.id] = {
         "manifold": manifold
       };
+      _ref = entityA.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        if ("begin_contact" in window.game.components[component]) {
+          window.game.components[component].begin_contact(entityA, entityB);
+        }
+      }
+      _ref1 = entityB.components;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        component = _ref1[_j];
+        if ("begin_contact" in window.game.components[component]) {
+          _results.push(window.game.components[component].begin_contact(entityB, entityA));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     },
     end_contact: function(contact) {
-      var bodyA, bodyB, entityA, entityB;
+      var bodyA, bodyB, component, entityA, entityB, _i, _j, _len, _len1, _ref, _ref1;
       bodyA = contact.GetFixtureA().GetBody();
       bodyB = contact.GetFixtureB().GetBody();
       entityA = window.game.entityIDs[bodyA.userData];
       entityB = window.game.entityIDs[bodyB.userData];
+      _ref = entityA.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        if ("end_contact" in window.game.components[component]) {
+          window.game.components[component].end_contact(entityA, entityB);
+        }
+      }
+      _ref1 = entityB.components;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        component = _ref1[_j];
+        if ("end_contact" in window.game.components[component]) {
+          window.game.components[component].end_contact(entityB, entityA);
+        }
+      }
       delete entityA.touching[entityB.id];
       return delete entityB.touching[entityA.id];
     },
@@ -187,6 +221,7 @@
     },
     start_game: function() {},
     update: function() {
+      var entity, _i, _len, _ref;
       if (window.viewModel.state() === 'PAUSE') {
         if (window.viewModel.debug()) {
           window.physics.world.DrawDebugData();
@@ -197,7 +232,13 @@
       if (window.viewModel.debug()) {
         window.physics.world.DrawDebugData();
       }
-      return window.physics.world.ClearForces();
+      window.physics.world.ClearForces();
+      _ref = window.physics.entities_to_delete;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        window.physics.world.DestroyBody(entity.fixture.GetBody());
+      }
+      return window.physics.entities_to_delete = [];
     },
     create_fixture_def: function(entity) {
       var fixDef, vector, vectors, _i, _len, _ref;
@@ -245,10 +286,12 @@
       body.userData = entity.id;
       return entity.fixture = body.CreateFixture(fixDef);
     },
-    remove_entity: function(entity) {
-      var body;
-      body = entity.fixture.GetBody();
-      return window.physics.world.DestroyBody(body);
+    remove_entity: function(entity, now) {
+      if (now) {
+        return window.physics.world.DestroyBody(entity.fixture.GetBody());
+      } else {
+        return window.physics.entities_to_delete.push(entity);
+      }
     }
   };
 
@@ -482,7 +525,7 @@
     play: function() {
       return window.game.build_state = window.game.get_state();
     },
-    remove_entity: function(entity) {
+    remove_entity: function(entity, now) {
       var bitmap, _i, _len, _ref;
       if ("bitmaps" in entity) {
         _ref = entity.bitmaps;
@@ -491,14 +534,14 @@
           window.game.stage.removeChild(bitmap);
         }
       }
-      return window.physics.remove_entity(entity);
+      return window.physics.remove_entity(entity, now);
     },
     clear_entities: function() {
       var entity, _i, _len, _ref;
       _ref = window.game.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        window.game.remove_entity(entity);
+        window.game.remove_entity(entity, true);
       }
       window.game.entities = [];
       return window.game.entityIDs = [];
@@ -639,7 +682,10 @@
       entity = {
         "type": "ball",
         "x": x,
-        "y": y
+        "y": y,
+        "init": function(entity) {
+          return entity.tags.push("ball");
+        }
       };
       return window.game.create_entity(entity);
     }
@@ -755,7 +801,8 @@
 
   window.game.entity_base = {
     scale: 1,
-    components: ["gluable"]
+    components: ["gluable"],
+    tags: []
   };
 
   /* -------------------------------------------- 
@@ -873,9 +920,10 @@
         }
       }
     },
-    init: function() {
-      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
-      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+    init: function(entity) {
+      entity.physics.shape.size.width = entity.scale_adjustment * entity.width_scale * entity.scale;
+      entity.physics.shape.size.height = entity.scale_adjustment * entity.height_scale * entity.scale;
+      return entity.components.push('exit');
     }
   };
 
@@ -1004,6 +1052,22 @@
             return window.game.create_ball(position.x, position.y + 0.1);
           }
         }
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin exit.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.components.exit = {
+    init: function(entity) {},
+    update: function(entity) {},
+    begin_contact: function(entity, other_entity) {
+      if (__indexOf.call(other_entity.tags, "ball") >= 0) {
+        return window.game.remove_entity(other_entity);
       }
     }
   };

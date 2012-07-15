@@ -19,6 +19,7 @@ B2ContactListener = Box2D.Dynamics.b2ContactListener
 
 window.physics =
 	world: new B2World(new B2Vec2(0,10),  true)
+	entities_to_delete: [] # Things to be deleted at the end of the current step
 
 	begin_contact: (contact) ->
 		# Begin contact between two elements
@@ -33,6 +34,13 @@ window.physics =
 		entityA.touching[entityB.id] = {"manifold": manifold}
 		entityB.touching[entityA.id] = {"manifold": manifold}
 
+		for component in entityA.components
+			if "begin_contact" of window.game.components[component]
+				window.game.components[component].begin_contact(entityA, entityB)
+		for component in entityB.components
+			if "begin_contact" of window.game.components[component]
+				window.game.components[component].begin_contact(entityB, entityA)
+
 	end_contact: (contact) ->
 		# End contact between two elements
 		bodyA = contact.GetFixtureA().GetBody()
@@ -41,8 +49,16 @@ window.physics =
 		entityA = window.game.entityIDs[bodyA.userData]
 		entityB = window.game.entityIDs[bodyB.userData]
 
+		for component in entityA.components
+			if "end_contact" of window.game.components[component]
+				window.game.components[component].end_contact(entityA, entityB)
+		for component in entityB.components
+			if "end_contact" of window.game.components[component]
+				window.game.components[component].end_contact(entityB, entityA)
+
 		delete entityA.touching[entityB.id]
 		delete entityB.touching[entityA.id]
+
 
 	init: () ->
 		# Initialise the physics engine
@@ -78,6 +94,9 @@ window.physics =
 		if window.viewModel.debug()
 			window.physics.world.DrawDebugData()
 		window.physics.world.ClearForces()
+
+		window.physics.world.DestroyBody(entity.fixture.GetBody()) for entity in window.physics.entities_to_delete
+		window.physics.entities_to_delete = []
 
 	create_fixture_def: (entity) ->
 		fixDef = new B2FixtureDef()
@@ -122,6 +141,8 @@ window.physics =
 		body.userData = entity.id
 		entity.fixture = body.CreateFixture(fixDef) # Add to the world
 
-	remove_entity: (entity) ->
-		body = entity.fixture.GetBody()
-		window.physics.world.DestroyBody(body)
+	remove_entity: (entity, now) ->
+		if now
+			window.physics.world.DestroyBody(entity.fixture.GetBody())
+		else
+			window.physics.entities_to_delete.push(entity)

@@ -185,14 +185,14 @@ window.game =
 		# Start the simulation
 		window.game.build_state = window.game.get_state()
 
-	remove_entity: (entity) ->
+	remove_entity: (entity, now) ->
 		if "bitmaps" of entity
 			window.game.stage.removeChild(bitmap) for bitmap in entity.bitmaps
 
-		window.physics.remove_entity(entity)
+		window.physics.remove_entity(entity, now)
 
 	clear_entities: () ->
-		window.game.remove_entity(entity) for entity in window.game.entities
+		window.game.remove_entity(entity, true) for entity in window.game.entities
 		window.game.entities = []
 		window.game.entityIDs = []
 
@@ -309,6 +309,8 @@ window.game =
 			"type": "ball"
 			"x": x
 			"y": y
+			"init": (entity) ->
+				entity.tags.push("ball")
 		window.game.create_entity(entity)
 
 

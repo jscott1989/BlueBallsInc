@@ -19,6 +19,8 @@ window.game.entity_types.exit_box =
 			size:
 				width: 6
 				height: 6
-	init: () ->
-		this.physics.shape.size.width = this.scale_adjustment * this.width_scale *  this.scale
-		this.physics.shape.size.height = this.scale_adjustment * this.height_scale *  this.scale
+	init: (entity) ->
+		entity.physics.shape.size.width = entity.scale_adjustment * entity.width_scale *  entity.scale
+		entity.physics.shape.size.height = entity.scale_adjustment * entity.height_scale *  entity.scale
+
+		entity.components.push('exit')
