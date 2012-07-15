@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, load_level;
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, images, img, load_level, preload, _i, _len;
 
   $menus = $('#menus');
 
@@ -1060,5 +1060,24 @@
     $game.fadeIn();
     return window.start_game();
   });
+
+  /* -------------------------------------------- 
+       Begin preload.coffee 
+  --------------------------------------------
+  */
+
+
+  preload = function(filename) {
+    var image;
+    image = new Image();
+    return image.src = filename;
+  };
+
+  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/glue.png"];
+
+  for (_i = 0, _len = images.length; _i < _len; _i++) {
+    img = images[_i];
+    preload(img);
+  }
 
 }).call(this);

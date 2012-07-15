@@ -5,3 +5,4 @@
 #@codekit-append "entities.coffee";
 #@codekit-append "components.coffee";
 #@codekit-append "menu.coffee";
+#@codekit-append "preload.coffee";
