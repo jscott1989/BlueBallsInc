@@ -1183,7 +1183,7 @@
     return image.src = filename;
   };
 
-  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/exit_box.png", "img/glue.png", "img/out.png", "img/in.png"];
+  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/exit_box.png", "img/glue.png", "img/out.png", "img/in.png", "img/xline.png", "img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     img = images[_i];

@@ -11,6 +11,8 @@ images = [
 	"img/glue.png"
 	"img/out.png"
 	"img/in.png"
+	"img/xline.png"
+	"img/yline.png"
 ]
 
 preload(img) for img in images
