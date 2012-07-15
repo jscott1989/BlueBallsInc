@@ -140,9 +140,10 @@ window.game =
 
 		window.game.create_entity(entity) for entity in state.entities if state.entities
 
+		window.game.settings = state.settings
 		# Set tools
 		window.viewModel.allowed_tools.removeAll()
-		window.viewModel.allowed_tools.push(tool) for tool in state.settings.tools
+		window.viewModel.allowed_tools.push(tool) for tool in window.game.settings.tools
 
 		window.game.walls = state.walls
 		window.game.create_wall(wall) for wall in window.game.walls
@@ -174,7 +175,7 @@ window.game =
 
 	get_state: () ->
 		# Serialize the current game state
-		state = {"walls": []} # Walls are already included in entities
+		state = {"walls": [], "settings": window.game.settings} # Walls are already included in entities
 
 		state.entities = (window.game.clean_entity(entity) for entity in window.game.entities)
 

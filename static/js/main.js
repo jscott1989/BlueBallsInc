@@ -429,8 +429,9 @@
           window.game.create_entity(entity);
         }
       }
+      window.game.settings = state.settings;
       window.viewModel.allowed_tools.removeAll();
-      _ref1 = state.settings.tools;
+      _ref1 = window.game.settings.tools;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         tool = _ref1[_j];
         window.viewModel.allowed_tools.push(tool);
@@ -463,7 +464,8 @@
     get_state: function() {
       var entity, state;
       state = {
-        "walls": []
+        "walls": [],
+        "settings": window.game.settings
       };
       state.entities = (function() {
         var _i, _len, _ref, _results;
