@@ -9,6 +9,8 @@ images = [
 	"img/enter_dropper.png",
 	"img/exit_box.png",
 	"img/glue.png"
+	"img/out.png"
+	"img/in.png"
 ]
 
 preload(img) for img in images

@@ -25,7 +25,7 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(true);
+    self.debug = ko.observable(false);
     self.level = ko.observable("level1");
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
@@ -1065,7 +1065,7 @@
     init: function(entity) {
       entity.balls_created = 0;
       if (!("ball_creation_interval" in entity)) {
-        entity.ball_creation_interval = 400;
+        entity.ball_creation_interval = 120;
       }
       entity.last_ball_created = entity.ball_creation_interval - 50;
     },
@@ -1183,7 +1183,7 @@
     return image.src = filename;
   };
 
-  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/exit_box.png", "img/glue.png"];
+  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/exit_box.png", "img/glue.png", "img/out.png", "img/in.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     img = images[_i];

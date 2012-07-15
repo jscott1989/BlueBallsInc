@@ -5,7 +5,7 @@ window.game.components.enter_dropper =
 		entity.balls_created = 0
 
 		if not ("ball_creation_interval" of entity)
-			entity.ball_creation_interval = 400
+			entity.ball_creation_interval = 120
 
 		entity.last_ball_created = entity.ball_creation_interval - 50
 		return
