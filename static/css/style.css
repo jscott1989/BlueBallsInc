@@ -116,6 +116,7 @@ a {
 #game #grid .inner .inner2 #debugCanvas {
   position: absolute;
   left: 0;
+  top: 0;
 }
 #game.state_BUILD #toolbox {
   display: block !important;
