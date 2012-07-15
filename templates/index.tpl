@@ -21,6 +21,7 @@
 			%include pause_menu
 			%include confirm_exit_menu
 			%include confirm_restart_menu
+			%include level_complete_menu
 		</div>
 	</div>
 

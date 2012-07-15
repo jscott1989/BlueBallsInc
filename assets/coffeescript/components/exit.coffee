@@ -8,3 +8,4 @@ window.game.components.exit =
 	begin_contact: (entity, other_entity) ->
 		if "ball" in other_entity.tags
 			window.game.remove_entity(other_entity)
+			window.viewModel.balls_complete(window.viewModel.balls_complete() + 1)

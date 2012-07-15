@@ -120,6 +120,9 @@ a {
 #game.state_PLAY #toolbox {
   display: none;
 }
+#game.state_PLAY #score {
+  display: block !important;
+}
 #game #sidebar {
   right: 0px;
   background: red;
@@ -162,4 +165,9 @@ a {
 }
 #game #sidebar .inner #toolbox li.active {
   background: blue;
+}
+#game #sidebar .inner #score {
+  font-size: 2em;
+  text-align: center;
+  display: none;
 }

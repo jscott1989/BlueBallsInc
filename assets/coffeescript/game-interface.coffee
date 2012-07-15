@@ -38,6 +38,12 @@ window.start_game = () ->
 	load_level(window.viewModel.level())
 	return
 
+window.level_complete = () ->
+	window.forward_to($('#level-complete-menu'))
+	$menus.fadeIn()
+	window.viewModel.state("COMPLETE")
+	return false
+
 $('.pause').click ->
 	window.forward_to($pause_menu)
 	$menus.fadeIn()

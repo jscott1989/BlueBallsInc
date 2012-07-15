@@ -58,6 +58,13 @@
     load_level(window.viewModel.level());
   };
 
+  window.level_complete = function() {
+    window.forward_to($('#level-complete-menu'));
+    $menus.fadeIn();
+    window.viewModel.state("COMPLETE");
+    return false;
+  };
+
   $('.pause').click(function() {
     window.forward_to($pause_menu);
     $menus.fadeIn();
@@ -479,6 +486,7 @@
         tool = _ref1[_j];
         window.viewModel.allowed_tools.push(tool);
       }
+      window.viewModel.balls_needed(window.game.settings.balls_needed);
       window.game.walls = state.walls;
       _ref2 = window.game.walls;
       _results = [];
@@ -523,6 +531,7 @@
       return state;
     },
     play: function() {
+      window.viewModel.balls_complete(0);
       return window.game.build_state = window.game.get_state();
     },
     remove_entity: function(entity, now) {
@@ -603,7 +612,10 @@
       }
       window.physics.update();
       window.game.update_positions();
-      return window.game.stage.update();
+      window.game.stage.update();
+      if (window.viewModel.state() === "PLAY" && window.viewModel.balls_complete() >= window.viewModel.balls_needed()) {
+        return window.level_complete();
+      }
     },
     mouse_down: function(e) {
       if (window.viewModel.state() === 'BUILD') {
@@ -1067,7 +1079,8 @@
     update: function(entity) {},
     begin_contact: function(entity, other_entity) {
       if (__indexOf.call(other_entity.tags, "ball") >= 0) {
-        return window.game.remove_entity(other_entity);
+        window.game.remove_entity(other_entity);
+        return window.viewModel.balls_complete(window.viewModel.balls_complete() + 1);
       }
     }
   };

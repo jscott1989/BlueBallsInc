@@ -17,6 +17,10 @@
 				<li data-bind="css: { active: $parent.tool() == $data }, text: $data, attr: {rel: $data}"></li>
 			</ul>
 
+			<div id="score">
+				<span data-bind="text: balls_complete"></span>/<span data-bind="text: balls_needed"></span>
+			</div>
+
 			<label><input type="checkbox" name="debug" data-bind="checked: debug"> Debug</label>
 		</div>
 	</div>

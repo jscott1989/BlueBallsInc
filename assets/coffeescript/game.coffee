@@ -145,6 +145,8 @@ window.game =
 		window.viewModel.allowed_tools.removeAll()
 		window.viewModel.allowed_tools.push(tool) for tool in window.game.settings.tools
 
+		window.viewModel.balls_needed(window.game.settings.balls_needed)
+
 		window.game.walls = state.walls
 		window.game.create_wall(wall) for wall in window.game.walls
 
@@ -183,6 +185,7 @@ window.game =
 
 	play: () ->
 		# Start the simulation
+		window.viewModel.balls_complete(0)
 		window.game.build_state = window.game.get_state()
 
 	remove_entity: (entity, now) ->
@@ -241,6 +244,10 @@ window.game =
 		window.game.update_positions()
 
 		window.game.stage.update()
+
+		if window.viewModel.state() == "PLAY" and window.viewModel.balls_complete() >= window.viewModel.balls_needed()
+			# Level complete
+			window.level_complete()
 
 	mouse_down: (e) ->
 		if window.viewModel.state() == 'BUILD'
