@@ -44,6 +44,7 @@ window.game =
 
 	stage: new Stage($('#gameCanvas')[0])
 
+	last_state: "BUILD"
 	last_selected_tool: "MOVE" # The previously selected tool, used to inform when it's deselected
 
 	init: () ->
@@ -66,10 +67,15 @@ window.game =
 		if state == 'BUILD'
 			# Either first starting the level or returning from playing
 			# Reset the level to the last built state
-			window.game.reset()
+			if window.game.last_state != "PAUSE"
+				# Not returning from pause
+				window.game.reset()
 		else if state == 'PLAY'
 			# Starting playing
-			window.game.play()
+			if window.game.last_state != "PAUSE"
+				# Not returning from pause
+				window.game.play()
+		window.game.last_state = state
 
 	tool_changed: (new_tool) ->
 		# This is called when the selected tool changes
@@ -77,6 +83,7 @@ window.game =
 			window.game.tools[window.game.last_selected_tool].deselect()
 		if 'select' of window.game.tools[new_tool]
 			window.game.tools[new_tool].select()
+		window.game.last_selected_tool = new_tool
 
 	create_entity: (entity) ->
 		entity = $.extend({}, window.game.entity_base, window.game.entity_types[entity.type], entity)
@@ -90,7 +97,10 @@ window.game =
 
 		if not ('bitmaps' of entity)
 			entity.bitmaps = []
-		
+
+		if not ('touching' of entity)
+			entity.touching = {}
+
 		if 'image' of entity
 
 			bitmap = new Bitmap("/img/" + entity.image)
@@ -152,6 +162,7 @@ window.game =
 		# TODO Initial forces? Maybe?
 
 		delete entity.bitmaps
+		delete entity.touching
 		delete entity.fixture
 		delete entity.init
 		return entity
@@ -215,6 +226,10 @@ window.game =
 	tick: () ->
 		# Called each frame
 		window.game.tools[window.viewModel.tool()].update()
+
+		for entity in window.game.entities
+			window.game.components[component].update(entity) for component in entity.components
+
 
 		window.physics.update()
 

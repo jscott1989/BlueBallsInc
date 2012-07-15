@@ -15,12 +15,44 @@ B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 B2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
 B2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
 B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef
+B2ContactListener = Box2D.Dynamics.b2ContactListener
 
 window.physics =
 	world: new B2World(new B2Vec2(0,10),  true)
 
+	begin_contact: (contact) ->
+		# Begin contact between two elements
+		bodyA = contact.GetFixtureA().GetBody()
+		bodyB = contact.GetFixtureB().GetBody()
+
+		entityA = window.game.entityIDs[bodyA.userData]
+		entityB = window.game.entityIDs[bodyB.userData]
+
+		manifold = contact.GetManifold()
+
+		entityA.touching[entityB.id] = {"manifold": manifold}
+		entityB.touching[entityA.id] = {"manifold": manifold}
+
+	end_contact: (contact) ->
+		# End contact between two elements
+		bodyA = contact.GetFixtureA().GetBody()
+		bodyB = contact.GetFixtureB().GetBody()
+
+		entityA = window.game.entityIDs[bodyA.userData]
+		entityB = window.game.entityIDs[bodyB.userData]
+
+		delete entityA.touching[entityB.id]
+		delete entityB.touching[entityA.id]
+
 	init: () ->
 		# Initialise the physics engine
+
+		window.physics.contact_listener = new B2ContactListener()
+
+		window.physics.contact_listener.BeginContact = window.physics.begin_contact
+		window.physics.contact_listener.EndContact = window.physics.end_contact
+
+		window.physics.world.SetContactListener(window.physics.contact_listener);
 
 		# Set up DebugDraw
 		debugDraw = new B2DebugDraw()

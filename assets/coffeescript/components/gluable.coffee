@@ -42,3 +42,16 @@ window.game.components.gluable =
 					entity.bitmaps.splice(idx, 1)
 
 	update: (entity) ->
+		# for touching of entity.touching
+		# 	# Here, see if the other entity is touching anywhere that has glue
+		# 	other_entity = window.game.entityIDs[touching]
+			
+		# 	body = entity.fixture.GetBody()
+		# 	other_body = other_entity.fixture.GetBody()
+
+		# 	position = body.GetPosition()
+		# 	other_position = other_body.GetPosition()
+
+		# 	console.log body
+
+			# for glue in entity.glue

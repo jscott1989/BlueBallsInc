@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, load_level;
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, load_level;
 
   $menus = $('#menus');
 
@@ -141,10 +141,39 @@
 
   B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
+  B2ContactListener = Box2D.Dynamics.b2ContactListener;
+
   window.physics = {
     world: new B2World(new B2Vec2(0, 10), true),
+    begin_contact: function(contact) {
+      var bodyA, bodyB, entityA, entityB, manifold;
+      bodyA = contact.GetFixtureA().GetBody();
+      bodyB = contact.GetFixtureB().GetBody();
+      entityA = window.game.entityIDs[bodyA.userData];
+      entityB = window.game.entityIDs[bodyB.userData];
+      manifold = contact.GetManifold();
+      entityA.touching[entityB.id] = {
+        "manifold": manifold
+      };
+      return entityB.touching[entityA.id] = {
+        "manifold": manifold
+      };
+    },
+    end_contact: function(contact) {
+      var bodyA, bodyB, entityA, entityB;
+      bodyA = contact.GetFixtureA().GetBody();
+      bodyB = contact.GetFixtureB().GetBody();
+      entityA = window.game.entityIDs[bodyA.userData];
+      entityB = window.game.entityIDs[bodyB.userData];
+      delete entityA.touching[entityB.id];
+      return delete entityB.touching[entityA.id];
+    },
     init: function() {
       var debugDraw;
+      window.physics.contact_listener = new B2ContactListener();
+      window.physics.contact_listener.BeginContact = window.physics.begin_contact;
+      window.physics.contact_listener.EndContact = window.physics.end_contact;
+      window.physics.world.SetContactListener(window.physics.contact_listener);
       debugDraw = new B2DebugDraw();
       debugDraw.SetSprite(window.game.debug_canvas.getContext("2d"));
       debugDraw.SetDrawScale(30);
@@ -283,6 +312,7 @@
     walls: [],
     next_id: 1,
     stage: new Stage($('#gameCanvas')[0]),
+    last_state: "BUILD",
     last_selected_tool: "MOVE",
     init: function() {
       window.physics.init();
@@ -299,18 +329,24 @@
     },
     state_changed: function(state) {
       if (state === 'BUILD') {
-        return window.game.reset();
+        if (window.game.last_state !== "PAUSE") {
+          window.game.reset();
+        }
       } else if (state === 'PLAY') {
-        return window.game.play();
+        if (window.game.last_state !== "PAUSE") {
+          window.game.play();
+        }
       }
+      return window.game.last_state = state;
     },
     tool_changed: function(new_tool) {
       if ('deselect' in window.game.tools[window.game.last_selected_tool]) {
         window.game.tools[window.game.last_selected_tool].deselect();
       }
       if ('select' in window.game.tools[new_tool]) {
-        return window.game.tools[new_tool].select();
+        window.game.tools[new_tool].select();
       }
+      return window.game.last_selected_tool = new_tool;
     },
     create_entity: function(entity) {
       var bitmap, component, _i, _len, _ref;
@@ -328,6 +364,9 @@
       }
       if (!('bitmaps' in entity)) {
         entity.bitmaps = [];
+      }
+      if (!('touching' in entity)) {
+        entity.touching = {};
       }
       if ('image' in entity) {
         bitmap = new Bitmap("/img/" + entity.image);
@@ -405,6 +444,7 @@
       entity.y = position.y;
       entity.angle = entity.fixture.GetBody().GetAngle();
       delete entity.bitmaps;
+      delete entity.touching;
       delete entity.fixture;
       delete entity.init;
       return entity;
@@ -494,7 +534,17 @@
       return _results;
     },
     tick: function() {
+      var component, entity, _i, _j, _len, _len1, _ref, _ref1;
       window.game.tools[window.viewModel.tool()].update();
+      _ref = window.game.entities;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        _ref1 = entity.components;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          component = _ref1[_j];
+          window.game.components[component].update(entity);
+        }
+      }
       window.physics.update();
       window.game.update_positions();
       return window.game.stage.update();

@@ -3,15 +3,9 @@
 	"entities": [
 		{
 			"type": "box",
-			"x": 5,
+			"x": 10,
 			"y": 5,
 			"scale": 1
-		},
-		{
-			"type": "box",
-			"x": 5,
-			"y": 5,
-			"scale": 3
 		},
 		{
 			"type": "box",
