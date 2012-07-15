@@ -157,7 +157,7 @@ window.game =
 		if not ("seed" of window.game.settings)
 			window.game.settings.seed = Math.random()
 
-		Math.seed_random(window.game.settings.seed)
+		Math.seedrandom(window.game.settings.seed)
 
 		window.game.walls = state.walls
 		window.game.create_wall(wall) for wall in window.game.walls

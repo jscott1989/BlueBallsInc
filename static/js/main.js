@@ -505,7 +505,7 @@
       if (!("seed" in window.game.settings)) {
         window.game.settings.seed = Math.random();
       }
-      Math.seed_random(window.game.settings.seed);
+      Math.seedrandom(window.game.settings.seed);
       window.game.walls = state.walls;
       _ref2 = window.game.walls;
       _results = [];
