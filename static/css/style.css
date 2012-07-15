@@ -117,11 +117,11 @@ a {
   position: absolute;
   left: 0;
 }
-#game.state_PLAY #toolbox {
-  display: none;
-}
-#game.state_PLAY #score {
+#game.state_BUILD #toolbox {
   display: block !important;
+}
+#game.state_BUILD #score {
+  display: none;
 }
 #game #sidebar {
   right: 0px;
@@ -151,6 +151,7 @@ a {
   font-size: 20px;
 }
 #game #sidebar .inner #toolbox {
+  display: none;
   background: white;
   border: 2px solid black;
   padding: 0;
@@ -169,5 +170,4 @@ a {
 #game #sidebar .inner #score {
   font-size: 2em;
   text-align: center;
-  display: none;
 }
