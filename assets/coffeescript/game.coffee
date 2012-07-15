@@ -16,7 +16,7 @@ B2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 B2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
 B2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
 B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef
-
+count = 0
 
 # We will contain all game logic in this object
 window.game =
@@ -75,6 +75,7 @@ window.game =
 			if window.game.last_state != "PAUSE"
 				# Not returning from pause
 				window.game.play()
+
 		window.game.last_state = state
 
 	tool_changed: (new_tool) ->
@@ -86,9 +87,9 @@ window.game =
 		window.game.last_selected_tool = new_tool
 
 	create_entity: (entity) ->
-		entity = $.extend({}, window.game.entity_base, window.game.entity_types[entity.type], entity)
+		entity = $.extend(true, {}, window.game.entity_base, window.game.entity_types[entity.type], entity)
 		if "init" of entity
-			entity.init()
+			entity.init(entity)
 
 		window.game.components[component].init(entity) for component in entity.components
 
@@ -145,7 +146,7 @@ window.game =
 	clean_entity: (entity) ->
 		# Remove game specific items from an entity so it can be loaded in a clean state
 		# This returns a copy
-		entity = $.extend({}, entity)
+		entity = $.extend(true, {}, entity)
 
 		# Basic physical properties
 		entity.physics.density = entity.fixture.m_density
@@ -230,7 +231,6 @@ window.game =
 		for entity in window.game.entities
 			window.game.components[component].update(entity) for component in entity.components
 
-
 		window.physics.update()
 
 		window.game.update_positions()
@@ -238,22 +238,25 @@ window.game =
 		window.game.stage.update()
 
 	mouse_down: (e) ->
-		if e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height
-			window.game.mouse_down = true
-			if 'mouse_down' of window.game.tools[window.viewModel.tool()]
-				window.game.tools[window.viewModel.tool()].mouse_down(e)
+		if window.viewModel.state() == 'BUILD'
+			if e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height
+				window.game.mouse_down = true
+				if 'mouse_down' of window.game.tools[window.viewModel.tool()]
+					window.game.tools[window.viewModel.tool()].mouse_down(e)
 
 	mouse_up: (e) ->
-		window.game.mouse_down = false
-		if 'mouse_up' of window.game.tools[window.viewModel.tool()]
-			window.game.tools[window.viewModel.tool()].mouse_up(e)
+		if window.viewModel.state() == 'BUILD'
+			window.game.mouse_down = false
+			if 'mouse_up' of window.game.tools[window.viewModel.tool()]
+				window.game.tools[window.viewModel.tool()].mouse_up(e)
 
 	mouse_move: (e) ->
-		window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale
-		window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale
+		if window.viewModel.state() == 'BUILD'
+			window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale
+			window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale
 
-		if 'mouse_move' of window.game.tools[window.viewModel.tool()]
-			window.game.tools[window.viewModel.tool()].mouse_move(e)
+			if 'mouse_move' of window.game.tools[window.viewModel.tool()]
+				window.game.tools[window.viewModel.tool()].mouse_move(e)
 
 	get_entity_at_mouse: () ->
 		mousePVec = new B2Vec2(window.game.mouseX, window.game.mouseY)
@@ -295,6 +298,14 @@ window.game =
 		point.y = ynew + origin.y
 
 		return point
+
+	create_ball: (x, y) ->
+		entity =
+			"type": "ball"
+			"x": x
+			"y": y
+		window.game.create_entity(entity)
+
 
 $(document).mousedown(window.game.mouse_down)
 $(document).mouseup(window.game.mouse_up)

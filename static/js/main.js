@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, load_level;
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, load_level;
 
   $menus = $('#menus');
 
@@ -24,7 +24,7 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(true);
+    self.debug = ko.observable(false);
     self.level = ko.observable("level1");
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
@@ -289,6 +289,8 @@
 
   B2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
+  count = 0;
+
   window.game = {
     tools: {
       _: ""
@@ -350,9 +352,9 @@
     },
     create_entity: function(entity) {
       var bitmap, component, _i, _len, _ref;
-      entity = $.extend({}, window.game.entity_base, window.game.entity_types[entity.type], entity);
+      entity = $.extend(true, {}, window.game.entity_base, window.game.entity_types[entity.type], entity);
       if ("init" in entity) {
-        entity.init();
+        entity.init(entity);
       }
       _ref = entity.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -435,7 +437,7 @@
     },
     clean_entity: function(entity) {
       var position;
-      entity = $.extend({}, entity);
+      entity = $.extend(true, {}, entity);
       entity.physics.density = entity.fixture.m_density;
       entity.physics.friction = entity.fixture.m_friction;
       entity.physics.restitution = entity.fixture.m_restitution;
@@ -550,24 +552,30 @@
       return window.game.stage.update();
     },
     mouse_down: function(e) {
-      if (e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height) {
-        window.game.mouse_down = true;
-        if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
-          return window.game.tools[window.viewModel.tool()].mouse_down(e);
+      if (window.viewModel.state() === 'BUILD') {
+        if (e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height) {
+          window.game.mouse_down = true;
+          if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
+            return window.game.tools[window.viewModel.tool()].mouse_down(e);
+          }
         }
       }
     },
     mouse_up: function(e) {
-      window.game.mouse_down = false;
-      if ('mouse_up' in window.game.tools[window.viewModel.tool()]) {
-        return window.game.tools[window.viewModel.tool()].mouse_up(e);
+      if (window.viewModel.state() === 'BUILD') {
+        window.game.mouse_down = false;
+        if ('mouse_up' in window.game.tools[window.viewModel.tool()]) {
+          return window.game.tools[window.viewModel.tool()].mouse_up(e);
+        }
       }
     },
     mouse_move: function(e) {
-      window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale;
-      window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale;
-      if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
-        return window.game.tools[window.viewModel.tool()].mouse_move(e);
+      if (window.viewModel.state() === 'BUILD') {
+        window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale;
+        window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale;
+        if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
+          return window.game.tools[window.viewModel.tool()].mouse_move(e);
+        }
       }
     },
     get_entity_at_mouse: function() {
@@ -614,6 +622,15 @@
       point.x = xnew + origin.x;
       point.y = ynew + origin.y;
       return point;
+    },
+    create_ball: function(x, y) {
+      var entity;
+      entity = {
+        "type": "ball",
+        "x": x,
+        "y": y
+      };
+      return window.game.create_entity(entity);
     }
   };
 
@@ -726,7 +743,35 @@
   window.game.entity_types = {};
 
   window.game.entity_base = {
+    scale: 1,
     components: ["gluable"]
+  };
+
+  /* -------------------------------------------- 
+       Begin ball.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.ball = {
+    name: "Ball",
+    image: "ball.png",
+    width_scale: 1,
+    height_scale: 1,
+    scale_adjustment: 0.5,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "circle",
+        size: 1
+      }
+    },
+    init: function() {
+      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
+      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+    }
   };
 
   /* -------------------------------------------- 
@@ -736,6 +781,69 @@
 
 
   window.game.entity_types.box = {
+    name: "Box",
+    image: "box.png",
+    width_scale: 6,
+    height_scale: 6,
+    scale_adjustment: 0.2,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "rectangle",
+        size: {
+          width: 6,
+          height: 6
+        }
+      }
+    },
+    init: function() {
+      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
+      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin dropper.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.enter_dropper = {
+    name: "Ball Dropper",
+    image: "enter_dropper.png",
+    width_scale: 2,
+    height_scale: 2,
+    fixed: true,
+    scale_adjustment: 1,
+    scale: 0.5,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "rectangle",
+        size: {
+          width: 6,
+          height: 6
+        }
+      }
+    },
+    init: function(entity) {
+      entity.physics.shape.size.width = entity.scale_adjustment * entity.width_scale * entity.scale;
+      entity.physics.shape.size.height = entity.scale_adjustment * entity.height_scale * entity.scale;
+      return entity.components.push('enter_dropper');
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin box.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.exit_box = {
     name: "Box",
     image: "box.png",
     width_scale: 6,
@@ -856,6 +964,32 @@
       };
     },
     update: function(entity) {}
+  };
+
+  /* -------------------------------------------- 
+       Begin enter_dropper.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.components.enter_dropper = {
+    init: function(entity) {
+      entity.balls_created = 0;
+      entity.last_ball_created = 0;
+      entity.ball_creation_interval = 100;
+    },
+    update: function(entity) {
+      var position;
+      if (window.viewModel.state() === 'PLAY') {
+        entity.last_ball_created += 1;
+        if (entity.last_ball_created > entity.ball_creation_interval) {
+          entity.last_ball_created = 0;
+          entity.balls_created += 1;
+          position = entity.fixture.GetBody().GetPosition();
+          return window.game.create_ball(position.x, position.y + 0.1);
+        }
+      }
+    }
   };
 
   /* -------------------------------------------- 

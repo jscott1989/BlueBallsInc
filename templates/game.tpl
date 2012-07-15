@@ -1,4 +1,4 @@
-<div id="game" data-bind="attr: { class: 'tool_' + tool() }">
+<div id="game" data-bind="attr: { class: 'tool_' + tool() + ' state_' + state() }">
 	<div id="grid">
 		<div class="inner">
 			<div class="inner2">
@@ -19,7 +19,7 @@
 				<li data-bind="css: { active : tool() == 'CLEAN' }" data-tool="CLEAN">Clean</li>
 			</ul>
 
-			<input type="checkbox" name="debug" data-bind="checked: debug"> Debug
+			<label><input type="checkbox" name="debug" data-bind="checked: debug"> Debug</label>
 		</div>
 	</div>
 </div>

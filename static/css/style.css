@@ -117,6 +117,9 @@ a {
   position: absolute;
   left: 0;
 }
+#game.state_PLAY #toolbox {
+  display: none;
+}
 #game #sidebar {
   right: 0px;
   background: red;
