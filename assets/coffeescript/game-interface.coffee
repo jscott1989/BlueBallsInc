@@ -16,6 +16,11 @@ GameViewModel = ->
 	self.isPlaying = ko.computed ->
 		self.state() == 'PLAY'
 
+	self.allowed_tools = ko.observableArray()
+
+	self.balls_complete = ko.observable(0)
+	self.balls_needed = ko.observable(0)
+
 	return
 
 window.viewModel = new GameViewModel()
@@ -64,9 +69,9 @@ $('.confirm-restart-level').click ->
 
 	window.backwards_to($main_menu)
 
-$('#toolbox li').click ->
+$('#toolbox li').live 'click', () ->
 	window.viewModel.last_tool(window.viewModel.tool())
-	window.viewModel.tool($(this).data('tool'))
+	window.viewModel.tool($(this).attr('rel'))
 
 window.select_last_tool = () ->
 	# Select the last selected tool (the current one is finished with)

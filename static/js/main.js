@@ -35,6 +35,9 @@
     self.isPlaying = ko.computed(function() {
       return self.state() === 'PLAY';
     });
+    self.allowed_tools = ko.observableArray();
+    self.balls_complete = ko.observable(0);
+    self.balls_needed = ko.observable(0);
   };
 
   window.viewModel = new GameViewModel();
@@ -89,9 +92,9 @@
     return window.backwards_to($main_menu);
   });
 
-  $('#toolbox li').click(function() {
+  $('#toolbox li').live('click', function() {
     window.viewModel.last_tool(window.viewModel.tool());
-    return window.viewModel.tool($(this).data('tool'));
+    return window.viewModel.tool($(this).attr('rel'));
   });
 
   window.select_last_tool = function() {
@@ -413,7 +416,7 @@
       }
     },
     load_state: function(state, save_as_default) {
-      var entity, wall, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var entity, tool, wall, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       window.game.clear_entities();
       if (save_as_default) {
         window.game.default_state = state;
@@ -426,11 +429,17 @@
           window.game.create_entity(entity);
         }
       }
-      window.game.walls = state.walls;
-      _ref1 = window.game.walls;
-      _results = [];
+      window.viewModel.allowed_tools.removeAll();
+      _ref1 = state.settings.tools;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        wall = _ref1[_j];
+        tool = _ref1[_j];
+        window.viewModel.allowed_tools.push(tool);
+      }
+      window.game.walls = state.walls;
+      _ref2 = window.game.walls;
+      _results = [];
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        wall = _ref2[_k];
         _results.push(window.game.create_wall(wall));
       }
       return _results;
@@ -762,7 +771,7 @@
     physics: {
       density: 40,
       friction: 2,
-      restitution: 0.2,
+      restitution: 0.5,
       shape: {
         type: "circle",
         size: 1
@@ -845,10 +854,11 @@
 
   window.game.entity_types.exit_box = {
     name: "Box",
-    image: "box.png",
-    width_scale: 6,
-    height_scale: 6,
-    scale_adjustment: 0.2,
+    image: "exit_box.png",
+    width_scale: 2,
+    height_scale: 2,
+    scale_adjustment: 0.5,
+    fixed: true,
     physics: {
       density: 40,
       friction: 2,
@@ -975,18 +985,22 @@
   window.game.components.enter_dropper = {
     init: function(entity) {
       entity.balls_created = 0;
-      entity.last_ball_created = 0;
-      entity.ball_creation_interval = 100;
+      if (!("ball_creation_interval" in entity)) {
+        entity.ball_creation_interval = 400;
+      }
+      entity.last_ball_created = entity.ball_creation_interval - 50;
     },
     update: function(entity) {
       var position;
       if (window.viewModel.state() === 'PLAY') {
-        entity.last_ball_created += 1;
-        if (entity.last_ball_created > entity.ball_creation_interval) {
-          entity.last_ball_created = 0;
-          entity.balls_created += 1;
-          position = entity.fixture.GetBody().GetPosition();
-          return window.game.create_ball(position.x, position.y + 0.1);
+        if (entity.balls_created < entity.maximum_balls) {
+          entity.last_ball_created += 1;
+          if (entity.last_ball_created > entity.ball_creation_interval) {
+            entity.last_ball_created = 0;
+            entity.balls_created += 1;
+            position = entity.fixture.GetBody().GetPosition();
+            return window.game.create_ball(position.x, position.y + 0.1);
+          }
         }
       }
     }
@@ -1073,7 +1087,7 @@
     return image.src = filename;
   };
 
-  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/glue.png"];
+  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/exit_box.png", "img/glue.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     img = images[_i];

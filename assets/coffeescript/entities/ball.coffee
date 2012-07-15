@@ -10,7 +10,7 @@ window.game.entity_types.ball =
 	physics:
 		density: 40
 		friction: 2
-		restitution: 0.2
+		restitution: 0.5
 		shape:
 			type: "circle"
 			size: 1

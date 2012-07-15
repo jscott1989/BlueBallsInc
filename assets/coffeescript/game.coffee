@@ -140,6 +140,10 @@ window.game =
 
 		window.game.create_entity(entity) for entity in state.entities if state.entities
 
+		# Set tools
+		window.viewModel.allowed_tools.removeAll()
+		window.viewModel.allowed_tools.push(tool) for tool in state.settings.tools
+
 		window.game.walls = state.walls
 		window.game.create_wall(wall) for wall in window.game.walls
 
