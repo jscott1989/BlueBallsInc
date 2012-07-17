@@ -91,6 +91,7 @@
   });
 
   $('.start').click(function() {
+    $('canvas').css('opacity', '100');
     if (window.viewModel.state() === "BUILD") {
       return window.viewModel.state("PLAY");
     } else {

@@ -4,9 +4,6 @@ $ ->
 
 	$('#menus').hide()
 	$('#game').show()
+	$('canvas').css('opacity', '0')
 	window.game.load_state window.replay.state, true
-
-	setTimeout () ->
-		window.game.reset()
-		window.viewModel.state("PLAY")
-	, 100
+	window.viewModel.state("REPLAY")

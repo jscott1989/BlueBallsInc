@@ -69,6 +69,7 @@ $('.resume').click ->
 	return false
 
 $('.start').click ->
+	$('canvas').css('opacity', '100')
 	if window.viewModel.state() == "BUILD"
 		window.viewModel.state("PLAY")
 	else
