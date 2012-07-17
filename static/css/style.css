@@ -61,7 +61,7 @@ a {
 #menus .overlay-window .inner .inner2 .inner3 ul li:hover {
   background: red;
 }
-* {
+#game * {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -130,6 +130,11 @@ a {
   width: 200px;
   height: 600px;
   display: inline-block;
+}
+#game #sidebar #replay_name {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
 }
 #game #sidebar .inner {
   padding: 10px;

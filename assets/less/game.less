@@ -3,7 +3,7 @@
 @grid-width: 700px;
 @sidebar-width: @width - @grid-width;
 
-* {
+#game * {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -30,7 +30,6 @@
 			cursor: pointer;
 		}
 	}
-
 
 	#grid, #sidebar {
 		position: absolute;
@@ -87,6 +86,12 @@
 		width: @sidebar-width;
 		height: @height;
 		display: inline-block;
+
+		#replay_name {
+			text-align: center;
+			font-weight: bold;
+			margin-top: 10px;
+		}
 
 		.inner {
 			padding: 10px;

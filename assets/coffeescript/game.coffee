@@ -143,7 +143,7 @@ window.game =
 
 		if save_as_default
 			window.game.default_state = state
-			window.game.build_state = state
+			window.viewModel.build_state(state)
 
 		window.game.create_entity(entity) for entity in state.entities if state.entities
 
@@ -198,7 +198,7 @@ window.game =
 	play: () ->
 		# Start the simulation
 		window.viewModel.balls_complete(0)
-		window.game.build_state = window.game.get_state()
+		window.viewModel.build_state(window.game.get_state())
 
 	remove_entity: (entity, now) ->
 		if "bitmaps" of entity
@@ -214,7 +214,7 @@ window.game =
 
 	reset: () ->
 		# Reset the simulation into the "build" state
-		window.game.load_state(window.game.build_state)
+		window.game.load_state(window.viewModel.build_state())
 
 	reset_level: () ->
 		# Reset to the beginning of the level, reverting any changes to the build
@@ -258,7 +258,7 @@ window.game =
 		window.game.stage.update()
 
 		if window.viewModel.state() == "PLAY" and window.viewModel.balls_complete() >= window.viewModel.balls_needed()
-			# Level complete
+			# Level complete	
 			window.level_complete()
 
 	mouse_down: (e) ->

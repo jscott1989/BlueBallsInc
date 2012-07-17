@@ -8,10 +8,11 @@
 		</div>
 	</div><div id="sidebar">
 		<div class="inner">
+			<span id="replay_name" data-bind="text: replay_name, style: {display: replay_mode() ? 'block' : 'none'}"></span>
 			<br /><br />
 			<button class="start" data-bind="text: isPlaying() ? 'Reset' : 'Start'">Start</button>
 			<br /><br />
-			<button class="pause">Menu</button>
+			<button class="pause" data-bind="style: {display: replay_mode() ? 'none' : 'block'}">Menu</button>
 
 			<ul id="toolbox" data-bind="foreach: allowed_tools">
 				<li data-bind="css: { active: $parent.tool() == $data }, text: $data, attr: {rel: $data}"></li>

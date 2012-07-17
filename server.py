@@ -6,7 +6,9 @@ from sys import argv
 import os
 
 import bottle
-from bottle import get, view, static_file, route
+from bottle import get, post, view, static_file, route, redirect, abort, request
+from couchdbkit import Server
+import json
 
 bottle.debug(True)
 bottle.reload = True
@@ -14,11 +16,37 @@ bottle.TEMPLATE_PATH = ["./templates"]
 
 root_directory = os.path.dirname(os.path.realpath(__file__))
 
+db_host = os.environ.get('CLOUDANT_URL', "http://localhost:5984")
+db = Server(db_host).get_or_create_db("blueballs")
+
 @get('/')
 @view("index")
 def index():
 	# The main page
 	return {}
+
+@post('/replay/new')
+def post_replay():
+	# Save the replay to the database
+
+	try:
+		# We decode then encode to ensure there's nothing bad in it
+		replay = {"replay_flag": True, "name": request.POST['name'], "state": json.loads(request.POST['state'])}
+	except: # TODO: Exception type
+		abort(400, "Invalid state data")
+
+	db.save_doc(replay)
+	return redirect('/replay/%s' % replay['_id'])
+
+@get('/replay/:replay_id')
+@view("replay")
+def replay(replay_id):
+	if not db.doc_exist(replay_id):
+		abort(404, "Replay not found")
+	replay = db.get(replay_id)
+	if not replay.get('replay_flag'):
+		abort(404, "Replay not found")
+	return {"replay": json.dumps(replay)}
 
 @route('/css/<filepath:path>')
 def static_css(filepath):

@@ -37,6 +37,13 @@
       return self.state() === 'PLAY';
     });
     self.allowed_tools = ko.observableArray();
+    self.replay_mode = ko.observable(false);
+    self.replay_name = ko.observable(false);
+    self.build_state = ko.observable(null);
+    self.build_state_string = ko.computed(function() {
+      return JSON.stringify(self.build_state());
+    });
+    self.name = ko.observable();
     self.balls_complete = ko.observable(0);
     self.balls_needed = ko.observable(0);
   };
@@ -59,7 +66,11 @@
   };
 
   window.level_complete = function() {
-    window.forward_to($('#level-complete-menu'));
+    if (window.replay) {
+      window.forward_to($('#replay-complete-menu'));
+    } else {
+      window.forward_to($('#level-complete-menu'));
+    }
     $menus.fadeIn();
     window.viewModel.state("COMPLETE");
     return false;
@@ -83,7 +94,13 @@
     if (window.viewModel.state() === "BUILD") {
       return window.viewModel.state("PLAY");
     } else {
-      return window.viewModel.state("BUILD");
+      if (window.viewModel.replay_mode()) {
+        window.viewModel.state("BUILD");
+        window.game.load_state(window.replay.state);
+        return window.viewModel.state("PLAY");
+      } else {
+        return window.viewModel.state("BUILD");
+      }
     }
   });
 
@@ -98,6 +115,17 @@
     $menus.fadeOut();
     load_level(window.viewModel.level());
     return window.backwards_to($main_menu);
+  });
+
+  $('.watch-replay').click(function() {
+    $('#replay-form').submit();
+    return false;
+  });
+
+  $('.watch-replay-again').click(function() {
+    $menus.fadeOut();
+    window.game.load_state(window.replay.state);
+    return window.viewModel.state("PLAY");
   });
 
   $('#toolbox li').live('click', function() {
@@ -485,7 +513,7 @@
       window.game.clear_entities();
       if (save_as_default) {
         window.game.default_state = state;
-        window.game.build_state = state;
+        window.viewModel.build_state(state);
       }
       if (state.entities) {
         _ref = state.entities;
@@ -551,7 +579,7 @@
     },
     play: function() {
       window.viewModel.balls_complete(0);
-      return window.game.build_state = window.game.get_state();
+      return window.viewModel.build_state(window.game.get_state());
     },
     remove_entity: function(entity, now) {
       var bitmap, _i, _len, _ref;
@@ -575,7 +603,7 @@
       return window.game.entityIDs = [];
     },
     reset: function() {
-      return window.game.load_state(window.game.build_state);
+      return window.game.load_state(window.viewModel.build_state());
     },
     reset_level: function() {
       return window.game.load_state(window.game.default_state);
@@ -1191,7 +1219,7 @@
     return image.src = filename;
   };
 
-  images = ["img/ball.png", "img/box.png", "img/dry-glue.png", "img/enter_dropper.png", "img/exit_box.png", "img/glue.png", "img/out.png", "img/in.png", "img/xline.png", "img/yline.png"];
+  images = ["/img/ball.png", "/img/box.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     img = images[_i];

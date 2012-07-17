@@ -39,6 +39,10 @@
 	<script type='text/javascript' src='/js/easeljs.js'></script>
 	<script type="text/javascript" src="/js/seedrandom.js"></script>
 	<script type="text/javascript" src="/js/main.js"></script>
+	<script type="text/javascript" src="/js/replay.js"></script>
+	<script type="text/javascript">
+		window.replay = {{!replay}};
+	</script>
 	<script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-13066747-1']);

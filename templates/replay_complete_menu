@@ -1,11 +1,10 @@
-<div id="level-complete-menu" class="overlay-window">
+<div id="replay-complete-menu" class="overlay-window">
 	<div class="inner">
 		<div class="inner2">
 			<div class="inner3">
 				<h1>Level Complete!</h1>
 				<ul>
-					<li data-menu="#watch-replay-menu">Watch replay</li>
-					<li class="confirm-restart-level">Restart level</li>
+					<li class="watch-replay-again">Watch again</li>
 					<li data-menu="#confirm-exit-menu">Exit</li>
 				</ul>
 			</div>

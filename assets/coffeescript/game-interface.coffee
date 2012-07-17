@@ -17,6 +17,15 @@ GameViewModel = ->
 		self.state() == 'PLAY'
 
 	self.allowed_tools = ko.observableArray()
+	
+	self.replay_mode = ko.observable(false)
+	self.replay_name = ko.observable(false)
+	self.build_state = ko.observable(null) # This is the content of the
+
+	self.build_state_string = ko.computed ->
+		JSON.stringify self.build_state()
+
+	self.name = ko.observable() # The name attached to the current replay
 
 	self.balls_complete = ko.observable(0)
 	self.balls_needed = ko.observable(0)
@@ -39,7 +48,10 @@ window.start_game = () ->
 	return
 
 window.level_complete = () ->
-	window.forward_to($('#level-complete-menu'))
+	if window.replay
+		window.forward_to($('#replay-complete-menu'))
+	else
+		window.forward_to($('#level-complete-menu'))
 	$menus.fadeIn()
 	window.viewModel.state("COMPLETE")
 	return false
@@ -60,7 +72,12 @@ $('.start').click ->
 	if window.viewModel.state() == "BUILD"
 		window.viewModel.state("PLAY")
 	else
-		window.viewModel.state("BUILD")
+		if window.viewModel.replay_mode()
+			window.viewModel.state("BUILD")
+			window.game.load_state(window.replay.state)
+			window.viewModel.state("PLAY")
+		else
+			window.viewModel.state("BUILD")
 
 $('.confirm-exit-game').click ->
 	window.viewModel.state("BUILD")
@@ -74,6 +91,15 @@ $('.confirm-restart-level').click ->
 	load_level(window.viewModel.level())
 
 	window.backwards_to($main_menu)
+
+$('.watch-replay').click ->
+	$('#replay-form').submit()
+	false
+
+$('.watch-replay-again').click ->
+	$menus.fadeOut()
+	window.game.load_state(window.replay.state)
+	window.viewModel.state("PLAY")
 
 $('#toolbox li').live 'click', () ->
 	window.viewModel.last_tool(window.viewModel.tool())
