@@ -4,8 +4,9 @@ $ ->
 
 	$('#menus').hide()
 	$('#game').show()
-	window.game.load_state(window.replay.state)
-	window.viewModel.state("PLAY")
-	window.viewModel.state("BUILD")
-	window.game.load_state(window.replay.state)
-	window.viewModel.state("PLAY")
+	window.game.load_state window.replay.state, true
+
+	setTimeout () ->
+		window.game.reset()
+		window.viewModel.state("PLAY")
+	, 100
