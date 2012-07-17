@@ -6,3 +6,6 @@ $ ->
 	$('#game').show()
 	window.game.load_state(window.replay.state)
 	window.viewModel.state("PLAY")
+	window.viewModel.state("BUILD")
+	window.game.load_state(window.replay.state)
+	window.viewModel.state("PLAY")
