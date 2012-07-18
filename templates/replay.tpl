@@ -27,7 +27,7 @@
 		</div>
 	</div>
 
-	<form id="replay-form" action="/replay/new" method="POST" style="display: none">
+	<form id="replay-form" action="/replay/new" method="POST" style="display: none" target="_BLANK">
 		<input type="text" name="name" data-bind="value: name">
 		<input type="text" name="state" data-bind="value: build_state_string()">
 		<input type="submit">

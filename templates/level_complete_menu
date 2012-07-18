@@ -4,6 +4,7 @@
 			<div class="inner3">
 				<h1>Level Complete!</h1>
 				<ul>
+					<li class="next-level">Next Level</li>
 					<li data-menu="#watch-replay-menu">Watch replay</li>
 					<li class="confirm-restart-level">Restart level</li>
 					<li data-menu="#confirm-exit-menu">Exit</li>

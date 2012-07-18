@@ -7,7 +7,7 @@ $main_menu = $('#main-menu')
 GameViewModel = ->
 	self = this
 	self.debug = ko.observable(false)
-	self.level = ko.observable("level1")
+	self.level = ko.observable(1)
 	self.tool = ko.observable("MOVE")
 	self.last_tool = ko.observable("MOVE")
 	self.state = ko.observable("BUILD")
@@ -44,7 +44,7 @@ load_level = (level_name) ->
 
 window.start_game = () ->
 	window.game.start_game()
-	load_level(window.viewModel.level())
+	load_level("level" + window.viewModel.level())
 	return
 
 window.level_complete = () ->
@@ -95,12 +95,18 @@ $('.confirm-restart-level').click ->
 
 $('.watch-replay').click ->
 	$('#replay-form').submit()
+	window.backwards_to($('#level-complete-menu'))
 	false
 
 $('.watch-replay-again').click ->
 	$menus.fadeOut()
 	window.game.load_state(window.replay.state)
 	window.viewModel.state("PLAY")
+
+$('.next-level').click ->
+	window.viewModel.level(window.viewModel.level() + 1)
+	load_level("level" + window.viewModel.level())
+	$menus.fadeOut()
 
 $('#toolbox li').live 'click', () ->
 	window.viewModel.last_tool(window.viewModel.tool())

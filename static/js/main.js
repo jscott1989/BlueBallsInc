@@ -26,7 +26,7 @@
     var self;
     self = this;
     self.debug = ko.observable(false);
-    self.level = ko.observable("level1");
+    self.level = ko.observable(1);
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
     self.state = ko.observable("BUILD");
@@ -62,7 +62,7 @@
 
   window.start_game = function() {
     window.game.start_game();
-    load_level(window.viewModel.level());
+    load_level("level" + window.viewModel.level());
   };
 
   window.level_complete = function() {
@@ -120,6 +120,7 @@
 
   $('.watch-replay').click(function() {
     $('#replay-form').submit();
+    window.backwards_to($('#level-complete-menu'));
     return false;
   });
 
@@ -127,6 +128,12 @@
     $menus.fadeOut();
     window.game.load_state(window.replay.state);
     return window.viewModel.state("PLAY");
+  });
+
+  $('.next-level').click(function() {
+    window.viewModel.level(window.viewModel.level() + 1);
+    load_level("level" + window.viewModel.level());
+    return $menus.fadeOut();
   });
 
   $('#toolbox li').live('click', function() {

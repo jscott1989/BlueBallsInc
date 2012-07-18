@@ -131,6 +131,9 @@ a {
   height: 600px;
   display: inline-block;
 }
+#game #sidebar #level {
+  text-align: center;
+}
 #game #sidebar #replay_name {
   text-align: center;
   font-weight: bold;
