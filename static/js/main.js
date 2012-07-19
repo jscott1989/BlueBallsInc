@@ -945,6 +945,26 @@
   };
 
   /* -------------------------------------------- 
+       Begin magnet.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.magnet = {
+    name: "Magnet",
+    image: "magnet.png",
+    scale_adjustment: 0.2,
+    physics: {
+      density: 90,
+      friction: 2,
+      restitution: 0,
+      shape: {
+        type: "rectangle"
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
        Begin plank.coffee 
   --------------------------------------------
   */
@@ -1192,6 +1212,17 @@
   };
 
   /* -------------------------------------------- 
+       Begin magnetized.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.components.magnetized = {
+    init: function(entity) {},
+    update: function(entity) {}
+  };
+
+  /* -------------------------------------------- 
        Begin menu.coffee 
   --------------------------------------------
   */
@@ -1272,7 +1303,7 @@
     return image.src = filename;
   };
 
-  images = ["/img/ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
+  images = ["/img/ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/magnet.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     img = images[_i];

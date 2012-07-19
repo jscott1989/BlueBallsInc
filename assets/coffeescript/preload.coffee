@@ -7,6 +7,7 @@ images = [
 	"/img/wheel.png",
 	"/img/plank.png",
 	"/img/box.png",
+	"/img/magnet.png",
 	"/img/dry-glue.png",
 	"/img/enter_dropper.png",
 	"/img/exit_box.png",
