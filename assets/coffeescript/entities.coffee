@@ -6,7 +6,9 @@ window.game.entity_base =
 	tags: []
 
 #@codekit-append "entities/ball.coffee";
+#@codekit-append "entities/wheel.coffee";
 #@codekit-append "entities/box.coffee";
+#@codekit-append "entities/plank.coffee";
 #@codekit-append "entities/walls.coffee";
 #@codekit-append "entities/enter/dropper.coffee";
 #@codekit-append "entities/exit/exit.coffee";

@@ -109,10 +109,12 @@ window.physics =
 			fixDef.restitution = entity.physics.restitution				# Restitution
 
 		if entity.physics.shape.type == "circle"
+			if not ('size' of entity.physics.shape)
+				entity.physics.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
 			fixDef.shape = new B2CircleShape(entity.physics.shape.size)		# Shape
+
 		else if entity.physics.shape.type == "rectangle"
 			fixDef.shape = new B2PolygonShape()
-
 			if not ('size' of entity.physics.shape)
 				entity.physics.shape.size =
 					width: (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)

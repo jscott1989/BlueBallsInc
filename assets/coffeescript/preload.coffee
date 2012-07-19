@@ -4,6 +4,8 @@ preload = (filename) ->
 
 images = [
 	"/img/ball.png",
+	"/img/wheel.png",
+	"/img/plank.png",
 	"/img/box.png",
 	"/img/dry-glue.png",
 	"/img/enter_dropper.png",

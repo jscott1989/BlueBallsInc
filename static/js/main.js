@@ -296,6 +296,9 @@
         fixDef.restitution = entity.physics.restitution;
       }
       if (entity.physics.shape.type === "circle") {
+        if (!('size' in entity.physics.shape)) {
+          entity.physics.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2);
+        }
         fixDef.shape = new B2CircleShape(entity.physics.shape.size);
       } else if (entity.physics.shape.type === "rectangle") {
         fixDef.shape = new B2PolygonShape();
@@ -900,6 +903,28 @@
   };
 
   /* -------------------------------------------- 
+       Begin wheel.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.wheel = {
+    name: "Wheel",
+    image: "wheel.png",
+    width_scale: 1,
+    height_scale: 1,
+    scale_adjustment: 0.5,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "circle"
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
        Begin box.coffee 
   --------------------------------------------
   */
@@ -913,6 +938,26 @@
       density: 40,
       friction: 2,
       restitution: 0.2,
+      shape: {
+        type: "rectangle"
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin plank.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.plank = {
+    name: "Plank",
+    image: "plank.png",
+    scale_adjustment: 0.5,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.1,
       shape: {
         type: "rectangle"
       }
@@ -1227,7 +1272,7 @@
     return image.src = filename;
   };
 
-  images = ["/img/ball.png", "/img/box.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
+  images = ["/img/ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     img = images[_i];
