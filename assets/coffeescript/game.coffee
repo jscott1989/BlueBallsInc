@@ -25,6 +25,7 @@ window.game =
 
 	bitmaps:
 		glue: new Bitmap("/img/glue.png")
+		megnet_beam: new Bitmap("/img/magnet-beam.png")
 
 	FPS: 60
 	scale: 30
@@ -199,6 +200,9 @@ window.game =
 		# Start the simulation
 		window.viewModel.balls_complete(0)
 		window.viewModel.build_state(window.game.get_state())
+		# for entity in window.game.entities
+		# 	window.game.components[component].play(entity) for component in entity.components
+
 
 	remove_entity: (entity, now) ->
 		if "bitmaps" of entity
@@ -215,6 +219,8 @@ window.game =
 	reset: () ->
 		# Reset the simulation into the "build" state
 		window.game.load_state(window.viewModel.build_state())
+		# for entity in window.game.entities
+		# 	window.game.components[component].reset(entity) for component in entity.components
 
 	reset_level: () ->
 		# Reset to the beginning of the level, reverting any changes to the build

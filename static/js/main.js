@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, images, img, load_level, preload, _i, _len,
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, i, images, load_level, preload, _i, _len,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
@@ -394,7 +394,8 @@
       _: ""
     },
     bitmaps: {
-      glue: new Bitmap("/img/glue.png")
+      glue: new Bitmap("/img/glue.png"),
+      megnet_beam: new Bitmap("/img/magnet-beam.png")
     },
     FPS: 60,
     scale: 30,
@@ -1219,7 +1220,15 @@
 
   window.game.components.magnetized = {
     init: function(entity) {},
-    update: function(entity) {}
+    update: function(entity) {},
+    play: function(entity) {
+      var bitmap;
+      bitmap = window.game.bitmaps.magnet_beam.clone();
+      entity.bitmaps.push(bitmap);
+      entity.magnet_beam = bitmap;
+      return window.game.stage.addChild(bitmap);
+    },
+    reset: function(entity) {}
   };
 
   /* -------------------------------------------- 
@@ -1300,14 +1309,26 @@
   preload = function(filename) {
     var image;
     image = new Image();
-    return image.src = filename;
+    image.src = filename;
+    return image.onload = function() {
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = images.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (images[i] === filename) {
+          images.splice(i, 1);
+          if (images.length === 0) {
+            window.forward_to($('#main-menu'));
+          }
+          return;
+        }
+      }
+    };
   };
 
-  images = ["/img/ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/magnet.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
+  images = ["/img/ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
-    img = images[_i];
-    preload(img);
+    i = images[_i];
+    preload(i);
   }
 
 }).call(this);

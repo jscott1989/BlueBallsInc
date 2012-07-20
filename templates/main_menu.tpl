@@ -1,4 +1,4 @@
-<div id="main-menu" class="overlay-window active">
+<div id="main-menu" class="overlay-window">
 	<div class="inner">
 		<div class="inner2">
 			<div class="inner3">

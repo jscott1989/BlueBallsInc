@@ -1,6 +1,16 @@
 preload = (filename) ->
 	image = new Image()
 	image.src = filename
+	image.onload = () ->
+		for i in [0...images.length]
+			if images[i] == filename
+				images.splice i, 1
+
+				if images.length == 0
+					window.forward_to($('#main-menu'))
+				return
+
+
 
 images = [
 	"/img/ball.png",
@@ -8,6 +18,7 @@ images = [
 	"/img/plank.png",
 	"/img/box.png",
 	"/img/magnet.png",
+	"/img/magnet-beam.png",
 	"/img/dry-glue.png",
 	"/img/enter_dropper.png",
 	"/img/exit_box.png",
@@ -18,4 +29,4 @@ images = [
 	"/img/yline.png"
 ]
 
-preload(img) for img in images
+preload(i) for i in images

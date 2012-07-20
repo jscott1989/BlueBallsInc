@@ -13,6 +13,7 @@
 		%include game
 
 		<div id="menus">
+			%include loading_menu
 			%include main_menu
 			%include challenge_menu
 			%include custom_menu
