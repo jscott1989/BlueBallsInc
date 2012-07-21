@@ -962,7 +962,7 @@
   window.game.entity_types.box = {
     name: "Box",
     image: "box.png",
-    scale_adjustment: 0.2,
+    scale_adjustment: 1,
     physics: {
       density: 40,
       friction: 2,
