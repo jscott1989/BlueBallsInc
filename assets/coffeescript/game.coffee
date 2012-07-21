@@ -311,6 +311,9 @@ window.game =
 		if selected_body
 			return window.game.entityIDs[selected_body.userData]
 
+	get_entity_by_fixture: (fixture) ->
+		return window.game.entityIDs[fixture.GetBody().userData]
+
 	get_offset_to_mouse: (entity) ->
 		body = entity.fixture.GetBody()
 		position = body.GetPosition()

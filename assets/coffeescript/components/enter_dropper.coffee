@@ -33,8 +33,6 @@ window.game.components.enter_dropper =
 						"type": entity.ball_order[entity.ball_order_pointer++]
 						"x": x
 						"y": y
-						"init": (entity) ->
-							entity.tags.push("ball")
 					window.game.create_entity(ball_entity)
 
 					if entity.ball_order_pointer >= entity.ball_order.length

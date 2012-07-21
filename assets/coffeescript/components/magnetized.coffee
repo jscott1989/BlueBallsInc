@@ -23,6 +23,22 @@ window.game.components.magnetized =
 	update: (entity) ->
 		# Find objects to pull
 
+		startOfRay = entity.fixture.GetBody().GetPosition();
+		endOfRay = new B2Vec2(startOfRay.x + 20, startOfRay.y);
+
+		endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle())
+
+		# console.log startOfRay, endOfRay
+
+		callback = (fixture, normal, fraction) ->
+			e = window.game.get_entity_by_fixture(fixture)
+
+			if 'magnetic' in e.tags
+				console.log e.name
+			return 1
+
+		window.physics.world.RayCast(callback, startOfRay, endOfRay);
+
 	play: (entity) ->
 
 	reset: (entity) ->

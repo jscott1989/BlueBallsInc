@@ -729,6 +729,9 @@
         return window.game.entityIDs[selected_body.userData];
       }
     },
+    get_entity_by_fixture: function(fixture) {
+      return window.game.entityIDs[fixture.GetBody().userData];
+    },
     get_offset_to_mouse: function(entity) {
       var body, mouse_position, position, rotated_position;
       body = entity.fixture.GetBody();
@@ -909,7 +912,6 @@
   window.game.entity_types['metal-ball'] = {
     name: "Metal Ball",
     image: "metal-ball.png",
-    magnetic: true,
     width_scale: 1,
     height_scale: 1,
     scale_adjustment: 0.5,
@@ -923,6 +925,7 @@
       }
     },
     init: function(entity) {
+      entity.tags.push("magnetic");
       this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
       return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
     }
@@ -1168,10 +1171,7 @@
             ball_entity = {
               "type": entity.ball_order[entity.ball_order_pointer++],
               "x": x,
-              "y": y,
-              "init": function(entity) {
-                return entity.tags.push("ball");
-              }
+              "y": y
             };
             window.game.create_entity(ball_entity);
             if (entity.ball_order_pointer >= entity.ball_order.length) {
@@ -1220,7 +1220,21 @@
     clean: function(entity) {
       return delete entity.magnet_beam;
     },
-    update: function(entity) {},
+    update: function(entity) {
+      var callback, endOfRay, startOfRay;
+      startOfRay = entity.fixture.GetBody().GetPosition();
+      endOfRay = new B2Vec2(startOfRay.x + 20, startOfRay.y);
+      endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle());
+      callback = function(fixture, normal, fraction) {
+        var e;
+        e = window.game.get_entity_by_fixture(fixture);
+        if (__indexOf.call(e.tags, 'magnetic') >= 0) {
+          console.log(e.name);
+        }
+        return 1;
+      };
+      return window.physics.world.RayCast(callback, startOfRay, endOfRay);
+    },
     play: function(entity) {},
     reset: function(entity) {}
   };
