@@ -2,7 +2,7 @@ window.game.entity_types.magnet =
 	name: "Magnet"
 	image: "magnet.png"
 
-	scale_adjustment: 0.2
+	scale_adjustment: 1
 
 	physics:
 		density: 90
