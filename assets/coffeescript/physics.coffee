@@ -59,6 +59,19 @@ window.physics =
 		delete entityA.touching[entityB.id]
 		delete entityB.touching[entityA.id]
 
+	pre_solve: (contact) ->
+		bodyA = contact.GetFixtureA().GetBody()
+		bodyB = contact.GetFixtureB().GetBody()
+
+		entityA = window.game.entityIDs[bodyA.userData]
+		entityB = window.game.entityIDs[bodyB.userData]
+
+		for component in entityA.components
+			if "pre_solve" of window.game.components[component]
+				window.game.components[component].pre_solve(entityA, entityB, contact)
+		for component in entityB.components
+			if "pre_solve" of window.game.components[component]
+				window.game.components[component].pre_solve(entityB, entityA, contact)
 
 	init: () ->
 		# Initialise the physics engine
@@ -67,6 +80,7 @@ window.physics =
 
 		window.physics.contact_listener.BeginContact = window.physics.begin_contact
 		window.physics.contact_listener.EndContact = window.physics.end_contact
+		window.physics.contact_listener.PreSolve = window.physics.pre_solve
 
 		window.physics.world.SetContactListener(window.physics.contact_listener);
 

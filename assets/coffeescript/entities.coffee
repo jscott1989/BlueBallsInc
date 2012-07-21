@@ -10,6 +10,7 @@ window.game.entity_base =
 #@codekit-append "entities/metal-ball.coffee";
 #@codekit-append "entities/wheel.coffee";
 #@codekit-append "entities/box.coffee";
+#@codekit-append "entities/conveyor-belt.coffee";
 #@codekit-append "entities/magnet.coffee";
 #@codekit-append "entities/plank.coffee";
 #@codekit-append "entities/walls.coffee";

@@ -18,6 +18,7 @@ images = [
 	"/img/wheel.png",
 	"/img/plank.png",
 	"/img/box.png",
+	"/img/conveyor-belt.png",
 	"/img/magnet.png",
 	"/img/magnet-beam.png",
 	"/img/dry-glue.png",

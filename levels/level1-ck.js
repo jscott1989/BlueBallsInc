@@ -17,6 +17,12 @@
             "y": 1
         },
         {
+            "type": "conveyor-belt",
+            "x": 7,
+            "y": 9,
+            "fixed": true
+        },
+        {
             "type": "enter_dropper",
             "image": "out.png",
             "x": 5.5,

@@ -3,3 +3,4 @@ window.game.components = {}
 #@codekit-append "components/enter_dropper.coffee";
 #@codekit-append "components/exit.coffee";
 #@codekit-append "components/magnetized.coffee";
+#@codekit-append "components/conveyor-belt.coffee";

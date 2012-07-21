@@ -248,11 +248,37 @@
       delete entityA.touching[entityB.id];
       return delete entityB.touching[entityA.id];
     },
+    pre_solve: function(contact) {
+      var bodyA, bodyB, component, entityA, entityB, _i, _j, _len, _len1, _ref, _ref1, _results;
+      bodyA = contact.GetFixtureA().GetBody();
+      bodyB = contact.GetFixtureB().GetBody();
+      entityA = window.game.entityIDs[bodyA.userData];
+      entityB = window.game.entityIDs[bodyB.userData];
+      _ref = entityA.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        if ("pre_solve" in window.game.components[component]) {
+          window.game.components[component].pre_solve(entityA, entityB, contact);
+        }
+      }
+      _ref1 = entityB.components;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        component = _ref1[_j];
+        if ("pre_solve" in window.game.components[component]) {
+          _results.push(window.game.components[component].pre_solve(entityB, entityA, contact));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    },
     init: function() {
       var debugDraw;
       window.physics.contact_listener = new B2ContactListener();
       window.physics.contact_listener.BeginContact = window.physics.begin_contact;
       window.physics.contact_listener.EndContact = window.physics.end_contact;
+      window.physics.contact_listener.PreSolve = window.physics.pre_solve;
       window.physics.world.SetContactListener(window.physics.contact_listener);
       debugDraw = new B2DebugDraw();
       debugDraw.SetSprite(window.game.debug_canvas.getContext("2d"));
@@ -974,6 +1000,29 @@
   };
 
   /* -------------------------------------------- 
+       Begin conveyor-belt.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types["conveyor-belt"] = {
+    name: "Conveyor Belt",
+    image: "conveyor-belt.png",
+    scale_adjustment: 1,
+    physics: {
+      density: 40,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "rectangle"
+      }
+    },
+    init: function(entity) {
+      return entity.components.push('conveyor-belt');
+    }
+  };
+
+  /* -------------------------------------------- 
        Begin magnet.coffee 
   --------------------------------------------
   */
@@ -1252,6 +1301,46 @@
   };
 
   /* -------------------------------------------- 
+       Begin conveyor-belt.coffee 
+  --------------------------------------------
+  */
+
+
+  /*global Box2D:false, $:false, Math:false
+  */
+
+
+  window.game.components["conveyor-belt"] = {
+    init: function(entity) {
+      return entity.moving = [];
+    },
+    update: function(entity) {
+      var body, e, _i, _len, _ref, _results;
+      _ref = entity.moving;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        e = _ref[_i];
+        body = e.fixture.GetBody();
+        console.log("MOVE");
+        _results.push(body.ApplyImpulse(new B2Vec2(1000, 0), body.GetWorldCenter()));
+      }
+      return _results;
+    },
+    begin_contact: function(entity, other_entity) {
+      return entity.moving.push(other_entity);
+    },
+    end_contact: function(entity, other_entity) {
+      var i, _i, _ref;
+      for (i = _i = 0, _ref = entity.moving.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (entity.moving[i].id === other_entity.id) {
+          entity.moving.splice(i, 1);
+          return;
+        }
+      }
+    }
+  };
+
+  /* -------------------------------------------- 
        Begin menu.coffee 
   --------------------------------------------
   */
@@ -1344,7 +1433,7 @@
     };
   };
 
-  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
+  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     i = images[_i];
