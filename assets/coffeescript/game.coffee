@@ -334,15 +334,6 @@ window.game =
 
 		return point
 
-	create_ball: (x, y) ->
-		entity =
-			"type": "ball"
-			"x": x
-			"y": y
-			"init": (entity) ->
-				entity.tags.push("ball")
-		window.game.create_entity(entity)
-
 
 $(document).mousedown(window.game.mouse_down)
 $(document).mouseup(window.game.mouse_up)

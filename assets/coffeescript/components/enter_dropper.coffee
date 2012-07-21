@@ -5,6 +5,11 @@ window.game.components.enter_dropper =
 	init: (entity) ->
 		entity.balls_created = 0
 
+		if not ("ball_order" of entity)
+			entity.ball_order = ['ball', 'metal-ball']
+
+		entity.ball_order_pointer = 0
+
 		if not ("ball_creation_interval" of entity)
 			entity.ball_creation_interval = 120
 
@@ -20,4 +25,17 @@ window.game.components.enter_dropper =
 					entity.last_ball_created = 0
 					entity.balls_created += 1
 					position = entity.fixture.GetBody().GetPosition()
-					window.game.create_ball(position.x + (Math.random() * 0.2) - 0.1, position.y + 1)
+
+					x = position.x + (Math.random() * 0.2) - 0.1
+					y = position.y + 1
+
+					ball_entity =
+						"type": entity.ball_order[entity.ball_order_pointer++]
+						"x": x
+						"y": y
+						"init": (entity) ->
+							entity.tags.push("ball")
+					window.game.create_entity(ball_entity)
+
+					if entity.ball_order_pointer >= entity.ball_order.length
+						entity.ball_order_pointer = 0

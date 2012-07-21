@@ -2,15 +2,17 @@ window.game.entity_types['metal-ball'] =
 	name: "Metal Ball"
 	image: "metal-ball.png"
 
+	magnetic: true
+	
 	width_scale: 1
 	height_scale: 1
 
 	scale_adjustment: 0.5
 
 	physics:
-		density: 40
+		density: 70
 		friction: 2
-		restitution: 0.4
+		restitution: 0.2
 		shape:
 			type: "circle"
 			size: 1

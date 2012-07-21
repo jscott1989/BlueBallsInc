@@ -754,18 +754,6 @@
       point.x = xnew + origin.x;
       point.y = ynew + origin.y;
       return point;
-    },
-    create_ball: function(x, y) {
-      var entity;
-      entity = {
-        "type": "ball",
-        "x": x,
-        "y": y,
-        "init": function(entity) {
-          return entity.tags.push("ball");
-        }
-      };
-      return window.game.create_entity(entity);
     }
   };
 
@@ -907,6 +895,34 @@
     },
     init: function(entity) {
       entity.tags.push("ball");
+      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
+      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+    }
+  };
+
+  /* -------------------------------------------- 
+       Begin metal-ball.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types['metal-ball'] = {
+    name: "Metal Ball",
+    image: "metal-ball.png",
+    magnetic: true,
+    width_scale: 1,
+    height_scale: 1,
+    scale_adjustment: 0.5,
+    physics: {
+      density: 70,
+      friction: 2,
+      restitution: 0.2,
+      shape: {
+        type: "circle",
+        size: 1
+      }
+    },
+    init: function(entity) {
       this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
       return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
     }
@@ -1129,13 +1145,17 @@
   window.game.components.enter_dropper = {
     init: function(entity) {
       entity.balls_created = 0;
+      if (!("ball_order" in entity)) {
+        entity.ball_order = ['ball', 'metal-ball'];
+      }
+      entity.ball_order_pointer = 0;
       if (!("ball_creation_interval" in entity)) {
         entity.ball_creation_interval = 120;
       }
       entity.last_ball_created = entity.ball_creation_interval - 50;
     },
     update: function(entity) {
-      var position;
+      var ball_entity, position, x, y;
       if (window.viewModel.state() === 'PLAY') {
         if (entity.balls_created < entity.maximum_balls) {
           entity.last_ball_created += 1;
@@ -1143,7 +1163,20 @@
             entity.last_ball_created = 0;
             entity.balls_created += 1;
             position = entity.fixture.GetBody().GetPosition();
-            return window.game.create_ball(position.x + (Math.random() * 0.2) - 0.1, position.y + 1);
+            x = position.x + (Math.random() * 0.2) - 0.1;
+            y = position.y + 1;
+            ball_entity = {
+              "type": entity.ball_order[entity.ball_order_pointer++],
+              "x": x,
+              "y": y,
+              "init": function(entity) {
+                return entity.tags.push("ball");
+              }
+            };
+            window.game.create_entity(ball_entity);
+            if (entity.ball_order_pointer >= entity.ball_order.length) {
+              return entity.ball_order_pointer = 0;
+            }
           }
         }
       }
@@ -1285,7 +1318,7 @@
     };
   };
 
-  images = ["/img/ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
+  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     i = images[_i];
