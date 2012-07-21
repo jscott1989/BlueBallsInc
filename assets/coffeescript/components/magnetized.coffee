@@ -28,16 +28,26 @@ window.game.components.magnetized =
 
 		endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle())
 
-		# console.log startOfRay, endOfRay
+		hit_entities = {}
 
 		callback = (fixture, normal, fraction) ->
 			e = window.game.get_entity_by_fixture(fixture)
 
 			if 'magnetic' in e.tags
-				console.log e.name
+				if not (e.id of hit_entities)
+					hit_entities[e.id] = e
 			return 1
 
 		window.physics.world.RayCast(callback, startOfRay, endOfRay);
+
+		for e of hit_entities
+			body = hit_entities[e].fixture.GetBody()
+			e_position = body.GetPosition()
+
+			xspeed = startOfRay.x - e_position.x
+			yspeed = startOfRay.y - e_position.y
+
+			body.ApplyForce(new B2Vec2(xspeed * 2000, yspeed * 2000), body.GetWorldCenter())
 
 	play: (entity) ->
 

@@ -1221,19 +1221,31 @@
       return delete entity.magnet_beam;
     },
     update: function(entity) {
-      var callback, endOfRay, startOfRay;
+      var body, callback, e, e_position, endOfRay, hit_entities, startOfRay, xspeed, yspeed, _results;
       startOfRay = entity.fixture.GetBody().GetPosition();
       endOfRay = new B2Vec2(startOfRay.x + 20, startOfRay.y);
       endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle());
+      hit_entities = {};
       callback = function(fixture, normal, fraction) {
         var e;
         e = window.game.get_entity_by_fixture(fixture);
         if (__indexOf.call(e.tags, 'magnetic') >= 0) {
-          console.log(e.name);
+          if (!(e.id in hit_entities)) {
+            hit_entities[e.id] = e;
+          }
         }
         return 1;
       };
-      return window.physics.world.RayCast(callback, startOfRay, endOfRay);
+      window.physics.world.RayCast(callback, startOfRay, endOfRay);
+      _results = [];
+      for (e in hit_entities) {
+        body = hit_entities[e].fixture.GetBody();
+        e_position = body.GetPosition();
+        xspeed = startOfRay.x - e_position.x;
+        yspeed = startOfRay.y - e_position.y;
+        _results.push(body.ApplyForce(new B2Vec2(xspeed * 2000, yspeed * 2000), body.GetWorldCenter()));
+      }
+      return _results;
     },
     play: function(entity) {},
     reset: function(entity) {}
