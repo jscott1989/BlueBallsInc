@@ -2,7 +2,8 @@ window.game.entity_types = {}
 
 window.game.entity_base =
 	scale: 1
-	components: ["gluable"]
+	components: []
+	bitmaps: []
 	tags: []
 
 #@codekit-append "entities/ball.coffee";

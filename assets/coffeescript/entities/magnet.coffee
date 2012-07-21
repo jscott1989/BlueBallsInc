@@ -10,3 +10,6 @@ window.game.entity_types.magnet =
 		restitution: 0
 		shape:
 			type: "rectangle"
+
+	init: (entity) ->
+		entity.components.push('magnetized')

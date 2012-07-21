@@ -395,7 +395,7 @@
     },
     bitmaps: {
       glue: new Bitmap("/img/glue.png"),
-      megnet_beam: new Bitmap("/img/magnet-beam.png")
+      magnet_beam: new Bitmap("/img/magnet-beam.png")
     },
     FPS: 60,
     scale: 30,
@@ -456,11 +456,6 @@
         entity.init(entity);
         entity.initialised = true;
       }
-      _ref = entity.components;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        component = _ref[_i];
-        window.game.components[component].init(entity);
-      }
       if (!entity.id) {
         entity.id = 'entity_' + (window.game.next_id++);
       }
@@ -491,6 +486,11 @@
       }
       window.game.entities.push(entity);
       window.game.entityIDs[entity.id] = entity;
+      _ref = entity.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        window.game.components[component].init(entity);
+      }
       return window.physics.add_entity(entity);
     },
     create_wall: function(wall) {
@@ -556,7 +556,7 @@
       return _results;
     },
     clean_entity: function(entity) {
-      var position;
+      var component, position, _i, _len, _ref;
       entity = $.extend(true, {}, entity);
       entity.physics.density = entity.fixture.m_density;
       entity.physics.friction = entity.fixture.m_friction;
@@ -569,6 +569,13 @@
       delete entity.touching;
       delete entity.fixture;
       delete entity.init;
+      _ref = entity.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        if ('clean' in window.game.components[component]) {
+          window.game.components[component].clean(entity);
+        }
+      }
       return entity;
     },
     get_state: function() {
@@ -872,7 +879,8 @@
 
   window.game.entity_base = {
     scale: 1,
-    components: ["gluable"],
+    components: [],
+    bitmaps: [],
     tags: []
   };
 
@@ -897,7 +905,8 @@
         size: 1
       }
     },
-    init: function() {
+    init: function(entity) {
+      entity.tags.push("ball");
       this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
       return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
     }
@@ -962,6 +971,9 @@
       shape: {
         type: "rectangle"
       }
+    },
+    init: function(entity) {
+      return entity.components.push('magnetized');
     }
   };
 
@@ -1105,63 +1117,6 @@
   window.game.components = {};
 
   /* -------------------------------------------- 
-       Begin gluable.coffee 
-  --------------------------------------------
-  */
-
-
-  window.game.components.gluable = {
-    init: function(entity) {
-      entity.glue = [];
-      entity.add_glue = function(offset) {
-        var bitmap;
-        bitmap = window.game.bitmaps.glue.clone();
-        bitmap.regX = window.game.meters_to_pixels(offset.x) + (bitmap.image.width / 2);
-        bitmap.regY = window.game.meters_to_pixels(offset.y) + (bitmap.image.width / 2);
-        entity.bitmaps.push(bitmap);
-        entity.glue.push({
-          "x": offset.x,
-          "y": offset.y,
-          "bitmap": bitmap
-        });
-        return window.game.stage.addChild(bitmap);
-      };
-      return entity.clean_glue = function(offset) {
-        var glue, glue_to_remove, idx, max_x, max_y, min_x, min_y, _i, _j, _len, _len1, _ref, _results;
-        min_x = offset.x - 0.2;
-        max_x = offset.x + 0.2;
-        min_y = offset.y - 0.2;
-        max_y = offset.y + 0.2;
-        glue_to_remove = [];
-        _ref = entity.glue;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          glue = _ref[_i];
-          if (glue.x > min_x && glue.x < max_x && glue.y > min_y && glue.y < max_y) {
-            glue_to_remove.push(glue);
-          }
-        }
-        _results = [];
-        for (_j = 0, _len1 = glue_to_remove.length; _j < _len1; _j++) {
-          glue = glue_to_remove[_j];
-          window.game.stage.removeChild(glue.bitmap);
-          idx = entity.glue.indexOf(glue);
-          if (idx !== -1) {
-            entity.glue.splice(idx, 1);
-          }
-          idx = entity.bitmaps.indexOf(glue.bitmap);
-          if (idx !== -1) {
-            _results.push(entity.bitmaps.splice(idx, 1));
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      };
-    },
-    update: function(entity) {}
-  };
-
-  /* -------------------------------------------- 
        Begin enter_dropper.coffee 
   --------------------------------------------
   */
@@ -1219,15 +1174,21 @@
 
 
   window.game.components.magnetized = {
-    init: function(entity) {},
-    update: function(entity) {},
-    play: function(entity) {
+    init: function(entity) {
       var bitmap;
       bitmap = window.game.bitmaps.magnet_beam.clone();
+      bitmap.scaleY = 0.2;
+      bitmap.regX = 0 - (bitmap.image.height * 0.2) / 2;
+      bitmap.regY = (bitmap.image.width * 0.2) / 2;
       entity.bitmaps.push(bitmap);
       entity.magnet_beam = bitmap;
       return window.game.stage.addChild(bitmap);
     },
+    clean: function(entity) {
+      return delete entity.magnet_beam;
+    },
+    update: function(entity) {},
+    play: function(entity) {},
     reset: function(entity) {}
   };
 

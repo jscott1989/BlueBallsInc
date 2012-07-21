@@ -25,7 +25,7 @@ window.game =
 
 	bitmaps:
 		glue: new Bitmap("/img/glue.png")
-		megnet_beam: new Bitmap("/img/magnet-beam.png")
+		magnet_beam: new Bitmap("/img/magnet-beam.png")
 
 	FPS: 60
 	scale: 30
@@ -93,8 +93,6 @@ window.game =
 			entity.init(entity)
 			entity.initialised = true
 
-		window.game.components[component].init(entity) for component in entity.components
-
 		if not entity.id
 			entity.id = 'entity_' + (window.game.next_id++)
 
@@ -125,6 +123,8 @@ window.game =
 
 		window.game.entities.push(entity)
 		window.game.entityIDs[entity.id] = entity
+
+		window.game.components[component].init(entity) for component in entity.components
 
 		window.physics.add_entity(entity)
 
@@ -186,6 +186,11 @@ window.game =
 		delete entity.touching
 		delete entity.fixture
 		delete entity.init
+
+		for component in entity.components
+			if 'clean' of window.game.components[component]
+				window.game.components[component].clean(entity) 
+
 		return entity
 
 	get_state: () ->
