@@ -23,14 +23,22 @@ window.game.components.magnetized =
 	update: (entity) ->
 		# Find objects to pull
 
-		startOfRay = entity.fixture.GetBody().GetPosition();
-		endOfRay = new B2Vec2(startOfRay.x + 20, startOfRay.y);
+		position = entity.fixture.GetBody().GetPosition();
+		# endOfRay = new B2Vec2(startOfRay.x + 20, startOfRay.y);
 
-		endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle())
+		# endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle())
 
 		hit_entities = {}
 
-		callback = (fixture, normal, fraction) ->
+		# callback = (fixture, normal, fraction) ->
+		# 	e = window.game.get_entity_by_fixture(fixture)
+
+		# 	if 'magnetic' in e.tags
+		# 		if not (e.id of hit_entities)
+		# 			hit_entities[e.id] = e
+		# 	return 1
+
+		callback = (fixture) ->
 			e = window.game.get_entity_by_fixture(fixture)
 
 			if 'magnetic' in e.tags
@@ -38,16 +46,25 @@ window.game.components.magnetized =
 					hit_entities[e.id] = e
 			return 1
 
-		window.physics.world.RayCast(callback, startOfRay, endOfRay);
+		# window.physics.world.RayCast(callback, startOfRay, endOfRay);
+		aabb = new B2AABB()
+
+		aabb.lowerBound = new B2Vec2(position.x - window.game.pixels_to_meters(entity.bitmaps[0].width / 2), position.y - window.game.pixels_to_meters(entity.bitmaps[0].height / 2))
+		aabb.upperBound = new B2Vec2(position.x + 20, position.y + window.game.pixels_to_meters(entity.bitmaps[0].height / 2))
+
+		aabb.lowerBound = window.game.rotate_point(aabb.lowerBound, position, entity.fixture.GetBody().GetAngle())
+		aabb.upperBound = window.game.rotate_point(aabb.upperBound, position, entity.fixture.GetBody().GetAngle())
+
+		window.physics.world.QueryAABB(callback, aabb);
 
 		for e of hit_entities
 			body = hit_entities[e].fixture.GetBody()
 			e_position = body.GetPosition()
 
-			xspeed = startOfRay.x - e_position.x
-			yspeed = startOfRay.y - e_position.y
+			xspeed = position.x - e_position.x
+			yspeed = position.y - e_position.y
 
-			body.ApplyForce(new B2Vec2(xspeed * 2000, yspeed * 2000), body.GetWorldCenter())
+			body.ApplyForce(new B2Vec2(xspeed * 1000, yspeed * 1000), body.GetWorldCenter())
 
 	play: (entity) ->
 

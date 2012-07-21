@@ -1270,12 +1270,10 @@
       return delete entity.magnet_beam;
     },
     update: function(entity) {
-      var body, callback, e, e_position, endOfRay, hit_entities, startOfRay, xspeed, yspeed, _results;
-      startOfRay = entity.fixture.GetBody().GetPosition();
-      endOfRay = new B2Vec2(startOfRay.x + 20, startOfRay.y);
-      endOfRay = window.game.rotate_point(endOfRay, startOfRay, entity.fixture.GetBody().GetAngle());
+      var aabb, body, callback, e, e_position, hit_entities, position, xspeed, yspeed, _results;
+      position = entity.fixture.GetBody().GetPosition();
       hit_entities = {};
-      callback = function(fixture, normal, fraction) {
+      callback = function(fixture) {
         var e;
         e = window.game.get_entity_by_fixture(fixture);
         if (__indexOf.call(e.tags, 'magnetic') >= 0) {
@@ -1285,14 +1283,19 @@
         }
         return 1;
       };
-      window.physics.world.RayCast(callback, startOfRay, endOfRay);
+      aabb = new B2AABB();
+      aabb.lowerBound = new B2Vec2(position.x - window.game.pixels_to_meters(entity.bitmaps[0].width / 2), position.y - window.game.pixels_to_meters(entity.bitmaps[0].height / 2));
+      aabb.upperBound = new B2Vec2(position.x + 20, position.y + window.game.pixels_to_meters(entity.bitmaps[0].height / 2));
+      aabb.lowerBound = window.game.rotate_point(aabb.lowerBound, position, entity.fixture.GetBody().GetAngle());
+      aabb.upperBound = window.game.rotate_point(aabb.upperBound, position, entity.fixture.GetBody().GetAngle());
+      window.physics.world.QueryAABB(callback, aabb);
       _results = [];
       for (e in hit_entities) {
         body = hit_entities[e].fixture.GetBody();
         e_position = body.GetPosition();
-        xspeed = startOfRay.x - e_position.x;
-        yspeed = startOfRay.y - e_position.y;
-        _results.push(body.ApplyForce(new B2Vec2(xspeed * 2000, yspeed * 2000), body.GetWorldCenter()));
+        xspeed = position.x - e_position.x;
+        yspeed = position.y - e_position.y;
+        _results.push(body.ApplyForce(new B2Vec2(xspeed * 1000, yspeed * 1000), body.GetWorldCenter()));
       }
       return _results;
     },
