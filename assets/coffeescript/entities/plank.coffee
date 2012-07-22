@@ -4,9 +4,10 @@ window.game.entity_types.plank =
 
 	scale_adjustment: 0.5
 
-	physics:
+	bodies: [{
 		density: 40
 		friction: 2
 		restitution: 0.1
 		shape:
 			type: "rectangle"
+	}]

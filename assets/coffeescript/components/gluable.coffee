@@ -46,8 +46,8 @@ window.game.components.gluable =
 		# 	# Here, see if the other entity is touching anywhere that has glue
 		# 	other_entity = window.game.entityIDs[touching]
 			
-		# 	body = entity.fixture.GetBody()
-		# 	other_body = other_entity.fixture.GetBody()
+		# 	body = entity.fixtures[0].GetBody()
+		# 	other_body = other_entity.fixtures[0].GetBody()
 
 		# 	position = body.GetPosition()
 		# 	other_position = other_body.GetPosition()

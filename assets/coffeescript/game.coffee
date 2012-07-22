@@ -168,23 +168,19 @@ window.game =
 		# This returns a copy
 		entity = $.extend(true, {}, entity)
 
-		# Basic physical properties
-		entity.physics.density = entity.fixture.m_density
-		entity.physics.friction = entity.fixture.m_friction
-		entity.physics.restitution = entity.fixture.m_restitution
-
 
 		# Position and angle
-		position = entity.fixture.GetBody().GetPosition()
-		entity.x = position.x
-		entity.y = position.y
-		entity.angle = entity.fixture.GetBody().GetAngle()
+		if entity.fixtures.length > 0
+			position = entity.fixtures[0].GetBody().GetPosition()
+			entity.x = position.x
+			entity.y = position.y
+			entity.angle = entity.fixtures[0].GetBody().GetAngle()
 
 		# TODO Initial forces? Maybe?
 
 		delete entity.bitmaps
 		delete entity.touching
-		delete entity.fixture
+		delete entity.fixtures
 		delete entity.init
 
 		for component in entity.components
@@ -243,13 +239,13 @@ window.game =
 		radians * 57.295779513082320876
 
 	update_position: (entity) ->
-		if "bitmaps" of entity
+		if "bitmaps" of entity and entity.fixtures.length > 0
 			# If we're drawing this
-			position = entity.fixture.GetBody().GetPosition()
+			position = entity.fixtures[0].GetBody().GetPosition()
 			for bitmap in entity.bitmaps
 				bitmap.x = window.game.meters_to_pixels(position.x)
 				bitmap.y = window.game.meters_to_pixels(position.y)
-				bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle())
+				bitmap.rotation = window.game.radians_to_degrees(entity.fixtures[0].GetBody().GetAngle())
 
 	update_positions: () ->
 		# Update the drawing positions to be in line with the physics
@@ -315,7 +311,7 @@ window.game =
 		return window.game.entityIDs[fixture.GetBody().userData]
 
 	get_offset_to_mouse: (entity) ->
-		body = entity.fixture.GetBody()
+		body = entity.fixtures[0].GetBody()
 		position = body.GetPosition()
 		mouse_position = {"x": window.game.mouseX, "y": window.game.mouseY}
 

@@ -24,7 +24,7 @@ window.game.components.enter_dropper =
 				if entity.last_ball_created > entity.ball_creation_interval
 					entity.last_ball_created = 0
 					entity.balls_created += 1
-					position = entity.fixture.GetBody().GetPosition()
+					position = entity.fixtures[0].GetBody().GetPosition()
 
 					x = position.x + (Math.random() * 0.2) - 0.1
 					y = position.y + 1

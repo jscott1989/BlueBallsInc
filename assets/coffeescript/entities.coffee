@@ -4,6 +4,7 @@ window.game.entity_base =
 	scale: 1
 	components: []
 	bitmaps: []
+	fixtures: []
 	tags: []
 
 #@codekit-append "entities/ball.coffee";

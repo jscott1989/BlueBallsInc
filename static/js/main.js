@@ -290,7 +290,7 @@
     },
     start_game: function() {},
     update: function() {
-      var entity, _i, _len, _ref;
+      var entity, fixture, _i, _j, _len, _len1, _ref, _ref1;
       if (window.viewModel.state() === 'PAUSE') {
         if (window.viewModel.debug()) {
           window.physics.world.DrawDebugData();
@@ -305,40 +305,44 @@
       _ref = window.physics.entities_to_delete;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        window.physics.world.DestroyBody(entity.fixture.GetBody());
+        _ref1 = entity.fixtures;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          fixture = _ref1[_j];
+          window.physics.world.DestroyBody(fixture.GetBody());
+        }
       }
       return window.physics.entities_to_delete = [];
     },
-    create_fixture_def: function(entity) {
+    create_fixture_def: function(entity, body) {
       var fixDef, vector, vectors, _i, _len, _ref;
       fixDef = new B2FixtureDef();
-      if ("density" in entity.physics) {
-        fixDef.density = entity.physics.density;
+      if ("density" in body) {
+        fixDef.density = body.density;
       }
-      if ("friction" in entity.physics) {
-        fixDef.friction = entity.physics.friction;
+      if ("friction" in body) {
+        fixDef.friction = body.friction;
       }
-      if ("restitution" in entity.physics) {
-        fixDef.restitution = entity.physics.restitution;
+      if ("restitution" in body) {
+        fixDef.restitution = body.restitution;
       }
-      if (entity.physics.shape.type === "circle") {
-        if (!('size' in entity.physics.shape)) {
-          entity.physics.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2);
+      if (body.shape.type === "circle") {
+        if (!('size' in body.shape)) {
+          body.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2);
         }
-        fixDef.shape = new B2CircleShape(entity.physics.shape.size);
-      } else if (entity.physics.shape.type === "rectangle") {
+        fixDef.shape = new B2CircleShape(body.shape.size);
+      } else if (body.shape.type === "rectangle") {
         fixDef.shape = new B2PolygonShape();
-        if (!('size' in entity.physics.shape)) {
-          entity.physics.shape.size = {
+        if (!('size' in body.shape)) {
+          body.shape.size = {
             width: (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2),
             height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
           };
         }
-        fixDef.shape.SetAsBox(entity.physics.shape.size.width, entity.physics.shape.size.height);
-      } else if (entity.physics.shape.type === "polygon") {
+        fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height);
+      } else if (body.shape.type === "polygon") {
         fixDef.shape = new B2PolygonShape();
         vectors = [];
-        _ref = entity.physics.shape.vectors;
+        _ref = body.shape.vectors;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           vector = _ref[_i];
           vectors.push(new B2Vec2(vector.x, vector.y));
@@ -348,7 +352,7 @@
       return fixDef;
     },
     add_entity: function(entity) {
-      var body, bodyDef, fixDef;
+      var body, bodyDef, fixDef, fixDefs;
       bodyDef = new B2BodyDef();
       if (entity.fixed) {
         bodyDef.type = B2Body.b2_staticBody;
@@ -359,14 +363,38 @@
       if ('angle' in entity) {
         bodyDef.angle = entity.angle;
       }
-      fixDef = window.physics.create_fixture_def(entity);
+      fixDefs = (function() {
+        var _i, _len, _ref, _results;
+        _ref = entity.bodies;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          body = _ref[_i];
+          _results.push(window.physics.create_fixture_def(entity, body));
+        }
+        return _results;
+      })();
       body = window.physics.world.CreateBody(bodyDef);
       body.userData = entity.id;
-      return entity.fixture = body.CreateFixture(fixDef);
+      return entity.fixtures = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = fixDefs.length; _i < _len; _i++) {
+          fixDef = fixDefs[_i];
+          _results.push(body.CreateFixture(fixDef));
+        }
+        return _results;
+      })();
     },
     remove_entity: function(entity, now) {
+      var fixture, _i, _len, _ref, _results;
       if (now) {
-        return window.physics.world.DestroyBody(entity.fixture.GetBody());
+        _ref = entity.fixtures;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          fixture = _ref[_i];
+          _results.push(window.physics.world.DestroyBody(fixture.GetBody()));
+        }
+        return _results;
       } else {
         return window.physics.entities_to_delete.push(entity);
       }
@@ -584,16 +612,15 @@
     clean_entity: function(entity) {
       var component, position, _i, _len, _ref;
       entity = $.extend(true, {}, entity);
-      entity.physics.density = entity.fixture.m_density;
-      entity.physics.friction = entity.fixture.m_friction;
-      entity.physics.restitution = entity.fixture.m_restitution;
-      position = entity.fixture.GetBody().GetPosition();
-      entity.x = position.x;
-      entity.y = position.y;
-      entity.angle = entity.fixture.GetBody().GetAngle();
+      if (entity.fixtures.length > 0) {
+        position = entity.fixtures[0].GetBody().GetPosition();
+        entity.x = position.x;
+        entity.y = position.y;
+        entity.angle = entity.fixtures[0].GetBody().GetAngle();
+      }
       delete entity.bitmaps;
       delete entity.touching;
-      delete entity.fixture;
+      delete entity.fixtures;
       delete entity.init;
       _ref = entity.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -667,15 +694,15 @@
     },
     update_position: function(entity) {
       var bitmap, position, _i, _len, _ref, _results;
-      if ("bitmaps" in entity) {
-        position = entity.fixture.GetBody().GetPosition();
+      if ("bitmaps" in entity && entity.fixtures.length > 0) {
+        position = entity.fixtures[0].GetBody().GetPosition();
         _ref = entity.bitmaps;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           bitmap = _ref[_i];
           bitmap.x = window.game.meters_to_pixels(position.x);
           bitmap.y = window.game.meters_to_pixels(position.y);
-          _results.push(bitmap.rotation = window.game.radians_to_degrees(entity.fixture.GetBody().GetAngle()));
+          _results.push(bitmap.rotation = window.game.radians_to_degrees(entity.fixtures[0].GetBody().GetAngle()));
         }
         return _results;
       }
@@ -760,7 +787,7 @@
     },
     get_offset_to_mouse: function(entity) {
       var body, mouse_position, position, rotated_position;
-      body = entity.fixture.GetBody();
+      body = entity.fixtures[0].GetBody();
       position = body.GetPosition();
       mouse_position = {
         "x": window.game.mouseX,
@@ -817,13 +844,14 @@
       if (window.game.mouse_down && !window.game.tools.MOVE.mouse_joint) {
         entity = window.game.get_entity_at_mouse();
         if (entity) {
-          body = entity.fixture.GetBody();
+          body = entity.fixtures[0].GetBody();
           md = new B2MouseJointDef();
           md.bodyA = window.physics.world.GetGroundBody();
           md.bodyB = body;
           md.target.Set(window.game.mouseX, window.game.mouseY);
           md.collideConnected = true;
           md.maxForce = 300.0 * body.GetMass();
+          console.log(md.maxForce);
           window.game.tools.MOVE.mouse_joint = window.physics.world.CreateJoint(md);
           body.SetAwake(true);
         }
@@ -898,6 +926,7 @@
     scale: 1,
     components: [],
     bitmaps: [],
+    fixtures: [],
     tags: []
   };
 
@@ -913,19 +942,19 @@
     width_scale: 1,
     height_scale: 1,
     scale_adjustment: 0.5,
-    physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.4,
-      shape: {
-        type: "circle",
-        size: 1
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.4,
+        shape: {
+          type: "circle",
+          size: 1
+        }
       }
-    },
+    ],
     init: function(entity) {
-      entity.tags.push("ball");
-      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
-      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+      return entity.tags.push("ball");
     }
   };
 
@@ -941,19 +970,19 @@
     width_scale: 1,
     height_scale: 1,
     scale_adjustment: 0.5,
-    physics: {
-      density: 70,
-      friction: 2,
-      restitution: 0.2,
-      shape: {
-        type: "circle",
-        size: 1
+    bodies: [
+      {
+        density: 70,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "circle",
+          size: 1
+        }
       }
-    },
+    ],
     init: function(entity) {
-      entity.tags.push("magnetic");
-      this.physics.shape.size.width = this.scale_adjustment * this.width_scale * this.scale;
-      return this.physics.shape.size.height = this.scale_adjustment * this.height_scale * this.scale;
+      return entity.tags.push("magnetic");
     }
   };
 
@@ -969,14 +998,16 @@
     width_scale: 1,
     height_scale: 1,
     scale_adjustment: 0.5,
-    physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.2,
-      shape: {
-        type: "circle"
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "circle"
+        }
       }
-    }
+    ]
   };
 
   /* -------------------------------------------- 
@@ -989,14 +1020,16 @@
     name: "Box",
     image: "box.png",
     scale_adjustment: 1,
-    physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.2,
-      shape: {
-        type: "rectangle"
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "rectangle"
+        }
       }
-    }
+    ]
   };
 
   /* -------------------------------------------- 
@@ -1009,14 +1042,16 @@
     name: "Conveyor Belt",
     image: "conveyor-belt.png",
     scale_adjustment: 1,
-    physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.2,
-      shape: {
-        type: "rectangle"
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "rectangle"
+        }
       }
-    },
+    ],
     init: function(entity) {
       return entity.components.push('conveyor-belt');
     }
@@ -1032,38 +1067,40 @@
     name: "Magnet",
     image: "magnet.png",
     scale_adjustment: 1,
-    physics: {
-      density: 90,
-      friction: 2,
-      restitution: 0,
-      shape: {
-        type: "polygon",
-        vectors: [
-          {
-            "x": -1.1,
-            "y": -1.1
-          }, {
-            "x": 0,
-            "y": -1.4
-          }, {
-            "x": 1.4,
-            "y": -1.1
-          }, {
-            "x": 1.4,
-            "y": 1.1
-          }, {
-            "x": 0,
-            "y": 1.4
-          }, {
-            "x": -1.1,
-            "y": 1.1
-          }, {
-            "x": -1.4,
-            "y": 0
-          }
-        ]
+    bodies: [
+      {
+        density: 90,
+        friction: 2,
+        restitution: 0,
+        shape: {
+          type: "polygon",
+          vectors: [
+            {
+              "x": -1.1,
+              "y": -1.1
+            }, {
+              "x": 0,
+              "y": -1.4
+            }, {
+              "x": 1.4,
+              "y": -1.1
+            }, {
+              "x": 1.4,
+              "y": 1.1
+            }, {
+              "x": 0,
+              "y": 1.4
+            }, {
+              "x": -1.1,
+              "y": 1.1
+            }, {
+              "x": -1.4,
+              "y": 0
+            }
+          ]
+        }
       }
-    },
+    ],
     init: function(entity) {
       return entity.components.push('magnetized');
     }
@@ -1079,14 +1116,16 @@
     name: "Plank",
     image: "plank.png",
     scale_adjustment: 0.5,
-    physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.1,
-      shape: {
-        type: "rectangle"
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.1,
+        shape: {
+          type: "rectangle"
+        }
       }
-    }
+    ]
   };
 
   /* -------------------------------------------- 
@@ -1098,15 +1137,17 @@
   window.game.entity_types.enter_dropper = {
     name: "Ball Dropper",
     fixed: true,
-    physics: {
-      shape: {
-        type: "rectangle",
-        size: {
-          width: 0.1,
-          height: 0.1
+    bodies: [
+      {
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 0.1,
+            height: 0.1
+          }
         }
       }
-    },
+    ],
     init: function(entity) {
       return entity.components.push('enter_dropper');
     }
@@ -1121,18 +1162,20 @@
   window.game.entity_types.exit = {
     name: "Box",
     fixed: true,
-    physics: {
-      density: 40,
-      friction: 2,
-      restitution: 0.2,
-      shape: {
-        type: "rectangle",
-        size: {
-          width: 1,
-          height: 1
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 1,
+            height: 1
+          }
         }
       }
-    },
+    ],
     init: function(entity) {
       return entity.components.push('exit');
     }
@@ -1147,29 +1190,33 @@
   window.game.entity_types.xwall = {
     name: "Wall",
     fixed: true,
-    "physics": {
-      "shape": {
-        "type": "rectangle",
-        "size": {
-          "width": 11.5,
-          "height": 0.1
+    bodies: [
+      {
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 11.5,
+            height: 0.1
+          }
         }
       }
-    }
+    ]
   };
 
   window.game.entity_types.ywall = {
     name: "Wall",
     fixed: true,
-    "physics": {
-      "shape": {
-        "type": "rectangle",
-        "size": {
-          "width": 0.1,
-          "height": 10
+    bodies: [
+      {
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 0.1,
+            height: 10
+          }
         }
       }
-    }
+    ]
   };
 
   /* -------------------------------------------- 
@@ -1182,22 +1229,26 @@
     name: "Line",
     image: "xline.png",
     fixed: true,
-    "physics": {
-      "shape": {
-        "type": "rectangle"
+    bodies: [
+      {
+        shape: {
+          type: "rectangle"
+        }
       }
-    }
+    ]
   };
 
   window.game.entity_types.yline = {
     name: "Line",
     image: "yline.png",
     fixed: true,
-    "physics": {
-      "shape": {
-        "type": "rectangle"
+    bodies: [
+      {
+        shape: {
+          type: "rectangle"
+        }
       }
-    }
+    ]
   };
 
   /* -------------------------------------------- 
@@ -1238,7 +1289,7 @@
           if (entity.last_ball_created > entity.ball_creation_interval) {
             entity.last_ball_created = 0;
             entity.balls_created += 1;
-            position = entity.fixture.GetBody().GetPosition();
+            position = entity.fixtures[0].GetBody().GetPosition();
             x = position.x + (Math.random() * 0.2) - 0.1;
             y = position.y + 1;
             ball_entity = {
@@ -1289,31 +1340,33 @@
     init: function(entity) {},
     update: function(entity) {
       var body, e, e_position, position, xspeed, yspeed, _i, _len, _ref, _results;
-      position = entity.fixture.GetBody().GetPosition();
-      _ref = window.game.entities;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        e = _ref[_i];
-        if (__indexOf.call(e.tags, 'magnetic') >= 0) {
-          body = e.fixture.GetBody();
-          e_position = body.GetPosition();
-          if (Math.abs(position.x - e_position.x) > MAX_DISTANCE || Math.abs(position.y - e_position.y) > MAX_DISTANCE) {
-            continue;
+      if (entity.fixtures.length > 0) {
+        position = entity.fixtures[0].GetBody().GetPosition();
+        _ref = window.game.entities;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          e = _ref[_i];
+          if (__indexOf.call(e.tags, 'magnetic') >= 0) {
+            body = e.fixtures[0].GetBody();
+            e_position = body.GetPosition();
+            if (Math.abs(position.x - e_position.x) > MAX_DISTANCE || Math.abs(position.y - e_position.y) > MAX_DISTANCE) {
+              continue;
+            }
+            xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER;
+            yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER;
+            if (e_position.x > position.x) {
+              xspeed = 0 - xspeed;
+            }
+            if (e_position.y > position.y) {
+              yspeed = 0 - yspeed;
+            }
+            _results.push(body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter()));
+          } else {
+            _results.push(void 0);
           }
-          xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER;
-          yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER;
-          if (e_position.x > position.x) {
-            xspeed = 0 - xspeed;
-          }
-          if (e_position.y > position.y) {
-            yspeed = 0 - yspeed;
-          }
-          _results.push(body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter()));
-        } else {
-          _results.push(void 0);
         }
+        return _results;
       }
-      return _results;
     },
     play: function(entity) {},
     reset: function(entity) {}

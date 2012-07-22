@@ -108,37 +108,38 @@ window.physics =
 		if window.viewModel.debug()
 			window.physics.world.DrawDebugData()
 		window.physics.world.ClearForces()
-
-		window.physics.world.DestroyBody(entity.fixture.GetBody()) for entity in window.physics.entities_to_delete
+		
+		for entity in window.physics.entities_to_delete
+			window.physics.world.DestroyBody(fixture.GetBody()) for fixture in entity.fixtures
 		window.physics.entities_to_delete = []
 
-	create_fixture_def: (entity) ->
+	create_fixture_def: (entity, body) ->
 		fixDef = new B2FixtureDef()
 
-		if "density" of entity.physics
-			fixDef.density = entity.physics.density					# Density
-		if "friction" of entity.physics
-			fixDef.friction = entity.physics.friction					# Friction
-		if "restitution" of entity.physics
-			fixDef.restitution = entity.physics.restitution				# Restitution
+		if "density" of body
+			fixDef.density = body.density					# Density
+		if "friction" of body
+			fixDef.friction = body.friction					# Friction
+		if "restitution" of body
+			fixDef.restitution = body.restitution				# Restitution
 
-		if entity.physics.shape.type == "circle"
-			if not ('size' of entity.physics.shape)
-				entity.physics.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
-			fixDef.shape = new B2CircleShape(entity.physics.shape.size)		# Shape
+		if body.shape.type == "circle"
+			if not ('size' of body.shape)
+				body.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
+			fixDef.shape = new B2CircleShape(body.shape.size)		# Shape
 
-		else if entity.physics.shape.type == "rectangle"
+		else if body.shape.type == "rectangle"
 			fixDef.shape = new B2PolygonShape()
-			if not ('size' of entity.physics.shape)
-				entity.physics.shape.size =
+			if not ('size' of body.shape)
+				body.shape.size =
 					width: (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
 					height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
 
-			fixDef.shape.SetAsBox(entity.physics.shape.size.width, entity.physics.shape.size.height)
-		else if entity.physics.shape.type == "polygon"
+			fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height)
+		else if body.shape.type == "polygon"
 			fixDef.shape = new B2PolygonShape()
 			vectors = []
-			for vector in entity.physics.shape.vectors
+			for vector in body.shape.vectors
 				vectors.push(new B2Vec2(vector.x, vector.y))
 			fixDef.shape.SetAsArray(vectors)
 		return fixDef
@@ -156,17 +157,17 @@ window.physics =
 		if 'angle' of entity
 			bodyDef.angle = entity.angle
 
-		fixDef = window.physics.create_fixture_def(entity)
+		fixDefs = (window.physics.create_fixture_def(entity, body) for body in entity.bodies)
 
 		body = window.physics.world.CreateBody(bodyDef)
 
 		# body.SetSleepingAllowed(false)
 
 		body.userData = entity.id
-		entity.fixture = body.CreateFixture(fixDef) # Add to the world
+		entity.fixtures = (body.CreateFixture(fixDef) for fixDef in fixDefs)
 
 	remove_entity: (entity, now) ->
 		if now
-			window.physics.world.DestroyBody(entity.fixture.GetBody())
+			window.physics.world.DestroyBody(fixture.GetBody()) for fixture in entity.fixtures
 		else
 			window.physics.entities_to_delete.push(entity)

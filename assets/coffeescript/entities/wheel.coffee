@@ -7,9 +7,10 @@ window.game.entity_types.wheel =
 
 	scale_adjustment: 0.5
 
-	physics:
+	bodies: [{
 		density: 40
 		friction: 2
 		restitution: 0.2
 		shape:
 			type: "circle"
+	}]
