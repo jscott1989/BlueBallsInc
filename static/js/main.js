@@ -141,6 +141,10 @@
     return window.viewModel.tool($(this).attr('rel'));
   });
 
+  $(window).resize(function() {
+    return window.game.refresh_canvas_position();
+  });
+
   window.select_last_tool = function() {
     var tmp_tool;
     tmp_tool = window.viewModel.tool();
@@ -455,6 +459,7 @@
     scale: 30,
     $canvas: $('#gameCanvas'),
     canvas: $('#gameCanvas')[0],
+    $debug_canvas: $('#debugCanvas'),
     debug_canvas: $('#debugCanvas')[0],
     canvas_position: {
       "x": 0,
@@ -738,11 +743,9 @@
     },
     mouse_down: function(e) {
       if (window.viewModel.state() === 'BUILD') {
-        if (e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height) {
-          window.game.mouse_down = true;
-          if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
-            return window.game.tools[window.viewModel.tool()].mouse_down(e);
-          }
+        window.game.mouse_down = true;
+        if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
+          return window.game.tools[window.viewModel.tool()].mouse_down(e);
         }
       }
     },
@@ -756,8 +759,8 @@
     },
     mouse_move: function(e) {
       if (window.viewModel.state() === 'BUILD') {
-        window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale;
-        window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale;
+        window.game.mouseX = e.offsetX / window.game.scale;
+        window.game.mouseY = e.offsetY / window.game.scale;
         if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
           return window.game.tools[window.viewModel.tool()].mouse_move(e);
         }
@@ -813,11 +816,17 @@
     }
   };
 
-  $(document).mousedown(window.game.mouse_down);
+  window.game.$debug_canvas.mousedown(window.game.mouse_down);
 
-  $(document).mouseup(window.game.mouse_up);
+  window.game.$debug_canvas.mouseup(window.game.mouse_up);
 
-  $(document).mousemove(window.game.mouse_move);
+  window.game.$debug_canvas.mousemove(window.game.mouse_move);
+
+  window.game.$canvas.mousedown(window.game.mouse_down);
+
+  window.game.$canvas.mouseup(window.game.mouse_up);
+
+  window.game.$canvas.mousemove(window.game.mouse_move);
 
   window.game.init();
 
@@ -851,7 +860,6 @@
           md.target.Set(window.game.mouseX, window.game.mouseY);
           md.collideConnected = true;
           md.maxForce = 300.0 * body.GetMass();
-          console.log(md.maxForce);
           window.game.tools.MOVE.mouse_joint = window.physics.world.CreateJoint(md);
           body.SetAwake(true);
         }
@@ -995,9 +1003,6 @@
   window.game.entity_types.wheel = {
     name: "Wheel",
     image: "wheel.png",
-    width_scale: 1,
-    height_scale: 1,
-    scale_adjustment: 0.5,
     bodies: [
       {
         density: 40,

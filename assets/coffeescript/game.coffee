@@ -32,6 +32,7 @@ window.game =
 	# Canvases
 	$canvas: $('#gameCanvas')
 	canvas: $('#gameCanvas')[0]
+	$debug_canvas: $('#debugCanvas')
 	debug_canvas: $('#debugCanvas')[0]
 	canvas_position: {"x": 0, "y": 0}
 	canvas_width: 700,
@@ -270,10 +271,12 @@ window.game =
 
 	mouse_down: (e) ->
 		if window.viewModel.state() == 'BUILD'
-			if e.clientX > window.game.canvas_position.left && e.clientY > window.game.canvas_position.top && e.clientX < window.game.canvas_position.left + window.game.canvas_width && e.clientY < window.game.canvas_position.top + window.game.canvas_height
-				window.game.mouse_down = true
-				if 'mouse_down' of window.game.tools[window.viewModel.tool()]
-					window.game.tools[window.viewModel.tool()].mouse_down(e)
+			# clientX = e.offsetX
+			# clientY = e.offsetY
+			# $('#gameCanvas')[0].getContext("2d").fillRect(clientX, clientY, 1, 1);
+			window.game.mouse_down = true
+			if 'mouse_down' of window.game.tools[window.viewModel.tool()]
+				window.game.tools[window.viewModel.tool()].mouse_down(e)
 
 	mouse_up: (e) ->
 		if window.viewModel.state() == 'BUILD'
@@ -283,8 +286,8 @@ window.game =
 
 	mouse_move: (e) ->
 		if window.viewModel.state() == 'BUILD'
-			window.game.mouseX = (e.clientX - window.game.canvas_position.left) / window.game.scale
-			window.game.mouseY = (e.clientY - window.game.canvas_position.top) / window.game.scale
+			window.game.mouseX = e.offsetX / window.game.scale
+			window.game.mouseY = e.offsetY / window.game.scale
 
 			if 'mouse_move' of window.game.tools[window.viewModel.tool()]
 				window.game.tools[window.viewModel.tool()].mouse_move(e)
@@ -334,9 +337,12 @@ window.game =
 		return point
 
 
-$(document).mousedown(window.game.mouse_down)
-$(document).mouseup(window.game.mouse_up)
-$(document).mousemove(window.game.mouse_move)
+window.game.$debug_canvas.mousedown(window.game.mouse_down)
+window.game.$debug_canvas.mouseup(window.game.mouse_up)
+window.game.$debug_canvas.mousemove(window.game.mouse_move)
+window.game.$canvas.mousedown(window.game.mouse_down)
+window.game.$canvas.mouseup(window.game.mouse_up)
+window.game.$canvas.mousemove(window.game.mouse_move)
 window.game.init()
 
 window.viewModel.state.subscribe window.game.state_changed

@@ -112,6 +112,9 @@ $('#toolbox li').live 'click', () ->
 	window.viewModel.last_tool(window.viewModel.tool())
 	window.viewModel.tool($(this).attr('rel'))
 
+$(window).resize ->
+	window.game.refresh_canvas_position()
+
 window.select_last_tool = () ->
 	# Select the last selected tool (the current one is finished with)
 	tmp_tool = window.viewModel.tool()

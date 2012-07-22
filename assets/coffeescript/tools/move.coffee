@@ -15,8 +15,7 @@ window.game.tools.MOVE =
 				md.target.Set(window.game.mouseX, window.game.mouseY);
 				md.collideConnected = true;
 				md.maxForce = 300.0 * body.GetMass();
-
-				console.log md.maxForce
+				
 				window.game.tools.MOVE.mouse_joint = window.physics.world.CreateJoint(md);
 				body.SetAwake(true);
 
