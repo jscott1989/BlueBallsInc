@@ -9,7 +9,16 @@ window.game.entity_types.magnet =
 		friction: 2
 		restitution: 0
 		shape:
-			type: "rectangle"
+			type: "polygon"
+			vectors: [
+				{"x": -1.1, "y": -1.1}
+				{"x": 0, "y": -1.4}
+				{"x": 1.4, "y": -1.1}
+				{"x": 1.4, "y": 1.1}
+				{"x": 0, "y": 1.4}
+				{"x": -1.1, "y": 1.1}
+				{"x": -1.4, "y": 0}
+			]
 
 	init: (entity) ->
 		entity.components.push('magnetized')

@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, GameViewModel, count, i, images, load_level, preload, _i, _len,
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, FORCE_PER_METER, GameViewModel, MAX_DISTANCE, MAX_FORCE, count, i, images, load_level, preload, _i, _len,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
@@ -25,7 +25,7 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(false);
+    self.debug = ko.observable(true);
     self.level = ko.observable(1);
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
@@ -1037,7 +1037,31 @@
       friction: 2,
       restitution: 0,
       shape: {
-        type: "rectangle"
+        type: "polygon",
+        vectors: [
+          {
+            "x": -1.1,
+            "y": -1.1
+          }, {
+            "x": 0,
+            "y": -1.4
+          }, {
+            "x": 1.4,
+            "y": -1.1
+          }, {
+            "x": 1.4,
+            "y": 1.1
+          }, {
+            "x": 0,
+            "y": 1.4
+          }, {
+            "x": -1.1,
+            "y": 1.1
+          }, {
+            "x": -1.4,
+            "y": 0
+          }
+        ]
       }
     },
     init: function(entity) {
@@ -1255,47 +1279,39 @@
   */
 
 
+  MAX_FORCE = 2500;
+
+  MAX_DISTANCE = window.game.pixels_to_meters(500);
+
+  FORCE_PER_METER = MAX_FORCE / MAX_DISTANCE;
+
   window.game.components.magnetized = {
-    init: function(entity) {
-      var bitmap;
-      bitmap = window.game.bitmaps.magnet_beam.clone();
-      bitmap.scaleY = 0.2;
-      bitmap.regX = 0 - (bitmap.image.height * 0.2) / 2;
-      bitmap.regY = (bitmap.image.width * 0.2) / 2;
-      entity.bitmaps.push(bitmap);
-      entity.magnet_beam = bitmap;
-      return window.game.stage.addChild(bitmap);
-    },
-    clean: function(entity) {
-      return delete entity.magnet_beam;
-    },
+    init: function(entity) {},
     update: function(entity) {
-      var aabb, body, callback, e, e_position, hit_entities, position, xspeed, yspeed, _results;
+      var body, e, e_position, position, xspeed, yspeed, _i, _len, _ref, _results;
       position = entity.fixture.GetBody().GetPosition();
-      hit_entities = {};
-      callback = function(fixture) {
-        var e;
-        e = window.game.get_entity_by_fixture(fixture);
-        if (__indexOf.call(e.tags, 'magnetic') >= 0) {
-          if (!(e.id in hit_entities)) {
-            hit_entities[e.id] = e;
-          }
-        }
-        return 1;
-      };
-      aabb = new B2AABB();
-      aabb.lowerBound = new B2Vec2(position.x - window.game.pixels_to_meters(entity.bitmaps[0].width / 2), position.y - window.game.pixels_to_meters(entity.bitmaps[0].height / 2));
-      aabb.upperBound = new B2Vec2(position.x + 20, position.y + window.game.pixels_to_meters(entity.bitmaps[0].height / 2));
-      aabb.lowerBound = window.game.rotate_point(aabb.lowerBound, position, entity.fixture.GetBody().GetAngle());
-      aabb.upperBound = window.game.rotate_point(aabb.upperBound, position, entity.fixture.GetBody().GetAngle());
-      window.physics.world.QueryAABB(callback, aabb);
+      _ref = window.game.entities;
       _results = [];
-      for (e in hit_entities) {
-        body = hit_entities[e].fixture.GetBody();
-        e_position = body.GetPosition();
-        xspeed = position.x - e_position.x;
-        yspeed = position.y - e_position.y;
-        _results.push(body.ApplyForce(new B2Vec2(xspeed * 1000, yspeed * 1000), body.GetWorldCenter()));
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        e = _ref[_i];
+        if (__indexOf.call(e.tags, 'magnetic') >= 0) {
+          body = e.fixture.GetBody();
+          e_position = body.GetPosition();
+          if (Math.abs(position.x - e_position.x) > MAX_DISTANCE || Math.abs(position.y - e_position.y) > MAX_DISTANCE) {
+            continue;
+          }
+          xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER;
+          yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER;
+          if (e_position.x > position.x) {
+            xspeed = 0 - xspeed;
+          }
+          if (e_position.y > position.y) {
+            yspeed = 0 - yspeed;
+          }
+          _results.push(body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter()));
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     },
@@ -1314,33 +1330,8 @@
 
 
   window.game.components["conveyor-belt"] = {
-    init: function(entity) {
-      return entity.moving = [];
-    },
-    update: function(entity) {
-      var body, e, _i, _len, _ref, _results;
-      _ref = entity.moving;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        e = _ref[_i];
-        body = e.fixture.GetBody();
-        console.log("MOVE");
-        _results.push(body.ApplyImpulse(new B2Vec2(1000, 0), body.GetWorldCenter()));
-      }
-      return _results;
-    },
-    begin_contact: function(entity, other_entity) {
-      return entity.moving.push(other_entity);
-    },
-    end_contact: function(entity, other_entity) {
-      var i, _i, _ref;
-      for (i = _i = 0, _ref = entity.moving.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (entity.moving[i].id === other_entity.id) {
-          entity.moving.splice(i, 1);
-          return;
-        }
-      }
-    }
+    init: function(entity) {},
+    update: function(entity) {}
   };
 
   /* -------------------------------------------- 
