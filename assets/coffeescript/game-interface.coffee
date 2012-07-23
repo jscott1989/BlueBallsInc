@@ -89,7 +89,7 @@ $('.confirm-exit-game').click ->
 $('.confirm-restart-level').click ->
 	window.viewModel.state("BUILD")
 	$menus.fadeOut()
-	load_level(window.viewModel.level())
+	load_level("level" + window.viewModel.level())
 
 	window.backwards_to($main_menu)
 
