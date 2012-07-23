@@ -17,9 +17,14 @@
             "y": 1
         },
         {
+            "type": "peg",
+            "x": 9,
+            "y": 4
+        },
+        {
             "type": "conveyor-belt",
             "x": 7,
-            "y": 9,
+            "y": 14,
             "fixed": true
         },
         {

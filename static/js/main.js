@@ -329,11 +329,28 @@
       if ("restitution" in body) {
         fixDef.restitution = body.restitution;
       }
+      if (!('position' in body)) {
+        body.position = {
+          x: 0,
+          y: 0,
+          angle: 0
+        };
+      }
+      if (!('x' in body.position)) {
+        body.position.x = 0;
+      }
+      if (!('y' in body.position)) {
+        body.position.y = 0;
+      }
+      if (!('angle' in body.position)) {
+        body.position.angle = 0;
+      }
       if (body.shape.type === "circle") {
         if (!('size' in body.shape)) {
           body.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2);
         }
         fixDef.shape = new B2CircleShape(body.shape.size);
+        fixDef.shape.m_p.Set(body.position.x, body.position.y);
       } else if (body.shape.type === "rectangle") {
         fixDef.shape = new B2PolygonShape();
         if (!('size' in body.shape)) {
@@ -342,7 +359,7 @@
             height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
           };
         }
-        fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height);
+        fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height, new B2Vec2(body.position.x, body.position.y), body.angle);
       } else if (body.shape.type === "polygon") {
         fixDef.shape = new B2PolygonShape();
         vectors = [];
@@ -947,17 +964,13 @@
   window.game.entity_types.ball = {
     name: "Ball",
     image: "ball.png",
-    width_scale: 1,
-    height_scale: 1,
-    scale_adjustment: 0.5,
     bodies: [
       {
         density: 40,
         friction: 2,
         restitution: 0.4,
         shape: {
-          type: "circle",
-          size: 1
+          type: "circle"
         }
       }
     ],
@@ -975,17 +988,13 @@
   window.game.entity_types['metal-ball'] = {
     name: "Metal Ball",
     image: "metal-ball.png",
-    width_scale: 1,
-    height_scale: 1,
-    scale_adjustment: 0.5,
     bodies: [
       {
         density: 70,
         friction: 2,
         restitution: 0.2,
         shape: {
-          type: "circle",
-          size: 1
+          type: "circle"
         }
       }
     ],
@@ -1055,8 +1064,33 @@
         shape: {
           type: "rectangle"
         }
+      }, {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "circle",
+          size: 1
+        },
+        position: {
+          x: 4,
+          y: 0
+        }
+      }, {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "circle",
+          size: 1
+        },
+        position: {
+          x: -4,
+          y: 0
+        }
       }
     ],
+    joints: [{}],
     init: function(entity) {
       return entity.components.push('conveyor-belt');
     }
@@ -1091,7 +1125,7 @@
               "y": -1.1
             }, {
               "x": 1.4,
-              "y": -0.1
+              "y": -0.2
             }, {
               "x": -0.1,
               "y": -0.5
@@ -1154,7 +1188,7 @@
               "y": 0.5
             }, {
               "x": 1.4,
-              "y": 0.1
+              "y": 0.2
             }, {
               "x": 1.4,
               "y": 1.1
@@ -1312,6 +1346,28 @@
     fixed: true,
     bodies: [
       {
+        shape: {
+          type: "rectangle"
+        }
+      }
+    ]
+  };
+
+  /* -------------------------------------------- 
+       Begin peg.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.peg = {
+    name: "Peg",
+    image: "peg.png",
+    fixed: true,
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
         shape: {
           type: "rectangle"
         }
@@ -1548,7 +1604,7 @@
     };
   };
 
-  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png"];
+  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     i = images[_i];

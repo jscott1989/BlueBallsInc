@@ -19,3 +19,4 @@ window.game.entity_base =
 #@codekit-append "entities/exit/exit.coffee";
 #@codekit-append "entities/walls.coffee";
 #@codekit-append "entities/lines.coffee";
+#@codekit-append "entities/peg.coffee";

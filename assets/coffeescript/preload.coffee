@@ -29,6 +29,7 @@ images = [
 	"/img/in.png"
 	"/img/xline.png"
 	"/img/yline.png"
+	"/img/peg.png"
 ]
 
 preload(i) for i in images

@@ -123,10 +123,25 @@ window.physics =
 		if "restitution" of body
 			fixDef.restitution = body.restitution				# Restitution
 
+		if not ('position' of body)
+				body.position = {
+					x: 0
+					y: 0
+					angle: 0
+				}
+
+		if not ('x' of body.position)
+			body.position.x = 0
+		if not ('y' of body.position)
+			body.position.y = 0
+		if not ('angle' of body.position)
+			body.position.angle = 0
+
 		if body.shape.type == "circle"
 			if not ('size' of body.shape)
 				body.shape.size = (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
 			fixDef.shape = new B2CircleShape(body.shape.size)		# Shape
+			fixDef.shape.m_p.Set(body.position.x, body.position.y)
 
 		else if body.shape.type == "rectangle"
 			fixDef.shape = new B2PolygonShape()
@@ -135,7 +150,7 @@ window.physics =
 					width: (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
 					height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
 
-			fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height)
+			fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height, new B2Vec2(body.position.x, body.position.y), body.angle)
 		else if body.shape.type == "polygon"
 			fixDef.shape = new B2PolygonShape()
 			vectors = []
