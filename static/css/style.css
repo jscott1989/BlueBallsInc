@@ -111,7 +111,7 @@ a {
   z-index: 1;
 }
 #game #grid .inner .inner2 #gameCanvas {
-  background: white;
+  background: url(/img/bg.png);
 }
 #game #grid .inner .inner2 #debugCanvas {
   position: absolute;

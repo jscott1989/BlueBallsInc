@@ -259,6 +259,9 @@ window.game =
 		for entity in window.game.entities
 			window.game.components[component].update(entity) for component in entity.components
 
+			if entity.top
+				window.game.stage.addChild(entity.bitmaps[0])
+
 		window.physics.update()
 
 		window.game.update_positions()

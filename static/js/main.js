@@ -359,7 +359,7 @@
             height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
           };
         }
-        fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height, new B2Vec2(body.position.x, body.position.y), body.angle);
+        fixDef.shape.SetAsOrientedBox(body.shape.size.width, body.shape.size.height, new B2Vec2(body.position.x, body.position.y), body.position.angle);
       } else if (body.shape.type === "polygon") {
         fixDef.shape = new B2PolygonShape();
         vectors = [];
@@ -749,6 +749,9 @@
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           component = _ref1[_j];
           window.game.components[component].update(entity);
+        }
+        if (entity.top) {
+          window.game.stage.addChild(entity.bitmaps[0]);
         }
       }
       window.physics.update();
@@ -1272,8 +1275,8 @@
         shape: {
           type: "rectangle",
           size: {
-            width: 1,
-            height: 1
+            width: 0.1,
+            height: 0.1
           }
         }
       }
@@ -1329,12 +1332,15 @@
 
   window.game.entity_types.xline = {
     name: "Line",
-    image: "xline.png",
     fixed: true,
     bodies: [
       {
         shape: {
-          type: "rectangle"
+          type: "rectangle",
+          size: {
+            width: 0.8,
+            height: 0.1
+          }
         }
       }
     ]
@@ -1342,12 +1348,15 @@
 
   window.game.entity_types.yline = {
     name: "Line",
-    image: "yline.png",
     fixed: true,
     bodies: [
       {
         shape: {
-          type: "rectangle"
+          type: "rectangle",
+          size: {
+            height: 0.8,
+            width: 0.1
+          }
         }
       }
     ]
@@ -1376,6 +1385,17 @@
   };
 
   /* -------------------------------------------- 
+       Begin image.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.image = {
+    name: "Image",
+    fixed: true
+  };
+
+  /* -------------------------------------------- 
        Begin components.coffee 
   --------------------------------------------
   */
@@ -1397,7 +1417,7 @@
     init: function(entity) {
       entity.balls_created = 0;
       if (!("ball_order" in entity)) {
-        entity.ball_order = ['ball', 'metal-ball'];
+        entity.ball_order = ['ball'];
       }
       entity.ball_order_pointer = 0;
       if (!("ball_creation_interval" in entity)) {
@@ -1594,6 +1614,7 @@
       var i, _i, _ref;
       for (i = _i = 0, _ref = images.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         if (images[i] === filename) {
+          console.log(filename);
           images.splice(i, 1);
           if (images.length === 0) {
             window.forward_to($('#main-menu'));
@@ -1604,7 +1625,7 @@
     };
   };
 
-  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/out.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
+  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
 
   for (_i = 0, _len = images.length; _i < _len; _i++) {
     i = images[_i];

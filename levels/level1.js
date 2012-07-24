@@ -7,16 +7,6 @@
     "walls": [],
     "entities": [
         {
-            "type": "yline",
-            "x": 4.3,
-            "y": 1
-        },
-        {
-            "type": "yline",
-            "x": 6.7,
-            "y": 1
-        },
-        {
             "type": "peg",
             "x": 9,
             "y": 4
@@ -29,26 +19,119 @@
         },
         {
             "type": "enter_dropper",
-            "image": "out.png",
             "x": 5.5,
             "y": 0.4,
             "maximum_balls": 3
-        },
-        {
-            "type": "xline",
-            "x": 16,
-            "y": 12
-        },
-        {
-            "type": "xline",
-            "x": 16,
-            "y": 15.2
         },
         {
             "type": "exit",
             "image": "in.png",
             "x": 17,
             "y": 14
+        },
+        {
+            "type": "image",
+            "image": "enter.png",
+            "top": true,
+            "x": 17,
+            "y": 14,
+            "bodies": [
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 0.1
+                        },
+                        "position": {
+                            "angle": 90
+                        }
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.3
+                        }
+                    },
+                    "position": {
+                        "x": -1.2,
+                        "y": 0
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.3
+                        }
+                    },
+                    "position": {
+                        "x": 1.2,
+                        "y": 0
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 1,
+                            "height": 0.1
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 1
+                    }
+                }
+            ]
+        },
+        {
+            "type": "image",
+            "image": "exit.png",
+            "top": true,
+            "x": 5.5,
+            "y": 0.4,
+            "bodies": [
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 0.1
+                        }
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.3
+                        }
+                    },
+                    "position": {
+                        "x": -1.2,
+                        "y": 0
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.3
+                        }
+                    },
+                    "position": {
+                        "x": 1.2,
+                        "y": 0
+                    }
+                }
+            ]
         },
         {
             "type": "wheel",

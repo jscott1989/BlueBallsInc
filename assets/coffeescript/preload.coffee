@@ -4,6 +4,7 @@ preload = (filename) ->
 	image.onload = () ->
 		for i in [0...images.length]
 			if images[i] == filename
+				console.log filename
 				images.splice i, 1
 
 				if images.length == 0
@@ -25,7 +26,8 @@ images = [
 	"/img/enter_dropper.png",
 	"/img/exit_box.png",
 	"/img/glue.png"
-	"/img/out.png"
+	"/img/enter.png"
+	"/img/exit.png"
 	"/img/in.png"
 	"/img/xline.png"
 	"/img/yline.png"

@@ -149,8 +149,9 @@ window.physics =
 				body.shape.size =
 					width: (entity.bitmaps[0].image.width * entity.bitmaps[0].scaleX) / (window.game.scale * 2)
 					height: (entity.bitmaps[0].image.height * entity.bitmaps[0].scaleY) / (window.game.scale * 2)
-
-			fixDef.shape.SetAsBox(body.shape.size.width, body.shape.size.height, new B2Vec2(body.position.x, body.position.y), body.angle)
+			
+			fixDef.shape.SetAsOrientedBox(body.shape.size.width, body.shape.size.height, new B2Vec2(body.position.x, body.position.y), body.position.angle)
+			
 		else if body.shape.type == "polygon"
 			fixDef.shape = new B2PolygonShape()
 			vectors = []

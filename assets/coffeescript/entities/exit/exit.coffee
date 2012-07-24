@@ -9,8 +9,8 @@ window.game.entity_types.exit =
 		shape:
 			type: "rectangle"
 			size:
-				width: 1
-				height: 1
+				width: 0.1
+				height: 0.1
 	}]
 	init: (entity) ->
 		entity.components.push('exit')

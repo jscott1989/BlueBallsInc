@@ -6,7 +6,7 @@ window.game.components.enter_dropper =
 		entity.balls_created = 0
 
 		if not ("ball_order" of entity)
-			entity.ball_order = ['ball', 'metal-ball']
+			entity.ball_order = ['ball']
 
 		entity.ball_order_pointer = 0
 
