@@ -26,26 +26,27 @@ window.game.components.magnetized =
 	update: (entity) ->
 		# Find objects to pull
 
-		if entity.fixtures.length > 0
-			position = entity.fixtures[0].GetBody().GetPosition();
+		if window.viewModel.state() == 'PLAY'
+			if entity.fixtures.length > 0
+				position = entity.fixtures[0].GetBody().GetPosition();
 
-			for e in window.game.entities
-				if 'magnetic' in e.tags
-					body = e.fixtures[0].GetBody()
-					e_position = body.GetPosition()
+				for e in window.game.entities
+					if 'magnetic' in e.tags
+						body = e.fixtures[0].GetBody()
+						e_position = body.GetPosition()
 
-					if Math.abs(position.x - e_position.x) > MAX_DISTANCE or Math.abs(position.y - e_position.y) > MAX_DISTANCE
-						continue
+						if Math.abs(position.x - e_position.x) > MAX_DISTANCE or Math.abs(position.y - e_position.y) > MAX_DISTANCE
+							continue
 
-					xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER
-					yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER
+						xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER
+						yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER
 
-					if e_position.x > position.x
-						xspeed = 0 - xspeed
-					if e_position.y > position.y
-						yspeed = 0 - yspeed
+						if e_position.x > position.x
+							xspeed = 0 - xspeed
+						if e_position.y > position.y
+							yspeed = 0 - yspeed
 
-					body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter())
+						body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter())
 
 	play: (entity) ->
 

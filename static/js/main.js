@@ -25,7 +25,7 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(true);
+    self.debug = ko.observable(false);
     self.level = ko.observable(1);
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
@@ -1484,32 +1484,34 @@
     init: function(entity) {},
     update: function(entity) {
       var body, e, e_position, position, xspeed, yspeed, _i, _len, _ref, _results;
-      if (entity.fixtures.length > 0) {
-        position = entity.fixtures[0].GetBody().GetPosition();
-        _ref = window.game.entities;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          e = _ref[_i];
-          if (__indexOf.call(e.tags, 'magnetic') >= 0) {
-            body = e.fixtures[0].GetBody();
-            e_position = body.GetPosition();
-            if (Math.abs(position.x - e_position.x) > MAX_DISTANCE || Math.abs(position.y - e_position.y) > MAX_DISTANCE) {
-              continue;
+      if (window.viewModel.state() === 'PLAY') {
+        if (entity.fixtures.length > 0) {
+          position = entity.fixtures[0].GetBody().GetPosition();
+          _ref = window.game.entities;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            e = _ref[_i];
+            if (__indexOf.call(e.tags, 'magnetic') >= 0) {
+              body = e.fixtures[0].GetBody();
+              e_position = body.GetPosition();
+              if (Math.abs(position.x - e_position.x) > MAX_DISTANCE || Math.abs(position.y - e_position.y) > MAX_DISTANCE) {
+                continue;
+              }
+              xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER;
+              yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER;
+              if (e_position.x > position.x) {
+                xspeed = 0 - xspeed;
+              }
+              if (e_position.y > position.y) {
+                yspeed = 0 - yspeed;
+              }
+              _results.push(body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter()));
+            } else {
+              _results.push(void 0);
             }
-            xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER;
-            yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER;
-            if (e_position.x > position.x) {
-              xspeed = 0 - xspeed;
-            }
-            if (e_position.y > position.y) {
-              yspeed = 0 - yspeed;
-            }
-            _results.push(body.ApplyForce(new B2Vec2(xspeed, yspeed), body.GetWorldCenter()));
-          } else {
-            _results.push(void 0);
           }
+          return _results;
         }
-        return _results;
       }
     },
     play: function(entity) {},
