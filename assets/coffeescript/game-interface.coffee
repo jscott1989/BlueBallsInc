@@ -1,4 +1,4 @@
-###global ko:false###
+###global ko:false, SoundJS:false###
 $menus = $('#menus')
 $game = $('#game')
 $pause_menu = $('#pause-menu')

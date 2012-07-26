@@ -6,7 +6,7 @@
 */
 
 
-/*global ko:false
+/*global ko:false, SoundJS:false
 */
 
 
@@ -787,8 +787,15 @@
     },
     mouse_move: function(e) {
       if (window.viewModel.state() === 'BUILD') {
-        window.game.mouseX = e.offsetX / window.game.scale;
-        window.game.mouseY = e.offsetY / window.game.scale;
+        console.log(e);
+        if (e.offsetX) {
+          window.game.mouseX = e.offsetX / window.game.scale;
+          window.game.mouseY = e.offsetY / window.game.scale;
+        } else {
+          window.game.mouseX = e.pageX / window.game.scale;
+          window.game.mouseY = e.pageY / window.game.scale;
+        }
+        console.log(window.game.mouseX);
         if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
           return window.game.tools[window.viewModel.tool()].mouse_move(e);
         }
@@ -1503,11 +1510,16 @@
   */
 
 
+  /*global SoundJS:false
+  */
+
+
   window.game.components.exit = {
     init: function(entity) {},
     update: function(entity) {},
     begin_contact: function(entity, other_entity) {
       if (__indexOf.call(other_entity.tags, "ball") >= 0) {
+        SoundJS.play("ball");
         window.game.remove_entity(other_entity);
         return window.viewModel.balls_complete(window.viewModel.balls_complete() + 1);
       }

@@ -289,8 +289,17 @@ window.game =
 
 	mouse_move: (e) ->
 		if window.viewModel.state() == 'BUILD'
-			window.game.mouseX = e.offsetX / window.game.scale
-			window.game.mouseY = e.offsetY / window.game.scale
+			console.log e
+			if e.offsetX
+				window.game.mouseX = e.offsetX / window.game.scale
+				window.game.mouseY = e.offsetY / window.game.scale
+			else
+				window.game.mouseX = e.pageX / window.game.scale
+				window.game.mouseY = e.pageY / window.game.scale
+
+			
+
+			console.log window.game.mouseX
 
 			if 'mouse_move' of window.game.tools[window.viewModel.tool()]
 				window.game.tools[window.viewModel.tool()].mouse_move(e)
