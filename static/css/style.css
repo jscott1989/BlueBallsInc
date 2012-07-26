@@ -11,6 +11,7 @@ a {
 button {
   width: 120px;
   display: block;
+  font-size: 13px;
   margin: 8px auto;
   padding: 6px 10px;
   background: transparent;
