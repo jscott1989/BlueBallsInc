@@ -57,6 +57,7 @@ window.level_complete = () ->
 	return false
 
 $('.pause').click ->
+	SoundJS.play("menu");
 	window.forward_to($pause_menu)
 	$menus.fadeIn()
 	window.viewModel.last_state = window.viewModel.state()
@@ -64,11 +65,13 @@ $('.pause').click ->
 	return false
 
 $('.resume').click ->
+	SoundJS.play("start");
 	$menus.fadeOut()
 	window.viewModel.state(window.viewModel.last_state)
 	return false
 
 $('.start').click ->
+	SoundJS.play("start");
 	$('canvas').css('opacity', '100')
 	if window.viewModel.state() == "BUILD"
 		window.viewModel.state("PLAY")
@@ -81,12 +84,14 @@ $('.start').click ->
 			window.viewModel.state("BUILD")
 
 $('.confirm-exit-game').click ->
+	SoundJS.play("menu");
 	window.viewModel.state("BUILD")
 	$game.fadeOut()
 
 	window.backwards_to($main_menu)
 
 $('.confirm-restart-level').click ->
+	SoundJS.play("start");
 	window.viewModel.state("BUILD")
 	$menus.fadeOut()
 	load_level("level" + window.viewModel.level())
@@ -94,16 +99,19 @@ $('.confirm-restart-level').click ->
 	window.backwards_to($main_menu)
 
 $('.watch-replay').click ->
+	SoundJS.play("start");
 	$('#replay-form').submit()
 	window.backwards_to($('#level-complete-menu'))
 	false
 
 $('.watch-replay-again').click ->
+	SoundJS.play("start");
 	$menus.fadeOut()
 	window.game.load_state(window.replay.state)
 	window.viewModel.state("PLAY")
 
 $('.next-level').click ->
+	SoundJS.play("start");
 	window.viewModel.level(window.viewModel.level() + 1)
 	load_level("level" + window.viewModel.level())
 	$menus.fadeOut()

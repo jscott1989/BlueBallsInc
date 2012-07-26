@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, FORCE_PER_METER, GameViewModel, MAX_DISTANCE, MAX_FORCE, count, i, images, load_level, preload, _i, _len,
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, FORCE_PER_METER, GameViewModel, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
@@ -77,6 +77,7 @@
   };
 
   $('.pause').click(function() {
+    SoundJS.play("menu");
     window.forward_to($pause_menu);
     $menus.fadeIn();
     window.viewModel.last_state = window.viewModel.state();
@@ -85,12 +86,14 @@
   });
 
   $('.resume').click(function() {
+    SoundJS.play("start");
     $menus.fadeOut();
     window.viewModel.state(window.viewModel.last_state);
     return false;
   });
 
   $('.start').click(function() {
+    SoundJS.play("start");
     $('canvas').css('opacity', '100');
     if (window.viewModel.state() === "BUILD") {
       return window.viewModel.state("PLAY");
@@ -106,12 +109,14 @@
   });
 
   $('.confirm-exit-game').click(function() {
+    SoundJS.play("menu");
     window.viewModel.state("BUILD");
     $game.fadeOut();
     return window.backwards_to($main_menu);
   });
 
   $('.confirm-restart-level').click(function() {
+    SoundJS.play("start");
     window.viewModel.state("BUILD");
     $menus.fadeOut();
     load_level("level" + window.viewModel.level());
@@ -119,18 +124,21 @@
   });
 
   $('.watch-replay').click(function() {
+    SoundJS.play("start");
     $('#replay-form').submit();
     window.backwards_to($('#level-complete-menu'));
     return false;
   });
 
   $('.watch-replay-again').click(function() {
+    SoundJS.play("start");
     $menus.fadeOut();
     window.game.load_state(window.replay.state);
     return window.viewModel.state("PLAY");
   });
 
   $('.next-level').click(function() {
+    SoundJS.play("start");
     window.viewModel.level(window.viewModel.level() + 1);
     load_level("level" + window.viewModel.level());
     return $menus.fadeOut();
@@ -1325,6 +1333,44 @@
   };
 
   /* -------------------------------------------- 
+       Begin walls.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.xwall = {
+    name: "Wall",
+    fixed: true,
+    bodies: [
+      {
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 11.5,
+            height: 0.1
+          }
+        }
+      }
+    ]
+  };
+
+  window.game.entity_types.ywall = {
+    name: "Wall",
+    fixed: true,
+    bodies: [
+      {
+        shape: {
+          type: "rectangle",
+          size: {
+            width: 0.1,
+            height: 10
+          }
+        }
+      }
+    ]
+  };
+
+  /* -------------------------------------------- 
        Begin lines.coffee 
   --------------------------------------------
   */
@@ -1539,6 +1585,10 @@
   */
 
 
+  /*global SoundJS:false
+  */
+
+
   $menus = $('#menus');
 
   $game = $('#game');
@@ -1593,10 +1643,12 @@
     var $this, menu_target;
     $this = $(this);
     menu_target = $this.data('menu');
+    SoundJS.play("menu");
     return window.show_menu(menu_target);
   });
 
   $('.start-tutorial').click(function() {
+    SoundJS.play("start");
     $menus.fadeOut();
     $game.fadeIn();
     return window.start_game();
@@ -1605,6 +1657,10 @@
   /* -------------------------------------------- 
        Begin preload.coffee 
   --------------------------------------------
+  */
+
+
+  /*global SoundJS:false, PreloadJS:false
   */
 
 
@@ -1629,9 +1685,47 @@
 
   images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
 
-  for (_i = 0, _len = images.length; _i < _len; _i++) {
-    i = images[_i];
-    preload(i);
+  sounds = ["ball", "collide", "menu", "start"];
+
+  SoundJS.FlashPlugin.BASE_PATH = "js/";
+
+  if (!SoundJS.checkPlugin(true)) {
+    console.log("Error initialising sound");
   }
+
+  loaded = 0;
+
+  load_complete = function(e) {
+    var i, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = images.length; _i < _len; _i++) {
+      i = images[_i];
+      _results.push(preload(i));
+    }
+    return _results;
+  };
+
+  queue = new PreloadJS();
+
+  queue.installPlugin(SoundJS);
+
+  queue.onComplete = load_complete;
+
+  load_sound = function(id) {
+    var filename, item;
+    filename = '/sound/' + id + '.mp3|/sound/' + id + '.ogg';
+    item = {
+      src: filename,
+      id: id
+    };
+    return queue.loadFile(item);
+  };
+
+  for (_i = 0, _len = sounds.length; _i < _len; _i++) {
+    s = sounds[_i];
+    load_sound(s);
+  }
+
+  queue.load();
 
 }).call(this);

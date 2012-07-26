@@ -1,3 +1,4 @@
+###global SoundJS:false###
 $menus = $('#menus')
 $game = $('#game')
 $last_active = $('.overlay-window.active')
@@ -43,10 +44,13 @@ $('li[data-menu]').click ->
 	$this = $(this)
 	menu_target = $this.data('menu')
 
+	SoundJS.play("menu");
+
 	window.show_menu(menu_target)
 
 $('.start-tutorial').click ->
 	# Start tutorial mode
+	SoundJS.play("start");
 	$menus.fadeOut()
 	$game.fadeIn()
 	window.start_game()

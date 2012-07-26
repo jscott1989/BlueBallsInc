@@ -57,6 +57,9 @@ def static_img(filepath):
 @route('/js/<filepath:path>')
 def static_js(filepath):
 	return static_file(filepath, root=root_directory + '/static/js/')
+@route('/sound/<filepath:path>')
+def static_sound(filepath):
+	return static_file(filepath, root=root_directory + '/static/sound/')
 
 @route('/levels/<level>')
 def level(level):
