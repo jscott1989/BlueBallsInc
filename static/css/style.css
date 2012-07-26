@@ -9,7 +9,7 @@ a {
   color: #000;
 }
 #container {
-  background: orange;
+  background: #7c879d;
   margin: auto;
   width: 900px;
   height: 600px;
@@ -38,9 +38,13 @@ a {
   vertical-align: middle;
 }
 #menus .overlay-window .inner .inner2 .inner3 {
-  background: blue;
-  padding: 20px;
+  background-color: rgba(65, 93, 129, 0.75);
+  color: white;
+  padding: 14px;
   text-align: center;
+  border: 6px solid rgba(211, 238, 255, 0.46);
+  border-radius: 12px;
+  -webkit-background-clip: padding;
 }
 #menus .overlay-window .inner .inner2 .inner3 ul {
   list-style: none;
@@ -49,8 +53,7 @@ a {
 }
 #menus .overlay-window .inner .inner2 .inner3 ul li {
   cursor: pointer;
-  padding-top: 2px;
-  padding-bottom: 2px;
+  padding-top: 8px;
 }
 #menus .overlay-window .inner .inner2 .inner3 ul li a {
   text-decoration: none;
@@ -59,7 +62,7 @@ a {
   height: 100%;
 }
 #menus .overlay-window .inner .inner2 .inner3 ul li:hover {
-  background: red;
+  background: #414f67;
 }
 #game * {
   -webkit-touch-callout: none;
@@ -126,12 +129,16 @@ a {
 }
 #game #sidebar {
   right: 0px;
-  background: red;
+  background-color: #394a67;
+  border-left: 2px solid #23314A;
   width: 200px;
   height: 600px;
   display: inline-block;
 }
 #game #sidebar #level {
+  margin-top: 20px;
+  color: white;
+  font-weight: bold;
   text-align: center;
 }
 #game #sidebar #replay_name {

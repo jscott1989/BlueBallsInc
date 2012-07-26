@@ -32,7 +32,10 @@
 		<input type="text" name="state" data-bind="value: build_state_string()">
 		<input type="submit">
 	</form>
-	
+
+	<script type='text/javascript' src='/js/preloadjs.js'></script>
+	<script type='text/javascript' src='/js/soundjs.js'></script>
+	<script type='text/javascript' src='/js/soundjs.flash.js'></script>
 	<script type="text/javascript" src="/js/jquery.js"></script>
 	<script type='text/javascript' src='/js/knockout.js'></script>
 	<script type='text/javascript' src='/js/box2dweb.js'></script>
