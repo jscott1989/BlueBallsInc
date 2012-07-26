@@ -4,7 +4,7 @@
 			<div class="inner3">
 				<ul>
 					<li class="start-tutorial">New Game</li>
-					<li data-menu="#custom-menu">Custom Level</li>
+					<!--<li data-menu="#custom-menu">Custom Level</li>-->
 					<!-- <li data-menu="#challenge-menu">Challenge Mode</li>
 					<li data-menu="#highscore-menu">High Scores</li> -->
 					<li data-menu="#about-menu">About</li>
