@@ -7,7 +7,7 @@
     "walls": [],
     "entities": [
         {
-            "type": "conveyor-belt",
+            "type": "ledge",
             "x": 7,
             "y": 14,
             "fixed": true

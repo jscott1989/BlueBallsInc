@@ -787,7 +787,6 @@
     },
     mouse_move: function(e) {
       if (window.viewModel.state() === 'BUILD') {
-        console.log(e);
         if (e.offsetX) {
           window.game.mouseX = e.offsetX / window.game.scale;
           window.game.mouseY = e.offsetY / window.game.scale;
@@ -795,7 +794,6 @@
           window.game.mouseX = e.pageX / window.game.scale;
           window.game.mouseY = e.pageY / window.game.scale;
         }
-        console.log(window.game.mouseX);
         if ('mouse_move' in window.game.tools[window.viewModel.tool()]) {
           return window.game.tools[window.viewModel.tool()].mouse_move(e);
         }
@@ -1065,53 +1063,41 @@
   };
 
   /* -------------------------------------------- 
-       Begin conveyor-belt.coffee 
+       Begin ledge.coffee 
   --------------------------------------------
   */
 
 
-  window.game.entity_types["conveyor-belt"] = {
-    name: "Conveyor Belt",
-    image: "conveyor-belt.png",
-    scale_adjustment: 1,
+  window.game.entity_types["ledge"] = {
+    name: "Ledge",
+    image: "ledge.png",
     bodies: [
       {
-        density: 40,
-        friction: 2,
-        restitution: 0.2,
         shape: {
-          type: "rectangle"
+          type: "rectangle",
+          size: {
+            width: 0.1,
+            height: 0.1
+          }
         }
       }, {
         density: 40,
         friction: 2,
         restitution: 0.2,
         shape: {
-          type: "circle",
-          size: 1
+          type: "rectangle",
+          size: {
+            height: 0.5,
+            width: 5.2
+          }
         },
         position: {
-          x: 4,
-          y: 0
-        }
-      }, {
-        density: 40,
-        friction: 2,
-        restitution: 0.2,
-        shape: {
-          type: "circle",
-          size: 1
-        },
-        position: {
-          x: -4,
-          y: 0
+          x: -0.1,
+          y: 0.2
         }
       }
     ],
-    joints: [{}],
-    init: function(entity) {
-      return entity.components.push('conveyor-belt');
-    }
+    joints: [{}]
   };
 
   /* -------------------------------------------- 
@@ -1577,21 +1563,6 @@
   };
 
   /* -------------------------------------------- 
-       Begin conveyor-belt.coffee 
-  --------------------------------------------
-  */
-
-
-  /*global Box2D:false, $:false, Math:false
-  */
-
-
-  window.game.components["conveyor-belt"] = {
-    init: function(entity) {},
-    update: function(entity) {}
-  };
-
-  /* -------------------------------------------- 
        Begin menu.coffee 
   --------------------------------------------
   */
@@ -1695,7 +1666,7 @@
     };
   };
 
-  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/conveyor-belt.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
+  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/bg.png", "/img/ledge.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
 
   sounds = ["ball", "collide", "menu", "start"];
 
