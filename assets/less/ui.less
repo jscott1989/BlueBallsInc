@@ -15,7 +15,7 @@ a {
 }
 
 #container {
-	background: orange;
+	background: #7c879d;
 	margin: auto;
 	width: @width;
 	height: @height;
@@ -43,9 +43,13 @@ a {
 				vertical-align:middle;
 
 				.inner3 {
-					background: blue;
-					padding: 20px;
+					background-color: rgba(65, 93, 129, 0.75);
+					color: white;
+					padding: 14px;
 					text-align: center;
+					border: 6px solid rgba(211, 238, 255, 0.46);
+					border-radius: 12px;
+					-webkit-background-clip: padding;
 					ul {
 						list-style: none;
 						padding: 0;
@@ -53,8 +57,7 @@ a {
 
 						li {
 							cursor: pointer;
-							padding-top: 2px;
-							padding-bottom: 2px;
+							padding-top: 8px;
 
 							a {
 								text-decoration: none;
@@ -64,7 +67,7 @@ a {
 							}
 
 							&:hover {
-								background: red;
+								background: #414f67;
 							}
 						}
 					}
