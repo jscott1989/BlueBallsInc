@@ -25,7 +25,7 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(false);
+    self.debug = ko.observable(true);
     self.level = ko.observable(1);
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
@@ -1107,15 +1107,28 @@
         friction: 2,
         restitution: 0.2,
         shape: {
-          type: "rectangle",
-          size: {
-            height: 0.5,
-            width: 5.2
-          }
-        },
-        position: {
-          x: -0.1,
-          y: 0.2
+          type: "polygon",
+          vectors: [
+            {
+              "x": -4.8,
+              "y": -0.3
+            }, {
+              "x": 4.7,
+              "y": -0.3
+            }, {
+              "x": 5,
+              "y": 0
+            }, {
+              "x": 5,
+              "y": 0.7
+            }, {
+              "x": -5.2,
+              "y": 0.7
+            }, {
+              "x": -5.2,
+              "y": 0
+            }
+          ]
         }
       }
     ],

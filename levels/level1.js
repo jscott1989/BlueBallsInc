@@ -53,12 +53,12 @@
                         "type": "rectangle",
                         "size": {
                             "width": 0.1,
-                            "height": 1.3
+                            "height": 1.1
                         }
                     },
                     "position": {
-                        "x": -1.2,
-                        "y": 0
+                        "x": -1.1,
+                        "y": 0.1
                     }
                 },
                 {
@@ -66,12 +66,12 @@
                         "type": "rectangle",
                         "size": {
                             "width": 0.1,
-                            "height": 1.3
+                            "height": 1.1
                         }
                     },
                     "position": {
-                        "x": 1.2,
-                        "y": 0
+                        "x": 1.1,
+                        "y": 0.1
                     }
                 },
                 {
