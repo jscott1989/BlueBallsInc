@@ -49,6 +49,12 @@ window.game =
 	last_state: "BUILD"
 	last_selected_tool: "MOVE" # The previously selected tool, used to inform when it's deselected
 
+	next_intro: () ->
+		if window.viewModel.intro().length == (window.viewModel.intro_pointer() + 1)
+			window.viewModel.state('BUILD')
+		else
+			window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1)
+
 	init: () ->
 		# Initialise the game engine
 		window.physics.init()
@@ -155,6 +161,9 @@ window.game =
 		window.viewModel.allowed_tools.push(tool) for tool in window.game.settings.tools
 
 		window.viewModel.balls_needed(window.game.settings.balls_needed)
+
+		window.viewModel.intro(state.intro)
+		window.viewModel.intro_pointer(0)
 
 		if not ("seed" of window.game.settings)
 			window.game.settings.seed = Math.random()
@@ -280,6 +289,8 @@ window.game =
 			window.game.mouse_down = true
 			if 'mouse_down' of window.game.tools[window.viewModel.tool()]
 				window.game.tools[window.viewModel.tool()].mouse_down(e)
+		else if window.viewModel.state() == 'INTRO'
+			window.game.next_intro()
 
 	mouse_up: (e) ->
 		if window.viewModel.state() == 'BUILD'
@@ -344,6 +355,7 @@ window.game =
 		return point
 
 
+$('#narration').mousedown(window.game.mouse_down)
 window.game.$debug_canvas.mousedown(window.game.mouse_down)
 window.game.$debug_canvas.mouseup(window.game.mouse_up)
 window.game.$debug_canvas.mousemove(window.game.mouse_move)

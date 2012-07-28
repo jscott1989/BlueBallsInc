@@ -1,4 +1,4 @@
-window.game.entity_types["ledge"] =
+window.game.entity_types.ledge =
 	name: "Ledge"
 	image: "ledge.png"
 

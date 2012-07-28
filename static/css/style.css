@@ -134,6 +134,29 @@ button:active {
   height: 600px;
   display: inline-block;
 }
+#game #grid #narration {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+}
+#game #grid #narration .inner {
+  width: 500px;
+  margin: auto;
+  background: rgba(0, 0, 0, 0.8);
+  color: #FFF;
+  padding: 10px;
+  font-weight: bold;
+}
+#game #grid #narration .inner a {
+  float: right;
+  color: #FFF;
+  cursor: pointer;
+  padding-right: 5px;
+  padding-bottom: 5px;
+}
+#game #grid #narration .inner a:hover {
+  color: #DDD;
+}
 #game #grid .inner {
   display: table;
   height: 100%;

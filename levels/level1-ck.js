@@ -4,6 +4,11 @@
         "tools": ["MOVE"],
         "seed": "1234567899"
     },
+    "intro": [
+        "Welcome to Blue Balls Inc! Formerly the number one exporter of blue balls in the whole of America. Unfortunately the place isn't what it used to be...",
+        "We need you to restore this company to its former glory.",
+        "To get started."
+    ],
     "walls": [],
     "entities": [
         {

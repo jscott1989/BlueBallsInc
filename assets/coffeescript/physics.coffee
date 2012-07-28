@@ -98,7 +98,7 @@ window.physics =
 
 	update: () ->
 		# Update the physics engine each tick
-		if window.viewModel.state() == 'PAUSE'
+		if window.viewModel.state() in ['PAUSE', 'INTRO']
 			# Don't step if we're paused
 			if window.viewModel.debug()
 				# If we're debugging

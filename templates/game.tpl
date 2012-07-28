@@ -4,6 +4,12 @@
 			<div class="inner2">
 				<canvas width="700" height="600" id="gameCanvas"></canvas>
 				<canvas width="700" height="600" id="debugCanvas" data-bind="style: {display: debug() ? 'inline' : 'none' }"></canvas>
+				<div id="narration" data-bind="style: {display: state() == 'INTRO' ? 'inline' : 'none' }">
+					<div class="inner">
+						<p data-bind="text: intro_text()"></p>
+						<a class="continue">Click to continue</a>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div><div id="sidebar">

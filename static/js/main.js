@@ -40,6 +40,14 @@
     self.replay_mode = ko.observable(false);
     self.replay_name = ko.observable(false);
     self.build_state = ko.observable(null);
+    self.intro = ko.observableArray();
+    self.intro_pointer = ko.observable(0);
+    self.intro_text = ko.computed(function() {
+      if (self.intro().length > self.intro_pointer()) {
+        return self.intro()[self.intro_pointer()];
+      }
+      return '';
+    });
     self.build_state_string = ko.computed(function() {
       return JSON.stringify(self.build_state());
     });
@@ -55,7 +63,8 @@
   load_level = function(level_name) {
     return $.getJSON('/levels/' + level_name, function(data) {
       window.game.load_state(data, true);
-      window.viewModel.state("BUILD");
+      window.viewModel.state("INTRO");
+      console.log(window.viewModel.state());
       return window.game.reset();
     });
   };
@@ -302,8 +311,8 @@
     },
     start_game: function() {},
     update: function() {
-      var entity, fixture, _i, _j, _len, _len1, _ref, _ref1;
-      if (window.viewModel.state() === 'PAUSE') {
+      var entity, fixture, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      if ((_ref = window.viewModel.state()) === 'PAUSE' || _ref === 'INTRO') {
         if (window.viewModel.debug()) {
           window.physics.world.DrawDebugData();
         }
@@ -314,12 +323,12 @@
         window.physics.world.DrawDebugData();
       }
       window.physics.world.ClearForces();
-      _ref = window.physics.entities_to_delete;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        entity = _ref[_i];
-        _ref1 = entity.fixtures;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          fixture = _ref1[_j];
+      _ref1 = window.physics.entities_to_delete;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        entity = _ref1[_i];
+        _ref2 = entity.fixtures;
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          fixture = _ref2[_j];
           window.physics.world.DestroyBody(fixture.GetBody());
         }
       }
@@ -499,6 +508,13 @@
     stage: new Stage($('#gameCanvas')[0]),
     last_state: "BUILD",
     last_selected_tool: "MOVE",
+    next_intro: function() {
+      if (window.viewModel.intro().length === (window.viewModel.intro_pointer() + 1)) {
+        return window.viewModel.state('BUILD');
+      } else {
+        return window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1);
+      }
+    },
     init: function() {
       window.physics.init();
       window.game.stage.update();
@@ -626,6 +642,8 @@
         window.viewModel.allowed_tools.push(tool);
       }
       window.viewModel.balls_needed(window.game.settings.balls_needed);
+      window.viewModel.intro(state.intro);
+      window.viewModel.intro_pointer(0);
       if (!("seed" in window.game.settings)) {
         window.game.settings.seed = Math.random();
       }
@@ -775,6 +793,8 @@
         if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
           return window.game.tools[window.viewModel.tool()].mouse_down(e);
         }
+      } else if (window.viewModel.state() === 'INTRO') {
+        return window.game.next_intro();
       }
     },
     mouse_up: function(e) {
@@ -848,6 +868,8 @@
       return point;
     }
   };
+
+  $('#narration').mousedown(window.game.mouse_down);
 
   window.game.$debug_canvas.mousedown(window.game.mouse_down);
 
@@ -1068,7 +1090,7 @@
   */
 
 
-  window.game.entity_types["ledge"] = {
+  window.game.entity_types.ledge = {
     name: "Ledge",
     image: "ledge.png",
     bodies: [

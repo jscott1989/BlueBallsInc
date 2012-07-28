@@ -22,6 +22,14 @@ GameViewModel = ->
 	self.replay_name = ko.observable(false)
 	self.build_state = ko.observable(null) # This is the content of the
 
+	self.intro = ko.observableArray()
+	self.intro_pointer = ko.observable(0)
+
+	self.intro_text = ko.computed ->
+		if self.intro().length > self.intro_pointer()
+			return self.intro()[self.intro_pointer()]
+		return ''
+
 	self.build_state_string = ko.computed ->
 		JSON.stringify self.build_state()
 
@@ -39,7 +47,8 @@ load_level = (level_name) ->
 	# Load a level from the server
 	$.getJSON '/levels/' + level_name, (data) ->
 		window.game.load_state data, true
-		window.viewModel.state("BUILD")
+		window.viewModel.state("INTRO")
+		console.log window.viewModel.state()
 		window.game.reset()
 
 window.start_game = () ->
