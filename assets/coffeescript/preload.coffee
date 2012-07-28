@@ -1,4 +1,4 @@
-###global SoundJS:false, PreloadJS:false, level:false, auto_load_game: false###
+###global SoundJS:false, PreloadJS:false, level:false, auto_load_game: false, replay_mode: false###
 preload = (filename) ->
 	image = new Image()
 	image.src = filename
@@ -10,6 +10,14 @@ preload = (filename) ->
 				if images.length == 0
 					if (auto_load_game)
 						$('.start-tutorial').click()
+					else if replay_mode
+						window.viewModel.replay_mode(true)
+						window.viewModel.replay_name(window.replay.name)
+
+						$('#menus').hide()
+						$('#game').show()
+						window.game.load_state window.replay.state, true
+						window.viewModel.state("PLAY")
 					else
 						window.forward_to($('#main-menu'))
 				return

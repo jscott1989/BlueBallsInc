@@ -23,7 +23,7 @@ db = Server(db_host).get_or_create_db("blueballs")
 @view("index")
 def index():
 	# The main page
-	return {"level": 1, "auto_load_game": "false"}
+	return {"level": 1, "auto_load_game": "false", "replay_mode": False}
 
 @post('/replay/new')
 def post_replay():
@@ -39,20 +39,20 @@ def post_replay():
 	return redirect('/replay/%s' % replay['_id'])
 
 @get('/replay/:replay_id')
-@view("replay")
+@view("index")
 def replay(replay_id):
 	if not db.doc_exist(replay_id):
 		abort(404, "Replay not found")
 	replay = db.get(replay_id)
 	if not replay.get('replay_flag'):
 		abort(404, "Replay not found")
-	return {"replay": json.dumps(replay)}
+	return {"level": 1, "auto_load_game": "false", "replay_mode": True, "replay": json.dumps(replay)}
 
 @get('/level/:level_name')
 @view("index")
 def play_level(level_name):
 	# Jump to a particular level
-	return {"level": level_name, "auto_load_game": "true"}
+	return {"level": level_name, "auto_load_game": "true", "replay_mode": False}
 
 @route('/css/<filepath:path>')
 def static_css(filepath):

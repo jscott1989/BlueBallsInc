@@ -14,7 +14,7 @@
 		</div>
 	</div><div id="sidebar">
 		<div class="inner">
-			<div id="level" data-bind="text: 'Level ' + level()"></div>
+			<div id="level" data-bind="style: {display: replay_mode() ? 'none' : 'block'}, text: 'Level ' + level()"></div>
 			<span id="replay_name" data-bind="text: replay_name, style: {display: replay_mode() ? 'block' : 'none'}"></span>
 			<button class="start" data-bind="text: isPlaying() ? 'Reset' : 'Start'">Start</button>
 			<button class="pause" data-bind="style: {display: replay_mode() ? 'none' : 'block'}">Menu</button>

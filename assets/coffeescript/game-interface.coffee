@@ -63,7 +63,7 @@ window.start_game = () ->
 	return
 
 window.level_complete = () ->
-	if window.replay
+	if window.replay_mode
 		window.forward_to($('#replay-complete-menu'))
 	else
 		window.forward_to($('#level-complete-menu'))
@@ -87,7 +87,6 @@ $('.resume').click ->
 
 $('.start').click ->
 	SoundJS.play("start");
-	$('canvas').css('opacity', '100')
 	if window.viewModel.state() == "BUILD"
 		window.viewModel.state("PLAY")
 	else

@@ -34,7 +34,13 @@
 		<input type="submit">
 	</form>
 	
-	<script type="text/javascript">auto_load_game = {{auto_load_game}}; level = {{level}};</script>
+	<script type="text/javascript">auto_load_game = {{auto_load_game}}; level = {{level}}; replay_mode = false;</script>
+	% if replay_mode:
+		<script type="text/javascript">
+			replay_mode = true;
+			window.replay = {{!replay}};
+		</script>
+	%end
 	<script type='text/javascript' src='/js/preloadjs.js'></script>
 	<script type='text/javascript' src='/js/soundjs.js'></script>
 	<script type='text/javascript' src='/js/soundjs.flash.js'></script>

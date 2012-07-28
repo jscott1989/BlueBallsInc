@@ -83,7 +83,7 @@
   };
 
   window.level_complete = function() {
-    if (window.replay) {
+    if (window.replay_mode) {
       window.forward_to($('#replay-complete-menu'));
     } else {
       window.forward_to($('#level-complete-menu'));
@@ -111,7 +111,6 @@
 
   $('.start').click(function() {
     SoundJS.play("start");
-    $('canvas').css('opacity', '100');
     if (window.viewModel.state() === "BUILD") {
       return window.viewModel.state("PLAY");
     } else {
@@ -1686,7 +1685,7 @@
   */
 
 
-  /*global SoundJS:false, PreloadJS:false, level:false, auto_load_game: false
+  /*global SoundJS:false, PreloadJS:false, level:false, auto_load_game: false, replay_mode: false
   */
 
 
@@ -1702,6 +1701,13 @@
           if (images.length === 0) {
             if (auto_load_game) {
               $('.start-tutorial').click();
+            } else if (replay_mode) {
+              window.viewModel.replay_mode(true);
+              window.viewModel.replay_name(window.replay.name);
+              $('#menus').hide();
+              $('#game').show();
+              window.game.load_state(window.replay.state, true);
+              window.viewModel.state("PLAY");
             } else {
               window.forward_to($('#main-menu'));
             }
