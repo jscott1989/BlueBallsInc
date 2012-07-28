@@ -7,7 +7,7 @@ window.game.tools.MOVE =
 	update: () ->
 		if window.game.mouse_down && !window.game.tools.MOVE.mouse_joint
 			entity = window.game.get_entity_at_mouse()
-			if entity
+			if entity and (not 'fixed' in entity or not entity.fixed)
 				body = entity.fixtures[0].GetBody()
 				md = new B2MouseJointDef()
 				md.bodyA = window.physics.world.GetGroundBody();

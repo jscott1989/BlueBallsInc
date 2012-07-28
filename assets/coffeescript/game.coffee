@@ -313,8 +313,8 @@ window.game =
 	get_entity_at_mouse: () ->
 		mousePVec = new B2Vec2(window.game.mouseX, window.game.mouseY)
 		aabb = new B2AABB();
-		aabb.lowerBound.Set(window.game.mouseX - 0.1, window.game.mouseY - 0.1)
-		aabb.upperBound.Set(window.game.mouseX + 0.1, window.game.mouseY + 0.1)
+		aabb.lowerBound.Set(window.game.mouseX - 0.2, window.game.mouseY - 0.2)
+		aabb.upperBound.Set(window.game.mouseX + 0.2, window.game.mouseY + 0.2)
 
 		selected_body = null
 

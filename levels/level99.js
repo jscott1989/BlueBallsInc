@@ -2,30 +2,14 @@
     "settings": {
         "balls_needed": 3,
         "tools": ["MOVE"],
-        "seed": "3224234"
+        "seed": "1234567899"
     },
-    "intro": [
-        "A smart person like you should have no trouble with this one"
-    ],
-    "walls": ["top", "left", "bottom", "right"],
+    "walls": [],
     "entities": [
-        {
-            "type": "box",
-            "x": 3.6,
-            "y": 5.685980267345847,
-            "angle": 3.2
-        },
-        {
-            "type": "plank",
-            "x": 21,
-            "y": 12,
-            "angle": -0.7
-        },
         {
             "type": "ledge",
             "x": 7,
             "y": 14,
-            "angle": 0.2,
             "fixed": true
         },
         {
@@ -37,22 +21,15 @@
         {
             "type": "exit",
             "image": "in.png",
-            "x": 19.5,
-            "y": 15
-        },
-        {
-            "type": "exit",
-            "image": "in.png",
-            "x": 19.5,
-            "y": 15
+            "x": 17,
+            "y": 14
         },
         {
             "type": "image",
             "image": "enter.png",
             "top": true,
-            "x": 20,
-            "y": 15,
-            "angle": 4.7,
+            "x": 17,
+            "y": 14,
             "bodies": [
                 {
                     "shape": {
@@ -150,6 +127,56 @@
                     }
                 }
             ]
+        },
+        {
+            "type": "wheel",
+            "x": 17.436797674218216,
+            "y": 18.685786389480416,
+            "angle": -12.565664850563655
+        },
+        {
+            "type": "plank",
+            "x": 16.001418532698857,
+            "y": 5.8159999260488915,
+            "angle": 14.137691679752665
+        },
+        {
+            "type": "plank",
+            "x": 5.001418532698857,
+            "y": 5.8159999260488915,
+            "angle": 14.137691679752665
+        },
+        {
+            "type": "box",
+            "x": 14.697277066805388,
+            "y": 18.685980267345847,
+            "angle": -14.135214968379996
+        },
+        {
+            "type": "ywall",
+            "x": 0,
+            "y": 10,
+            "glue": [],
+            "id": "entity_25",
+            "angle": 0
+        },
+        {
+            "type": "xwall",
+            "x": 11.5,
+            "y": 0,
+            "angle": 0
+        },
+        {
+            "type": "ywall",
+            "x": 23.199999999999996,
+            "y": 9.9999999999999929,
+            "angle": 0
+        },
+        {
+            "type": "xwall",
+            "x": 11.500000000000007,
+            "y": 19.999999999999986,
+            "angle": 0
         }
     ]
 }

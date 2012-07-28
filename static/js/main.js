@@ -830,8 +830,8 @@
       var aabb, get_body_cb, mousePVec, selected_body;
       mousePVec = new B2Vec2(window.game.mouseX, window.game.mouseY);
       aabb = new B2AABB();
-      aabb.lowerBound.Set(window.game.mouseX - 0.1, window.game.mouseY - 0.1);
-      aabb.upperBound.Set(window.game.mouseX + 0.1, window.game.mouseY + 0.1);
+      aabb.lowerBound.Set(window.game.mouseX - 0.2, window.game.mouseY - 0.2);
+      aabb.upperBound.Set(window.game.mouseX + 0.2, window.game.mouseY + 0.2);
       selected_body = null;
       get_body_cb = function(fixture) {
         if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
@@ -911,10 +911,10 @@
   window.game.tools.MOVE = {
     mouse_joint: false,
     update: function() {
-      var body, entity, md;
+      var body, entity, md, _ref;
       if (window.game.mouse_down && !window.game.tools.MOVE.mouse_joint) {
         entity = window.game.get_entity_at_mouse();
-        if (entity) {
+        if (entity && ((_ref = !'fixed', __indexOf.call(entity, _ref) >= 0) || !entity.fixed)) {
           body = entity.fixtures[0].GetBody();
           md = new B2MouseJointDef();
           md.bodyA = window.physics.world.GetGroundBody();
