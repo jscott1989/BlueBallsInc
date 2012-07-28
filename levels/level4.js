@@ -2,24 +2,29 @@
     "settings": {
         "balls_needed": 3,
         "tools": ["MOVE"],
-        "seed": "3224234"
+        "seed": "4354364564"
     },
     "intro": [
-        "A smart person like you should have no trouble with this one"
+        "Those idiots! They've messed up the order. They've mixed a load of metal in with the blue balls! Who even buys metal balls?",
+        "You need to get the metal balls out of the production line",
+        "Maybe this will help"
     ],
     "walls": ["top", "left", "bottom", "right"],
     "entities": [
         {
+            "type": "magnet",
+            "x": 16.6,
+            "y": 18
+        },
+        {
             "type": "box",
-            "x": 3.6,
-            "y": 5.685980267345847,
-            "angle": 3.2
+            "x": 16.6,
+            "y": 18
         },
         {
             "type": "plank",
-            "x": 21,
-            "y": 12,
-            "angle": -0.7
+            "x": 14,
+            "y": 14
         },
         {
             "type": "peg",
@@ -47,7 +52,8 @@
             "type": "enter_dropper",
             "x": 5.5,
             "y": 0.4,
-            "maximum_balls": 3
+            "maximum_balls": 6,
+            "ball_order": ["ball", "metal-ball"]
         },
         {
             "type": "exit",

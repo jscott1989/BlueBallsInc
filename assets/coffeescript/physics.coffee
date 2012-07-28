@@ -3,6 +3,9 @@
 B2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
 B2Vec2 = Box2D.Common.Math.b2Vec2;
 B2AABB = Box2D.Collision.b2AABB;
+B2PointState = Box2D.Collision.b2PointState;
+B2GetPointStates = Box2D.Collision.b2GetPointStates;
+B2WorldManifold = Box2D.Collision.b2WorldManifold;
 B2BodyDef = Box2D.Dynamics.b2BodyDef;
 B2Body = Box2D.Dynamics.b2Body;
 B2FixtureDef = Box2D.Dynamics.b2FixtureDef;
@@ -34,6 +37,26 @@ window.physics =
 		entityA.touching[entityB.id] = {"manifold": manifold}
 		entityB.touching[entityA.id] = {"manifold": manifold}
 
+		sound_cutoff = 2.5
+		max_velocity = 30
+
+		x_velocity = Math.abs(bodyA.GetLinearVelocity().x)
+		y_velocity = Math.abs(bodyA.GetLinearVelocity().y)
+
+		if x_velocity > max_velocity
+			x_velocity = max_velocity
+		if y_velocity > max_velocity
+			y_velocity = max_velocity
+
+		if x_velocity > y_velocity
+			biggest_velocity = x_velocity
+		else
+			biggest_velocity = y_velocity
+
+		if biggest_velocity > sound_cutoff
+			SoundJS.play("collide", null, null, null, null, biggest_velocity / max_velocity)
+		else
+			console.log biggest_velocity
 		for component in entityA.components
 			if "begin_contact" of window.game.components[component]
 				window.game.components[component].begin_contact(entityA, entityB)
@@ -59,7 +82,7 @@ window.physics =
 		delete entityA.touching[entityB.id]
 		delete entityB.touching[entityA.id]
 
-	pre_solve: (contact) ->
+	pre_solve: (contact, old_manifold) ->
 		bodyA = contact.GetFixtureA().GetBody()
 		bodyB = contact.GetFixtureB().GetBody()
 

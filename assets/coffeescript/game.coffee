@@ -54,6 +54,7 @@ window.game =
 			window.viewModel.state('BUILD')
 		else
 			window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1)
+			SoundJS.play("intro", SoundJS.INTERRUPT_EARLY);
 
 	init: () ->
 		# Initialise the game engine

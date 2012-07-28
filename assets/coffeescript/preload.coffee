@@ -51,6 +51,7 @@ sounds = [
 	"collide"
 	"menu"
 	"start"
+	"intro"
 ]
 
 SoundJS.FlashPlugin.BASE_PATH = "js/"

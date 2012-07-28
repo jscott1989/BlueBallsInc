@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2MassData, B2MouseJointDef, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, FORCE_PER_METER, GameViewModel, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2GetPointStates, B2MassData, B2MouseJointDef, B2PointState, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, B2WorldManifold, FORCE_PER_METER, GameViewModel, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
@@ -192,6 +192,12 @@
 
   B2AABB = Box2D.Collision.b2AABB;
 
+  B2PointState = Box2D.Collision.b2PointState;
+
+  B2GetPointStates = Box2D.Collision.b2GetPointStates;
+
+  B2WorldManifold = Box2D.Collision.b2WorldManifold;
+
   B2BodyDef = Box2D.Dynamics.b2BodyDef;
 
   B2Body = Box2D.Dynamics.b2Body;
@@ -222,7 +228,7 @@
     world: new B2World(new B2Vec2(0, 10), true),
     entities_to_delete: [],
     begin_contact: function(contact) {
-      var bodyA, bodyB, component, entityA, entityB, manifold, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var biggest_velocity, bodyA, bodyB, component, entityA, entityB, manifold, max_velocity, sound_cutoff, x_velocity, y_velocity, _i, _j, _len, _len1, _ref, _ref1, _results;
       bodyA = contact.GetFixtureA().GetBody();
       bodyB = contact.GetFixtureB().GetBody();
       entityA = window.game.entityIDs[bodyA.userData];
@@ -234,6 +240,26 @@
       entityB.touching[entityA.id] = {
         "manifold": manifold
       };
+      sound_cutoff = 2.5;
+      max_velocity = 30;
+      x_velocity = Math.abs(bodyA.GetLinearVelocity().x);
+      y_velocity = Math.abs(bodyA.GetLinearVelocity().y);
+      if (x_velocity > max_velocity) {
+        x_velocity = max_velocity;
+      }
+      if (y_velocity > max_velocity) {
+        y_velocity = max_velocity;
+      }
+      if (x_velocity > y_velocity) {
+        biggest_velocity = x_velocity;
+      } else {
+        biggest_velocity = y_velocity;
+      }
+      if (biggest_velocity > sound_cutoff) {
+        SoundJS.play("collide", null, null, null, null, biggest_velocity / max_velocity);
+      } else {
+        console.log(biggest_velocity);
+      }
       _ref = entityA.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         component = _ref[_i];
@@ -276,7 +302,7 @@
       delete entityA.touching[entityB.id];
       return delete entityB.touching[entityA.id];
     },
-    pre_solve: function(contact) {
+    pre_solve: function(contact, old_manifold) {
       var bodyA, bodyB, component, entityA, entityB, _i, _j, _len, _len1, _ref, _ref1, _results;
       bodyA = contact.GetFixtureA().GetBody();
       bodyB = contact.GetFixtureB().GetBody();
@@ -519,7 +545,8 @@
       if (window.viewModel.intro().length === (window.viewModel.intro_pointer() + 1)) {
         return window.viewModel.state('BUILD');
       } else {
-        return window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1);
+        window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1);
+        return SoundJS.play("intro", SoundJS.INTERRUPT_EARLY);
       }
     },
     init: function() {
@@ -1720,7 +1747,7 @@
 
   images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/bg.png", "/img/ledge.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
 
-  sounds = ["ball", "collide", "menu", "start"];
+  sounds = ["ball", "collide", "menu", "start", "intro"];
 
   SoundJS.FlashPlugin.BASE_PATH = "js/";
 
