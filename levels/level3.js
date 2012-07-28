@@ -7,31 +7,16 @@
     "walls": [],
     "entities": [
         {
-            "type": "yline",
-            "x": 4.3,
-            "y": 1
-        },
-        {
-            "type": "yline",
-            "x": 6.7,
-            "y": 1
+            "type": "ledge",
+            "x": 7,
+            "y": 14,
+            "fixed": true
         },
         {
             "type": "enter_dropper",
-            "image": "out.png",
             "x": 5.5,
             "y": 0.4,
             "maximum_balls": 3
-        },
-        {
-            "type": "xline",
-            "x": 16,
-            "y": 12
-        },
-        {
-            "type": "xline",
-            "x": 16,
-            "y": 15.2
         },
         {
             "type": "exit",
@@ -39,25 +24,127 @@
             "x": 17,
             "y": 14
         },
-{
-            "type": "box",
+        {
+            "type": "image",
+            "image": "enter.png",
+            "top": true,
+            "x": 17,
+            "y": 14,
+            "bodies": [
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 0.1
+                        },
+                        "position": {
+                            "angle": 90
+                        }
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.1
+                        }
+                    },
+                    "position": {
+                        "x": -1.1,
+                        "y": 0.1
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.1
+                        }
+                    },
+                    "position": {
+                        "x": 1.1,
+                        "y": 0.1
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 1,
+                            "height": 0.1
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 1.3
+                    }
+                }
+            ]
+        },
+        {
+            "type": "image",
+            "image": "exit.png",
+            "top": true,
+            "x": 5.5,
+            "y": 0.4,
+            "bodies": [
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 0.1
+                        }
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.3
+                        }
+                    },
+                    "position": {
+                        "x": -1.2,
+                        "y": 0
+                    }
+                },
+                {
+                    "shape": {
+                        "type": "rectangle",
+                        "size": {
+                            "width": 0.1,
+                            "height": 1.3
+                        }
+                    },
+                    "position": {
+                        "x": 1.2,
+                        "y": 0
+                    }
+                }
+            ]
+        },
+        {
+            "type": "wheel",
             "x": 17.436797674218216,
             "y": 18.685786389480416,
             "angle": -12.565664850563655
         },
         {
-            "type": "box",
+            "type": "plank",
             "x": 16.001418532698857,
             "y": 5.8159999260488915,
             "angle": 14.137691679752665
         },
-
         {
-            "scale": 2,
-            "type": "box",
-            "x": 15.990921200980313,
-            "y": 9.445408506751189,
-            "angle": 7.8544855969471135
+            "type": "plank",
+            "x": 5.001418532698857,
+            "y": 5.8159999260488915,
+            "angle": 14.137691679752665
         },
         {
             "type": "box",

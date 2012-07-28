@@ -6,7 +6,7 @@
 */
 
 
-/*global ko:false, SoundJS:false
+/*global ko:false, SoundJS:false, level:false
 */
 
 
@@ -25,8 +25,9 @@
   GameViewModel = function() {
     var self;
     self = this;
-    self.debug = ko.observable(true);
-    self.level = ko.observable(1);
+    self.debug = ko.observable(false);
+    self.first_level = ko.observable(level);
+    self.level = ko.observable(level);
     self.tool = ko.observable("MOVE");
     self.last_tool = ko.observable("MOVE");
     self.state = ko.observable("BUILD");
@@ -40,10 +41,12 @@
     self.replay_mode = ko.observable(false);
     self.replay_name = ko.observable(false);
     self.build_state = ko.observable(null);
-    self.intro = ko.observableArray();
+    self.intro = ko.observableArray([]);
     self.intro_pointer = ko.observable(0);
     self.intro_text = ko.computed(function() {
-      if (self.intro().length > self.intro_pointer()) {
+      var intro;
+      intro = self.intro();
+      if (intro && intro.length > self.intro_pointer()) {
         return self.intro()[self.intro_pointer()];
       }
       return '';
@@ -63,13 +66,18 @@
   load_level = function(level_name) {
     return $.getJSON('/levels/' + level_name, function(data) {
       window.game.load_state(data, true);
-      window.viewModel.state("INTRO");
-      console.log(window.viewModel.state());
+      if (window.viewModel.intro()) {
+        window.viewModel.state("INTRO");
+      } else {
+        window.viewModel.state("BUILD");
+      }
       return window.game.reset();
     });
   };
 
   window.start_game = function() {
+    window.viewModel.level(window.viewModel.first_level());
+    window.viewModel.first_level(1);
     window.game.start_game();
     load_level("level" + window.viewModel.level());
   };
@@ -597,25 +605,25 @@
       if (wall === "bottom") {
         return window.game.create_entity({
           "type": "xwall",
-          "x": 11.5,
-          "y": 20
+          "x": 11.6,
+          "y": 20.1
         });
       } else if (wall === "top") {
         return window.game.create_entity({
           "type": "xwall",
           "x": 11.5,
-          "y": -0
+          "y": -0.1
         });
       } else if (wall === "left") {
         return window.game.create_entity({
           "type": "ywall",
-          "x": -0,
+          "x": -0.1,
           "y": 10
         });
       } else if (wall === "right") {
         return window.game.create_entity({
           "type": "ywall",
-          "x": 23.2,
+          "x": 23.4,
           "y": 10
         });
       }
@@ -1678,7 +1686,7 @@
   */
 
 
-  /*global SoundJS:false, PreloadJS:false
+  /*global SoundJS:false, PreloadJS:false, level:false, auto_load_game: false
   */
 
 
@@ -1690,10 +1698,13 @@
       var i, _i, _ref;
       for (i = _i = 0, _ref = images.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         if (images[i] === filename) {
-          console.log(filename);
           images.splice(i, 1);
           if (images.length === 0) {
-            window.forward_to($('#main-menu'));
+            if (auto_load_game) {
+              $('.start-tutorial').click();
+            } else {
+              window.forward_to($('#main-menu'));
+            }
           }
           return;
         }

@@ -34,6 +34,7 @@
 		<input type="submit">
 	</form>
 	
+	<script type="text/javascript">auto_load_game = {{auto_load_game}}; level = {{level}};</script>
 	<script type='text/javascript' src='/js/preloadjs.js'></script>
 	<script type='text/javascript' src='/js/soundjs.js'></script>
 	<script type='text/javascript' src='/js/soundjs.flash.js'></script>

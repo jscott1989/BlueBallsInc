@@ -1,4 +1,4 @@
-###global ko:false, SoundJS:false###
+###global ko:false, SoundJS:false, level:false###
 $menus = $('#menus')
 $game = $('#game')
 $pause_menu = $('#pause-menu')
@@ -6,8 +6,9 @@ $main_menu = $('#main-menu')
 
 GameViewModel = ->
 	self = this
-	self.debug = ko.observable(true)
-	self.level = ko.observable(1)
+	self.debug = ko.observable(false)
+	self.first_level = ko.observable(level)
+	self.level = ko.observable(level)
 	self.tool = ko.observable("MOVE")
 	self.last_tool = ko.observable("MOVE")
 	self.state = ko.observable("BUILD")
@@ -22,11 +23,12 @@ GameViewModel = ->
 	self.replay_name = ko.observable(false)
 	self.build_state = ko.observable(null) # This is the content of the
 
-	self.intro = ko.observableArray()
+	self.intro = ko.observableArray([])
 	self.intro_pointer = ko.observable(0)
 
 	self.intro_text = ko.computed ->
-		if self.intro().length > self.intro_pointer()
+		intro = self.intro()
+		if intro and intro.length > self.intro_pointer()
 			return self.intro()[self.intro_pointer()]
 		return ''
 
@@ -47,11 +49,15 @@ load_level = (level_name) ->
 	# Load a level from the server
 	$.getJSON '/levels/' + level_name, (data) ->
 		window.game.load_state data, true
-		window.viewModel.state("INTRO")
-		console.log window.viewModel.state()
+		if window.viewModel.intro()
+			window.viewModel.state("INTRO")
+		else
+			window.viewModel.state("BUILD")
 		window.game.reset()
 
 window.start_game = () ->
+	window.viewModel.level(window.viewModel.first_level())
+	window.viewModel.first_level(1)
 	window.game.start_game()
 	load_level("level" + window.viewModel.level())
 	return

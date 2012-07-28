@@ -137,13 +137,13 @@ window.game =
 
 	create_wall: (wall) ->
 		if wall == "bottom"
-			window.game.create_entity({"type": "xwall","x": 11.5,"y": 20})
+			window.game.create_entity({"type": "xwall","x": 11.6,"y": 20.1})
 		else if wall == "top"
-			window.game.create_entity({"type": "xwall","x": 11.5,"y": -0})
+			window.game.create_entity({"type": "xwall","x": 11.5,"y": -0.1})
 		else if wall == "left"
-			window.game.create_entity({"type": "ywall","x": -0,"y": 10})
+			window.game.create_entity({"type": "ywall","x": -0.1,"y": 10})
 		else if wall == "right"
-			window.game.create_entity({"type": "ywall","x": 23.2,"y": 10})
+			window.game.create_entity({"type": "ywall","x": 23.4,"y": 10})
 
 	load_state: (state, save_as_default) ->
 		# Load the world to a given state

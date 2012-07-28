@@ -1,15 +1,17 @@
-###global SoundJS:false, PreloadJS:false###
+###global SoundJS:false, PreloadJS:false, level:false, auto_load_game: false###
 preload = (filename) ->
 	image = new Image()
 	image.src = filename
 	image.onload = () ->
 		for i in [0...images.length]
 			if images[i] == filename
-				console.log filename
 				images.splice i, 1
 
 				if images.length == 0
-					window.forward_to($('#main-menu'))
+					if (auto_load_game)
+						$('.start-tutorial').click()
+					else
+						window.forward_to($('#main-menu'))
 				return
 
 
