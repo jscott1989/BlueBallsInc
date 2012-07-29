@@ -54,7 +54,7 @@ window.game =
 			window.viewModel.state('BUILD')
 		else
 			window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1)
-			SoundJS.play("intro", SoundJS.INTERRUPT_EARLY);
+			window.play_sound("intro");
 
 	init: () ->
 		# Initialise the game engine
@@ -286,7 +286,9 @@ window.game =
 		if window.viewModel.state() == 'BUILD'
 			# clientX = e.offsetX
 			# clientY = e.offsetY
-			# $('#gameCanvas')[0].getContext("2d").fillRect(clientX, clientY, 1, 1);
+			clientX = window.game.mouseX * window.game.scale
+			clientY = window.game.mouseY * window.game.scale
+			$('#gameCanvas')[0].getContext("2d").fillRect(clientX, clientY, 1, 1);
 			window.game.mouse_down = true
 			if 'mouse_down' of window.game.tools[window.viewModel.tool()]
 				window.game.tools[window.viewModel.tool()].mouse_down(e)

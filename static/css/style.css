@@ -2,7 +2,6 @@ body {
   margin: 0;
   font-family: 'Raleway';
   font-size: 20px;
-  margin-top: 20px;
   background: #000;
 }
 a {
@@ -46,7 +45,6 @@ button:active {
 }
 #container {
   background: #7c879d;
-  margin: auto;
   width: 900px;
   height: 600px;
   overflow: hidden;
@@ -193,6 +191,14 @@ button:active {
   width: 200px;
   height: 600px;
   display: inline-block;
+}
+#game #sidebar label {
+  /* The sound option */
+
+  position: absolute;
+  bottom: 10px;
+  width: 200px;
+  text-align: center;
 }
 #game #sidebar #level {
   margin-top: 20px;

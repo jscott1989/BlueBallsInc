@@ -54,9 +54,7 @@ window.physics =
 			biggest_velocity = y_velocity
 
 		if biggest_velocity > sound_cutoff
-			SoundJS.play("collide", null, null, null, null, biggest_velocity / max_velocity)
-		else
-			console.log biggest_velocity
+			window.play_sound("collide", biggest_velocity / max_velocity)
 		for component in entityA.components
 			if "begin_contact" of window.game.components[component]
 				window.game.components[component].begin_contact(entityA, entityB)

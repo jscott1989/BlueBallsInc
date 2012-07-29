@@ -44,13 +44,13 @@ $('li[data-menu]').click ->
 	$this = $(this)
 	menu_target = $this.data('menu')
 
-	SoundJS.play("menu");
+	window.play_sound("menu");
 
 	window.show_menu(menu_target)
 
 $('.start-tutorial').click ->
 	# Start tutorial mode
-	SoundJS.play("start");
+	window.play_sound("start");
 	$menus.fadeOut()
 	$game.fadeIn()
 	window.start_game()

@@ -26,6 +26,7 @@
     var self;
     self = this;
     self.debug = ko.observable(false);
+    self.sound = ko.observable(true);
     self.first_level = ko.observable(level);
     self.level = ko.observable(level);
     self.tool = ko.observable("MOVE");
@@ -75,6 +76,15 @@
     });
   };
 
+  window.play_sound = function(sound, volume) {
+    if (window.viewModel.sound()) {
+      if (!volume) {
+        volume = 1;
+      }
+      return SoundJS.play(sound, null, null, null, null, volume);
+    }
+  };
+
   window.start_game = function() {
     window.viewModel.level(window.viewModel.first_level());
     window.viewModel.first_level(1);
@@ -94,7 +104,7 @@
   };
 
   $('.pause').click(function() {
-    SoundJS.play("menu");
+    window.play_sound("menu");
     window.forward_to($pause_menu);
     $menus.fadeIn();
     window.viewModel.last_state = window.viewModel.state();
@@ -103,14 +113,14 @@
   });
 
   $('.resume').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     $menus.fadeOut();
     window.viewModel.state(window.viewModel.last_state);
     return false;
   });
 
   $('.start').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     if (window.viewModel.state() === "BUILD") {
       return window.viewModel.state("PLAY");
     } else {
@@ -125,14 +135,14 @@
   });
 
   $('.confirm-exit-game').click(function() {
-    SoundJS.play("menu");
+    window.play_sound("menu");
     window.viewModel.state("BUILD");
     $game.fadeOut();
     return window.backwards_to($main_menu);
   });
 
   $('.confirm-restart-level').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     window.viewModel.state("BUILD");
     $menus.fadeOut();
     load_level("level" + window.viewModel.level());
@@ -140,21 +150,21 @@
   });
 
   $('.watch-replay').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     $('#replay-form').submit();
     window.backwards_to($('#level-complete-menu'));
     return false;
   });
 
   $('.watch-replay-again').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     $menus.fadeOut();
     window.game.load_state(window.replay.state);
     return window.viewModel.state("PLAY");
   });
 
   $('.next-level').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     window.viewModel.level(window.viewModel.level() + 1);
     load_level("level" + window.viewModel.level());
     return $menus.fadeOut();
@@ -256,9 +266,7 @@
         biggest_velocity = y_velocity;
       }
       if (biggest_velocity > sound_cutoff) {
-        SoundJS.play("collide", null, null, null, null, biggest_velocity / max_velocity);
-      } else {
-        console.log(biggest_velocity);
+        window.play_sound("collide", biggest_velocity / max_velocity);
       }
       _ref = entityA.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -546,7 +554,7 @@
         return window.viewModel.state('BUILD');
       } else {
         window.viewModel.intro_pointer(window.viewModel.intro_pointer() + 1);
-        return SoundJS.play("intro", SoundJS.INTERRUPT_EARLY);
+        return window.play_sound("intro");
       }
     },
     init: function() {
@@ -822,7 +830,11 @@
       }
     },
     mouse_down: function(e) {
+      var clientX, clientY;
       if (window.viewModel.state() === 'BUILD') {
+        clientX = window.game.mouseX * window.game.scale;
+        clientY = window.game.mouseY * window.game.scale;
+        $('#gameCanvas')[0].getContext("2d").fillRect(clientX, clientY, 1, 1);
         window.game.mouse_down = true;
         if ('mouse_down' in window.game.tools[window.viewModel.tool()]) {
           return window.game.tools[window.viewModel.tool()].mouse_down(e);
@@ -1574,7 +1586,7 @@
     update: function(entity) {},
     begin_contact: function(entity, other_entity) {
       if (__indexOf.call(other_entity.tags, "ball") >= 0) {
-        SoundJS.play("ball");
+        window.play_sound("ball");
         window.game.remove_entity(other_entity);
         return window.viewModel.balls_complete(window.viewModel.balls_complete() + 1);
       }
@@ -1695,12 +1707,12 @@
     var $this, menu_target;
     $this = $(this);
     menu_target = $this.data('menu');
-    SoundJS.play("menu");
+    window.play_sound("menu");
     return window.show_menu(menu_target);
   });
 
   $('.start-tutorial').click(function() {
-    SoundJS.play("start");
+    window.play_sound("start");
     $menus.fadeOut();
     $game.fadeIn();
     return window.start_game();

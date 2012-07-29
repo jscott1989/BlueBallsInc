@@ -20,8 +20,13 @@ db_host = os.environ.get('CLOUDANT_URL', "http://localhost:5984")
 db = Server(db_host).get_or_create_db("blueballs")
 
 @get('/')
+@view("wrap")
+def wrap_index():
+	return {"inner": "/inner/"}
+
+@get('/inner/')
 @view("index")
-def index():
+def inner_index():
 	# The main page
 	return {"level": 1, "auto_load_game": "false", "replay_mode": False}
 
@@ -39,6 +44,11 @@ def post_replay():
 	return redirect('/replay/%s' % replay['_id'])
 
 @get('/replay/:replay_id')
+@view("wrap")
+def wrap_replay(replay_id):
+	return {"inner": "/inner/replay/%s" % replay_id}
+
+@get('/inner/replay/:replay_id')
 @view("index")
 def replay(replay_id):
 	if not db.doc_exist(replay_id):
@@ -49,6 +59,11 @@ def replay(replay_id):
 	return {"level": 1, "auto_load_game": "false", "replay_mode": True, "replay": json.dumps(replay)}
 
 @get('/level/:level_name')
+@view("wrap")
+def wrap_level(level_name):
+	return {"inner": "/inner/level/%s" % level_name}
+
+@get('/inner/level/:level_name')
 @view("index")
 def play_level(level_name):
 	# Jump to a particular level

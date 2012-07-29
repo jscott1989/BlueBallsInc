@@ -7,6 +7,7 @@ $main_menu = $('#main-menu')
 GameViewModel = ->
 	self = this
 	self.debug = ko.observable(false)
+	self.sound = ko.observable(true)
 	self.first_level = ko.observable(level)
 	self.level = ko.observable(level)
 	self.tool = ko.observable("MOVE")
@@ -55,6 +56,12 @@ load_level = (level_name) ->
 			window.viewModel.state("BUILD")
 		window.game.reset()
 
+window.play_sound = (sound, volume) ->
+	if window.viewModel.sound()
+		if not volume
+			volume = 1
+		SoundJS.play(sound,null, null, null, null, volume)
+
 window.start_game = () ->
 	window.viewModel.level(window.viewModel.first_level())
 	window.viewModel.first_level(1)
@@ -72,7 +79,7 @@ window.level_complete = () ->
 	return false
 
 $('.pause').click ->
-	SoundJS.play("menu");
+	window.play_sound("menu");
 	window.forward_to($pause_menu)
 	$menus.fadeIn()
 	window.viewModel.last_state = window.viewModel.state()
@@ -80,13 +87,13 @@ $('.pause').click ->
 	return false
 
 $('.resume').click ->
-	SoundJS.play("start");
+	window.play_sound("start");
 	$menus.fadeOut()
 	window.viewModel.state(window.viewModel.last_state)
 	return false
 
 $('.start').click ->
-	SoundJS.play("start");
+	window.play_sound("start");
 	if window.viewModel.state() == "BUILD"
 		window.viewModel.state("PLAY")
 	else
@@ -98,14 +105,14 @@ $('.start').click ->
 			window.viewModel.state("BUILD")
 
 $('.confirm-exit-game').click ->
-	SoundJS.play("menu");
+	window.play_sound("menu");
 	window.viewModel.state("BUILD")
 	$game.fadeOut()
 
 	window.backwards_to($main_menu)
 
 $('.confirm-restart-level').click ->
-	SoundJS.play("start");
+	window.play_sound("start");
 	window.viewModel.state("BUILD")
 	$menus.fadeOut()
 	load_level("level" + window.viewModel.level())
@@ -113,19 +120,19 @@ $('.confirm-restart-level').click ->
 	window.backwards_to($main_menu)
 
 $('.watch-replay').click ->
-	SoundJS.play("start");
+	window.play_sound("start");
 	$('#replay-form').submit()
 	window.backwards_to($('#level-complete-menu'))
 	false
 
 $('.watch-replay-again').click ->
-	SoundJS.play("start");
+	window.play_sound("start");
 	$menus.fadeOut()
 	window.game.load_state(window.replay.state)
 	window.viewModel.state("PLAY")
 
 $('.next-level').click ->
-	SoundJS.play("start");
+	window.play_sound("start");
 	window.viewModel.level(window.viewModel.level() + 1)
 	load_level("level" + window.viewModel.level())
 	$menus.fadeOut()
