@@ -22,7 +22,7 @@
 
   $main_menu = $('#main-menu');
 
-  LAST_LEVEL = 1;
+  LAST_LEVEL = 3;
 
   GameViewModel = function() {
     var self;
@@ -73,6 +73,7 @@
     return $.getJSON('/levels/' + level_name, function(data) {
       window.game.load_state(data, true);
       if (window.viewModel.intro()) {
+        window.viewModel.balls_complete(0);
         window.viewModel.state("INTRO");
       } else {
         window.viewModel.state("BUILD");

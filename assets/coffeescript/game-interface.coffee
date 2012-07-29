@@ -4,7 +4,7 @@ $game = $('#game')
 $pause_menu = $('#pause-menu')
 $main_menu = $('#main-menu')
 
-LAST_LEVEL = 1
+LAST_LEVEL = 3
 
 GameViewModel = ->
 	self = this
@@ -56,6 +56,7 @@ load_level = (level_name) ->
 	$.getJSON '/levels/' + level_name, (data) ->
 		window.game.load_state data, true
 		if window.viewModel.intro()
+			window.viewModel.balls_complete(0)
 			window.viewModel.state("INTRO")
 		else
 			window.viewModel.state("BUILD")
