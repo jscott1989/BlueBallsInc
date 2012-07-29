@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2GetPointStates, B2MassData, B2MouseJointDef, B2PointState, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, B2WorldManifold, FORCE_PER_METER, GameViewModel, LAST_LEVEL, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2GetPointStates, B2MassData, B2MouseJointDef, B2PointState, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, B2WorldManifold, GameViewModel, LAST_LEVEL, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
@@ -22,7 +22,7 @@
 
   $main_menu = $('#main-menu');
 
-  LAST_LEVEL = 3;
+  LAST_LEVEL = 4;
 
   GameViewModel = function() {
     var self;
@@ -1527,6 +1527,86 @@
   };
 
   /* -------------------------------------------- 
+       Begin trampoline.coffee 
+  --------------------------------------------
+  */
+
+
+  window.game.entity_types.trampoline = {
+    name: "Trampoline",
+    image: "trampoline.png",
+    bodies: [
+      {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "polygon",
+          vectors: [
+            {
+              "x": -2.2,
+              "y": -1.7
+            }, {
+              "x": -1.7,
+              "y": -1.7
+            }, {
+              "x": -1.7,
+              "y": 1.6
+            }, {
+              "x": -2.2,
+              "y": 1.6
+            }
+          ]
+        }
+      }, {
+        density: 40,
+        friction: 2,
+        restitution: 0.2,
+        shape: {
+          type: "polygon",
+          vectors: [
+            {
+              "x": 1.7,
+              "y": -1.7
+            }, {
+              "x": 2.2,
+              "y": -1.7
+            }, {
+              "x": 2.2,
+              "y": 1.6
+            }, {
+              "x": 1.7,
+              "y": 1.6
+            }
+          ]
+        }
+      }, {
+        density: 40,
+        friction: 2,
+        restitution: 1,
+        shape: {
+          type: "polygon",
+          vectors: [
+            {
+              "x": -2.1,
+              "y": -1.7
+            }, {
+              "x": 2.1,
+              "y": -1.7
+            }, {
+              "x": 2.1,
+              "y": -1.2
+            }, {
+              "x": -2.1,
+              "y": -1.2
+            }
+          ]
+        }
+      }
+    ]
+  };
+
+  /* -------------------------------------------- 
        Begin components.coffee 
   --------------------------------------------
   */
@@ -1610,16 +1690,14 @@
   */
 
 
-  MAX_FORCE = 2500;
+  MAX_FORCE = 15000;
 
   MAX_DISTANCE = window.game.pixels_to_meters(500);
-
-  FORCE_PER_METER = MAX_FORCE / MAX_DISTANCE;
 
   window.game.components.magnetized = {
     init: function(entity) {},
     update: function(entity) {
-      var body, e, e_position, position, xspeed, yspeed, _i, _len, _ref, _results;
+      var bigger_distance, body, e, e_position, position, xspeed, yspeed, _i, _len, _ref, _results;
       if (window.viewModel.state() === 'PLAY') {
         if (entity.fixtures.length > 0) {
           position = entity.fixtures[0].GetBody().GetPosition();
@@ -1630,11 +1708,16 @@
             if (__indexOf.call(e.tags, 'magnetic') >= 0) {
               body = e.fixtures[0].GetBody();
               e_position = body.GetPosition();
-              if (Math.abs(position.x - e_position.x) > MAX_DISTANCE || Math.abs(position.y - e_position.y) > MAX_DISTANCE) {
+              bigger_distance = Math.abs(position.x - e_position.x);
+              if (Math.abs(position.y - e_position.y) > bigger_distance) {
+                bigger_distance = Math.abs(position.y - e_position.y);
+              }
+              if (bigger_distance > MAX_DISTANCE) {
                 continue;
               }
-              xspeed = (MAX_DISTANCE - Math.abs(position.x - e_position.x)) * FORCE_PER_METER;
-              yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER;
+              xspeed = 2500;
+              yspeed = 4000;
+              console.log(xspeed, yspeed);
               if (e_position.x > position.x) {
                 xspeed = 0 - xspeed;
               }
@@ -1768,7 +1851,7 @@
     };
   };
 
-  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/bg.png", "/img/ledge.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png"];
+  images = ["/img/ball.png", "/img/metal-ball.png", "/img/wheel.png", "/img/plank.png", "/img/box.png", "/img/bg.png", "/img/ledge.png", "/img/magnet.png", "/img/magnet-beam.png", "/img/dry-glue.png", "/img/enter_dropper.png", "/img/exit_box.png", "/img/glue.png", "/img/enter.png", "/img/exit.png", "/img/in.png", "/img/xline.png", "/img/yline.png", "/img/peg.png", "/img/trampoline.png"];
 
   sounds = ["ball", "collide", "menu", "start", "intro"];
 

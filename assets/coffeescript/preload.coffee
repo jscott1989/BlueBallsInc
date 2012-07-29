@@ -44,6 +44,7 @@ images = [
 	"/img/xline.png"
 	"/img/yline.png"
 	"/img/peg.png"
+	"/img/trampoline.png"
 ]
 
 sounds = [

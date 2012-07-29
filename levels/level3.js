@@ -5,14 +5,14 @@
         "seed": "3224234"
     },
     "intro": [
-        "A smart person like you should have no trouble with this one"
+        "I have no idea where that wheel came from. This stuff definitely worked at one point though."
     ],
     "walls": ["top", "left", "bottom", "right"],
     "entities": [
         {
             "type": "box",
             "x": 3.6,
-            "y": 5.685980267345847,
+            "y": 14,
             "angle": 3.2
         },
         {
@@ -39,9 +39,14 @@
         {
             "type": "ledge",
             "x": 7,
-            "y": 14,
+            "y": 10,
             "angle": 0.2,
             "fixed": true
+        },
+        {
+            "type": "wheel",
+            "x": 3,
+            "y": 5
         },
         {
             "type": "enter_dropper",

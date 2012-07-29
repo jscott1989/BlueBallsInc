@@ -4,7 +4,7 @@ $game = $('#game')
 $pause_menu = $('#pause-menu')
 $main_menu = $('#main-menu')
 
-LAST_LEVEL = 3
+LAST_LEVEL = 4
 
 GameViewModel = ->
 	self = this
