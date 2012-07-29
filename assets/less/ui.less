@@ -58,6 +58,19 @@ button:active {
 	overflow: hidden; /* To stop margins collapsing */
 }
 
+#end-game-menu {
+	width: 600px !important;
+	margin-left: 150px !important;
+	p {
+		font-size: 18px !important;
+	}
+
+	strong {
+		display: block;
+		font-size: 25px;
+	}
+}
+
 #menus {
 	position: relative;
 	height: 100%;
@@ -86,10 +99,12 @@ button:active {
 					border: 6px solid rgba(211, 238, 255, 0.46);
 					border-radius: 12px;
 					-webkit-background-clip: padding;
+					p, ul {
+						font-size: 40px;
+					}
 					ul {
 						list-style: none;
 						padding: 0;
-						font-size: 40px;
 
 						li {
 							cursor: pointer;

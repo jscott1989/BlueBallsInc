@@ -25,6 +25,7 @@
 			%include level_complete_menu
 			%include replay_complete_menu
 			%include watch_replay_menu
+			%include end_game_menu
 		</div>
 	</div>
 

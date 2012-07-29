@@ -4,6 +4,8 @@ $game = $('#game')
 $pause_menu = $('#pause-menu')
 $main_menu = $('#main-menu')
 
+LAST_LEVEL = 1
+
 GameViewModel = ->
 	self = this
 	self.debug = ko.observable(false)
@@ -41,6 +43,9 @@ GameViewModel = ->
 	self.balls_complete = ko.observable(0)
 	self.balls_needed = ko.observable(0)
 
+	self.levelOver = ko.computed ->
+		self.balls_complete() >= self.balls_needed()
+
 	return
 
 window.viewModel = new GameViewModel()
@@ -73,7 +78,11 @@ window.level_complete = () ->
 	if window.replay_mode
 		window.forward_to($('#replay-complete-menu'))
 	else
-		window.forward_to($('#level-complete-menu'))
+		console.log window.viewModel.level()
+		if window.viewModel.level() == LAST_LEVEL
+			window.forward_to($('#end-game-menu'))
+		else
+			window.forward_to($('#level-complete-menu'))
 	$menus.fadeIn()
 	window.viewModel.state("COMPLETE")
 	return false

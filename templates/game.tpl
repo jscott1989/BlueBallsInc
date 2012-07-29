@@ -31,5 +31,5 @@
 		</div>
 	</div>
 </div>
-<div id="game-cover" data-bind="style: {display: isPaused() ? 'block' : 'none' }">
+<div id="game-cover" data-bind="style: {display: isPaused() || levelOver() ? 'block' : 'none' }">
 </div>

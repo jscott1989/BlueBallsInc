@@ -11,7 +11,7 @@
 
 
 (function() {
-  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2GetPointStates, B2MassData, B2MouseJointDef, B2PointState, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, B2WorldManifold, FORCE_PER_METER, GameViewModel, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
+  var $game, $last_active, $main_menu, $menus, $pause_menu, B2AABB, B2Body, B2BodyDef, B2CircleShape, B2ContactListener, B2DebugDraw, B2DistanceJointDef, B2Fixture, B2FixtureDef, B2GetPointStates, B2MassData, B2MouseJointDef, B2PointState, B2PolygonShape, B2RevoluteJointDef, B2Vec2, B2WeldJointDef, B2World, B2WorldManifold, FORCE_PER_METER, GameViewModel, LAST_LEVEL, MAX_DISTANCE, MAX_FORCE, count, images, load_complete, load_level, load_sound, loaded, preload, queue, s, sounds, _i, _len,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $menus = $('#menus');
@@ -21,6 +21,8 @@
   $pause_menu = $('#pause-menu');
 
   $main_menu = $('#main-menu');
+
+  LAST_LEVEL = 1;
 
   GameViewModel = function() {
     var self;
@@ -58,6 +60,9 @@
     self.name = ko.observable();
     self.balls_complete = ko.observable(0);
     self.balls_needed = ko.observable(0);
+    self.levelOver = ko.computed(function() {
+      return self.balls_complete() >= self.balls_needed();
+    });
   };
 
   window.viewModel = new GameViewModel();
@@ -96,7 +101,12 @@
     if (window.replay_mode) {
       window.forward_to($('#replay-complete-menu'));
     } else {
-      window.forward_to($('#level-complete-menu'));
+      console.log(window.viewModel.level());
+      if (window.viewModel.level() === LAST_LEVEL) {
+        window.forward_to($('#end-game-menu'));
+      } else {
+        window.forward_to($('#level-complete-menu'));
+      }
     }
     $menus.fadeIn();
     window.viewModel.state("COMPLETE");

@@ -2,9 +2,7 @@
 	<div class="inner">
 		<div class="inner2">
 			<div class="inner3">
-				<ul>
-					<li>Loading...</li>
-				</ul>
+				<p>Loading...</p>
 			</div>
 		</div>
 	</div>
