@@ -22,7 +22,7 @@
 
   $main_menu = $('#main-menu');
 
-  LAST_LEVEL = 4;
+  LAST_LEVEL = 6;
 
   GameViewModel = function() {
     var self;
@@ -72,8 +72,8 @@
   load_level = function(level_name) {
     return $.getJSON('/levels/' + level_name, function(data) {
       window.game.load_state(data, true);
+      window.viewModel.balls_complete(0);
       if (window.viewModel.intro()) {
-        window.viewModel.balls_complete(0);
         window.viewModel.state("INTRO");
       } else {
         window.viewModel.state("BUILD");
@@ -102,7 +102,6 @@
     if (window.replay_mode) {
       window.forward_to($('#replay-complete-menu'));
     } else {
-      console.log(window.viewModel.level());
       if (window.viewModel.level() === LAST_LEVEL) {
         window.forward_to($('#end-game-menu'));
       } else {
@@ -1690,7 +1689,7 @@
   */
 
 
-  MAX_FORCE = 15000;
+  MAX_FORCE = 25000;
 
   MAX_DISTANCE = window.game.pixels_to_meters(500);
 
@@ -1717,7 +1716,6 @@
               }
               xspeed = 2500;
               yspeed = 4000;
-              console.log(xspeed, yspeed);
               if (e_position.x > position.x) {
                 xspeed = 0 - xspeed;
               }

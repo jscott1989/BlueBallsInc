@@ -4,7 +4,7 @@ $game = $('#game')
 $pause_menu = $('#pause-menu')
 $main_menu = $('#main-menu')
 
-LAST_LEVEL = 4
+LAST_LEVEL = 6
 
 GameViewModel = ->
 	self = this
@@ -55,8 +55,8 @@ load_level = (level_name) ->
 	# Load a level from the server
 	$.getJSON '/levels/' + level_name, (data) ->
 		window.game.load_state data, true
+		window.viewModel.balls_complete(0)
 		if window.viewModel.intro()
-			window.viewModel.balls_complete(0)
 			window.viewModel.state("INTRO")
 		else
 			window.viewModel.state("BUILD")
@@ -79,7 +79,6 @@ window.level_complete = () ->
 	if window.replay_mode
 		window.forward_to($('#replay-complete-menu'))
 	else
-		console.log window.viewModel.level()
 		if window.viewModel.level() == LAST_LEVEL
 			window.forward_to($('#end-game-menu'))
 		else

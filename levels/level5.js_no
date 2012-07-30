@@ -2,15 +2,62 @@
     "settings": {
         "balls_needed": 3,
         "tools": ["MOVE"],
-        "seed": "1234567899"
+        "seed": "3224234"
     },
-    "walls": [],
+    "intro": [
+        "I'm not sure what you're supposed to do here. There's a few of the metal balls from before though, just keep them out of the way"
+    ],
+    "walls": ["top", "left", "bottom", "right"],
     "entities": [
         {
+            "type": "plank",
+            "x": 21,
+            "y": 12,
+            "angle": -0.7
+        },
+        {
+            "type": "peg",
+            "x": 12,
+            "y": 5
+        },
+        {
+            "type": "peg",
+            "x": 16,
+            "y": 5
+        },
+        {
+            "type": "peg",
+            "x": 20,
+            "y": 5
+        },
+        {
             "type": "ledge",
-            "x": 7,
-            "y": 14,
+            "x": 4,
+            "y": 10,
+            "angle": 0.1,
             "fixed": true
+        },
+        {
+            "type": "ledge",
+            "x": 9,
+            "y": 13,
+            "fixed": true
+        },
+        {
+            "type": "magnet",
+            "x": 3,
+            "y": 5,
+            "angle": 2.4
+        },
+        {
+            "type": "metal-ball",
+            "x": 18,
+            "y": 18
+        },
+        {
+            "type": "metal-ball",
+            "x": 19,
+            "y": 18
         },
         {
             "type": "enter_dropper",
@@ -21,15 +68,16 @@
         {
             "type": "exit",
             "image": "in.png",
-            "x": 17,
-            "y": 14
+            "x": 18,
+            "y": 12.5
         },
         {
             "type": "image",
             "image": "enter.png",
             "top": true,
-            "x": 17,
-            "y": 14,
+            "x": 18,
+            "y": 12.5,
+            "angle": 4.7,
             "bodies": [
                 {
                     "shape": {
@@ -127,56 +175,6 @@
                     }
                 }
             ]
-        },
-        {
-            "type": "wheel",
-            "x": 17.436797674218216,
-            "y": 18.685786389480416,
-            "angle": -12.565664850563655
-        },
-        {
-            "type": "plank",
-            "x": 16.001418532698857,
-            "y": 5.8159999260488915,
-            "angle": 14.137691679752665
-        },
-        {
-            "type": "plank",
-            "x": 5.001418532698857,
-            "y": 5.8159999260488915,
-            "angle": 14.137691679752665
-        },
-        {
-            "type": "box",
-            "x": 14.697277066805388,
-            "y": 18.685980267345847,
-            "angle": -14.135214968379996
-        },
-        {
-            "type": "ywall",
-            "x": 0,
-            "y": 10,
-            "glue": [],
-            "id": "entity_25",
-            "angle": 0
-        },
-        {
-            "type": "xwall",
-            "x": 11.5,
-            "y": 0,
-            "angle": 0
-        },
-        {
-            "type": "ywall",
-            "x": 23.199999999999996,
-            "y": 9.9999999999999929,
-            "angle": 0
-        },
-        {
-            "type": "xwall",
-            "x": 11.500000000000007,
-            "y": 19.999999999999986,
-            "angle": 0
         }
     ]
 }

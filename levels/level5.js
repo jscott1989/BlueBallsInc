@@ -4,22 +4,19 @@
         "tools": ["MOVE"],
         "seed": "3224234"
     },
+    "intro": [
+        "I had big plans for this (poorly designed) trampoline. *sigh*"
+    ],
     "walls": ["top", "left", "bottom", "right"],
     "entities": [
-        {
-            "type": "plank",
-            "x": 21,
-            "y": 12,
-            "angle": -0.7
-        },
         {
             "type": "peg",
             "x": 12,
             "y": 5
         },
         {
-            "type": "peg",
-            "x": 16,
+            "type": "trampoline",
+            "x": 12,
             "y": 5
         },
         {
@@ -30,31 +27,15 @@
         {
             "type": "ledge",
             "x": 4,
-            "y": 10,
-            "angle": 0.1,
+            "y": 13,
+            "angle": 0.2,
             "fixed": true
         },
         {
             "type": "ledge",
-            "x": 9,
-            "y": 13,
+            "x": 21.5,
+            "y": 15,
             "fixed": true
-        },
-        {
-            "type": "magnet",
-            "x": 3,
-            "y": 5,
-            "angle": 2.4
-        },
-        {
-            "type": "metal-ball",
-            "x": 18,
-            "y": 18
-        },
-        {
-            "type": "metal-ball",
-            "x": 19,
-            "y": 18
         },
         {
             "type": "enter_dropper",
@@ -65,15 +46,15 @@
         {
             "type": "exit",
             "image": "in.png",
-            "x": 18,
-            "y": 12.5
+            "x": 20,
+            "y": 13.5
         },
         {
             "type": "image",
             "image": "enter.png",
             "top": true,
-            "x": 18,
-            "y": 12.5,
+            "x": 20,
+            "y": 13.5,
             "angle": 4.7,
             "bodies": [
                 {

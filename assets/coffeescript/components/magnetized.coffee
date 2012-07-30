@@ -1,6 +1,6 @@
 # This will send magnetism in a direction, pulling metalic objects towards me
 
-MAX_FORCE = 15000
+MAX_FORCE = 25000
 
 MAX_DISTANCE = window.game.pixels_to_meters(500)
 
@@ -44,8 +44,7 @@ window.game.components.magnetized =
 						# yspeed = (MAX_DISTANCE - Math.abs(position.y - e_position.y)) * FORCE_PER_METER
 						xspeed = 2500
 						yspeed = 4000
-
-						console.log xspeed, yspeed
+						
 						if e_position.x > position.x
 							xspeed = 0 - xspeed
 						if e_position.y > position.y
